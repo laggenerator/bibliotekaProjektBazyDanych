@@ -1,0 +1,35 @@
+body {
+  display: block;
+}
+
+.ksiazki-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.ksiazki-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.ksiazka-karta{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.ksiazka-obraz{
+  justify-content: center;
+}
+
+.ksiazka-obraz img{
+  max-width: 10vw;
+}

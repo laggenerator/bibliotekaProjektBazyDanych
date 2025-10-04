@@ -1,3 +1,8 @@
+body {
+  display: flex;
+  flex-direction: column;
+}
+
 #tekststartowy{
   margin: auto;
 }
@@ -12,4 +17,11 @@
 .koncepcjabox{
   width: 100px;
   aspect-ratio: 1/2;
+}
+
+.funkcje-container{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  margin-top: 5vh;
 }
