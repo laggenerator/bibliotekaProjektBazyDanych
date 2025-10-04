@@ -11,7 +11,7 @@ app.use(express.static(path.join(__dirname, "public/js")));
 app.use(express.static(path.join(__dirname, "public/assets")));
 
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/public/index.html");
+  res.sendFile(__dirname + "/public/roadmap.html");
 });
 
 app.listen(PORT, () => {

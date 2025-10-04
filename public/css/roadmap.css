@@ -1,0 +1,15 @@
+#tekststartowy{
+  margin: auto;
+}
+#koncepcjacontainer{
+  width: 30vw;
+}
+#koncepcja{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+.koncepcjabox{
+  width: 100px;
+  aspect-ratio: 1/2;
+}
