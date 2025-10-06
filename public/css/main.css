@@ -64,7 +64,7 @@ header{
     background: var(--green-accent-highlight);
 }
 
-.modern-login-btn {
+.login-btn {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -80,7 +80,7 @@ header{
     transition: all 0.3s ease;
 }
 
-.modern-login-btn:hover {
+.login-btn:hover {
     background: #333;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
