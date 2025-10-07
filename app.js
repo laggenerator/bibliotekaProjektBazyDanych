@@ -1,64 +1,81 @@
 const express = require("express");
+const session = require("express-session");
 const path = require("path");
 const app = express();
+const expressLayouts = require('express-ejs-layouts');
 var favicon = require("serve-favicon");
-const PORT = 1789;
+const { Pool } = require('pg');
+require('dotenv').config();
+
+const authRoutes = require("./routes/uwierzytelnianie");
+const mainRoutes = require("./routes/main");
+const adminRoutes = require("./routes/admin");
+const ksiazkiRoutes = require("./routes/ksiazki");
+const autorzyRoutes = require("./routes/autorzy");
+const kategorieRoutes = require("./routes/kategorie");
+const PORT = process.env.PORT;
 
 
 app.set("view engine", "ejs");
-// app.use("views", "views");
+app.set("views", path.join(__dirname, "views"));
+app.use(expressLayouts);
+app.set("layout", "layout");
 app.use(express.json());
-app.use(express.urlencoded({extended: false}));
+app.use(express.urlencoded({extended: true}));
+app.use(express.static('public'));
+app.use(favicon(path.join(__dirname, "public", "assets", "favicon.png")));
 
-app.use(express.static(path.join(__dirname, "public")));
-app.use(favicon(path.join(__dirname, "public/assets", "favicon.png")));
-app.use(express.static(path.join(__dirname, "public/css")));
-app.use(express.static(path.join(__dirname, "public/js")));
-app.use(express.static(path.join(__dirname, "public/assets")));
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
 
-app.get("/", (req, res) => {
-  // res.sendFile(__dirname + "/public/index.html");
-  // TO OCZYWISCIE NIE BEDA CONSTY TYLKO REQUESTY Z POSTGRESA
-      const ksiazki = [
-        {
-            img: 'assets/okladki/fizyka1.png',
-            tytul: 'Fizyka 1',
-            autor: ['Robert Resnick', 'David Halliday']
-        },
-        {
-            img: 'assets/okladki/fizyka1.png',
-            tytul: '1984',
-            autor: 'jorjor well'
-        },
-        {
-            img: 'assets/okladki/fizyka1.png',
-            tytul: 'Modele dynamiki układów fizycznych dla inżynierów',
-            autor: 'Anna Czemplik'
-        },
-        {
-            img: 'assets/okladki/fizyka1.png',
-            tytul: 'Maszyny elektryczne',
-            autor: 'Antoni M. Plamitzer'
-        },
-        {
-            img: 'assets/okladki/fizyka1.png',
-            tytul: 'Nie znam więcej książek',
-            autor: 'Tomasz Gąsior'
-        }
-    ];
 
-    const najnowsze = [
-      {
-        tytul: 'Fizyka 1',
-        autor: ['Robert Resnick', 'David Halliday']
-      }
-    ]
-    
-    res.render('index', { ksiazki: ksiazki , najnowsze: najnowsze});
+app.use((req, res, next) => {
+  res.locals.uzytkownik = req.session.userId ? {
+    numer_karty: req.session.userId,
+    nazwa_uzytkownika: req.session.nazwa_uzytkownika,
+    email: req.session.email,
+    rola: req.session.rola,
+    poterminie: req.session.poterminie
+  } : null;
+  next();
 });
+
+app.use("/auth", authRoutes);
+app.use("/admin", adminRoutes);
+app.use("/ksiazki", ksiazkiRoutes);
+app.use("/autorzy", autorzyRoutes);
+app.use("/kategorie", kategorieRoutes);
+app.use("/", mainRoutes);
+
 app.get("/roadmap", (req, res) => {
-  // res.sendFile(__dirname + "/public/roadmap.html");
-  res.render("roadmap", {title: "Roadmap"});
+  res.sendFile(__dirname + "/public/roadmap.html");
+});
+
+
+// Error handling
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).render("error", {
+    tytul: "Błąd serwera",
+    wiadomosc: err.message || "Coś poszło nie tak!",
+    customCSS: '/css/error.css'
+  });
+});
+// 404 handling
+app.use((req, res) => {
+  res.status(404).render("error", {
+    tytul: "Błąd",
+    wiadomosc: "Strona której szukasz nie istnieje",
+    customCSS: '/css/error.css'
+  });
 });
 
 app.listen(PORT, () => {

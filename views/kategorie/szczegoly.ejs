@@ -1,0 +1,117 @@
+<div class="ksiazka-szczegoly-container">
+    <div class="ksiazka-header">
+        
+        <div class="ksiazka-info">
+            <h1 class="ksiazka-tytul"><%= autor %></h1>
+        </div>
+    </div>
+
+    <div class="ksiazki-lista">
+    <% ksiazki.forEach(function(ksiazka) { %>
+      <div class="ksiazka-lista-item">
+        <div class="ksiazka-lista-lewa">
+          <a href="/ksiazki/<%= ksiazka.isbn %>">
+            <img class="ksiazka-lista-obraz" src="<%= ksiazka.img_link %>" alt="Okładka: <%= ksiazka.tytul %>" onerror="this.src='/assets/okladki/placeholder.webp'">
+          </a>
+        </div>
+        
+        <div class="ksiazka-lista-prawa">
+          <h3 class="ksiazka-lista-tytul">
+            <a href="/ksiazki/<%= ksiazka.isbn %>" class="tytul-link"><%= ksiazka.tytul %></a>
+          </h3>
+          
+          <div class="ksiazka-lista-autor">
+            <span class="label">
+                <% if (Array.isArray(ksiazka.autor)) { %>
+                    Autorzy:
+                <% } else { %>
+                    Autor:
+                <% } %>
+            </span>
+            <span class="value">
+                <% if (Array.isArray(ksiazka.autor)) { %>
+                    <% ksiazka.autor.forEach(function(autor, index) { %>
+                        <a href="/autorzy/<%= encodeURIComponent(autor) %>" class="autor-link">
+                            <%= autor %>
+                        </a>
+                        <% if (index < ksiazka.autor.length - 1) { %>, <% } %>
+                    <% }); %>
+                <% } else { %>
+                    <a href="/autorzy/<%= encodeURIComponent(autor) %>" class="autor-link">
+                        <%= ksiazka.autor %>
+                    </a>
+                <% } %>
+            </span>
+          </div>
+          
+          <div class="ksiazka-lista-details">
+            <div class="detail-group">
+              <span class="label">Rok wydania:</span>
+              <span class="value"><%= ksiazka.rok_wydania %></span>
+            </div>
+            
+            <div class="detail-group">
+              <span class="label">Ilość stron:</span>
+              <span class="value"><%= ksiazka.ilosc_stron %> stron</span>
+            </div>
+            
+            <div class="detail-group">
+              <span class="label">ISBN:</span>
+              <span class="value isbn"><%= ksiazka.isbn %></span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- <div class="ksiazka-lista-actions">
+          <a href="/ksiazki/<%= ksiazka.id %>" class="btn btn-primary">Szczegóły</a>
+          <button class="btn btn-secondary">Rezerwuj</button>
+        </div> -->
+      </div>
+    <% }); %>
+  </div>
+<!-- 
+    <div class="kopie-section">
+        <h2>Kopie w bibliotece</h2>
+        <div class="dostepnosc-stats">
+                <div class="stat-dostepne">
+                    <span class="stat-number"><%= dostepneKopie.length %></span>
+                    <span class="stat-label">dostępnych kopii</span>
+                </div>
+                <div class="stat-lacznie">
+                    <span class="stat-number"><%= kopie.length %></span>
+                    <span class="stat-label">łącznie w bibliotece</span>
+                </div>
+            </div>
+        <div class="kopie-lista">
+            <% kopie.forEach(function(kopia, index) { %>
+                <div class="kopia-item <%= kopia.dostepna ? 'dostepna' : 'niedostepna' %>">
+                    <a href="/ksiazki/<%= kopia.isbn %>">
+                        <img class="ksiazka-autor-obraz" src="<%= kopia.img_link %>" alt="Okładka: <%= kopia.tytul %>" onerror="this.src='/assets/okladki/placeholder.webp'">
+                    </a>
+                    <div class="kopia-info">
+                        <div class="kopia-numer">
+                            <span class="numer"><%= kopia.tytul %></span>
+                            <span class="status <%= kopia.dostepna ? 'status-dostepna' : 'status-niedostepna' %>">
+                                <%= kopia.dostepna ? 'Dostępna' : 'Wypożyczona' %>
+                            </span>
+                        </div>
+                        
+                        <div class="kopia-id">
+                            <span class="label">Rok wydania:</span>
+                            <span class="value"><%= kopia.rok_wydania %></span>
+                        </div>
+                        <div class="kopia-id">
+                            <span class="label">ISBN:</span>
+                            <span class="value"><%= kopia.isbn %></span>
+                        </div>
+
+                        <div class="kopia-id">
+                            <span class="label">ID książki:</span>
+                            <span class="value"><%= kopia.id %></span>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    </div> -->
+</div>

@@ -1,0 +1,138 @@
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    padding: 40px 20px;
+}
+
+.auth-card {
+    background: rgba(30, 30, 36, 0.95);
+    border: 1px solid var(--bg-contrast);
+    padding: 40px;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.auth-header h2 {
+    color: var(--font-color);
+    margin-bottom: 10px;
+    font-size: 28px;
+}
+
+.auth-header p {
+    color: var(--bg-contrast);
+    opacity: 0.8;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-label {
+    color: var(--font-color);
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.form-input {
+    padding: 12px 16px;
+    background: color-mix(in srgb, var(--dashboard-color) 10%, transparent);
+    border: 2px solid color-mix(in srgb, var(--dashboard-color), 0.3);
+    border-radius: 8px;
+    color: var(--font-color);
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--green-accent);
+    background: color-mix(in srgb, var(--dashboard-color), 0.15);
+}
+
+.form-input::placeholder {
+    color: color-mix(in srgb, var(--dashboard-color), 0.5);
+}
+
+.auth-btn {
+    padding: 14px 20px;
+    background: var(--green-accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.auth-btn:hover {
+    background: var(--green-accent-highlight);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px color-mix(in srgb, var(--dashbaord-secondary), 0.3);
+}
+
+.auth-btn:active {
+    transform: translateY(0);
+}
+
+.auth-links {
+    text-align: center;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid color-mix(in srgb, var(--dashboard-color) 20%, transparent);
+}
+
+.auth-links p {
+    color: var(--bg-contrast);
+    opacity: 0.8;
+}
+
+.auth-link {
+    color: var(--green-accent);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.auth-link:hover {
+    color: var(--green-accent-highlight);
+    text-decoration: underline;
+}
+
+.alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.alert-error {
+    background: rgba(235, 81, 96, 0.2);
+    border: 1px solid var(--red-accent);
+    color: var(--red-accent);
+}
+
+.alert-sukces {
+    background: color-mix(in srgb, var(--dashbaord-secondary) 20%, transparent);
+    border: 1px solid var(--green-accent);
+    color: var(--green-accent);
+}
+

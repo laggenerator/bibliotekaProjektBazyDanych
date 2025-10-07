@@ -1,0 +1,273 @@
+.main-header {
+    background: var(--bg-contrast);
+    color: var(--bg-dark);
+    padding: 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    height: 70px;
+}
+
+/* Logo + przyciski */
+.header-left {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    flex: 1;
+}
+
+.logo-link {
+    vertical-align: middle;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--bg-dark);
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+
+.logo {
+    width: 32px;
+    height: 32px;
+}
+
+.logo-text {
+    font-weight: 700;
+}
+
+.main-nav {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    gap: 25px;
+}
+
+.nav-link {
+    vertical-align: middle;
+    color: var(--bg-dark);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.nav-link:hover {
+    background: color-mix(in srgb, var(--header-color) 10%, transparent);
+    color: var(--bg-dark);
+}
+
+/* Środek z wyszukiwarką */
+.header-center {
+    flex: 0 1 500px;
+    display: flex;
+    justify-content: center;
+}
+
+.wyszukiwarka-container {
+    display: flex;
+    width: 100%;
+    max-width: 400px;
+}
+
+.wyszukiwarka-input {
+    flex: 1;
+    padding: 10px 16px;
+    border: 2px solid color-mix(in srgb, var(--header-color) 20%, transparent);
+    border-right: none;
+    border-radius: 25px 0 0 25px;
+    outline: none;
+    font-size: 14px;
+    background: white;
+    color: var(--bg-dark);
+}
+
+.wyszukiwarka-input:focus {
+    border-color: var(--green-accent);
+}
+
+.wyszukiwarka-input::placeholder {
+    color: #666;
+}
+
+.wyszukiwarka-btn {
+    padding: 10px 20px;
+    background: var(--green-accent);
+    color: white;
+    border: none;
+    border-radius: 0 25px 25px 0;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease;
+}
+
+.wyszukiwarka-btn:hover {
+    background: var(--green-accent-highlight);
+}
+
+/* Przycisk z kontem */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+/* Przycisk do logowania */
+.login-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--bg-dark);
+    border: none;
+    border-radius: 25px;
+    color: var(--bg-contrast);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+    background: #333;
+    transform: translateY(-2px);
+}
+
+.register-btn {
+    padding: 10px 20px;
+    background: transparent;
+    border: 2px solid var(--bg-dark);
+    border-radius: 25px;
+    color: var(--bg-dark);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.register-btn:hover {
+    background: var(--bg-dark);
+    color: var(--bg-contrast);
+}
+
+
+.user-menu {
+    position: relative;
+}
+
+.user-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: color-mix(in srgb, var(--header-color) 10%, transparent);
+    border: none;
+    border-radius: 20px;
+    color: var(--bg-dark);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.user-btn:hover {
+    background: color-mix(in srgb, var(--header-color) 20%, transparent);
+}
+
+.user-name {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 10px;
+    background: var(--bg-contrast);
+    border: 1px solid color-mix(in srgb, var(--header-color) 10%, transparent);
+    border-radius: 12px;
+    padding: 8px;
+    min-width: 200px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+}
+
+.user-menu:hover .user-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    color: var(--bg-dark);
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.3s ease;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background: color-mix(in srgb, var(--header-color) 10%, transparent);
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: color-mix(in srgb, var(--header-color) 10%, transparent);
+    margin: 6px 0;
+}
+
+.wyloguj-item {
+    color: var(--red-accent);
+}
+
+.wyloguj-item:hover {
+    background: rgba(235, 81, 96, 0.1);
+    color: var(--red-accent);
+}
+
+.wyloguj-form {
+    margin: 0;
+}
+
+.admin-highlight{
+    color: var(--red-accent-highlight);
+    font-weight: bold;
+}

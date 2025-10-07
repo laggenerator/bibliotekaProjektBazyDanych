@@ -1,0 +1,68 @@
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Panel użytkownika</h1>
+        <p>Witaj, <strong><%= locals.uzytkownik.nazwa_uzytkownika %></strong>!</p>
+    </div>
+
+    <div class="dashboard-stats">
+        <div class="stat-card">
+          <div class="stat-icon">📚</div>
+          <div class="stat-info">
+            <h3>Aktualnie wypożyczone</h3>
+            <p class="stat-number">0</p>
+          </div>
+        </div>
+
+        <div class="stat-card <%= poterminie > 0 ? 'zle' : '' %>">
+          <div class="stat-icon">⏰</div>
+          <div class="stat-info">
+            <h3>Książki przetrzymane po terminie zwrotu</h3>
+            <p class="stat-number"><%= poterminie %></p>
+          </div>
+        </div>
+    </div>
+
+    <div class="dashboard-sections">
+      <div class="section-card">
+        <h2>Szybkie akcje</h2>
+        <div class="action-buttons">
+          <a href="/ksiazki" class="action-btn">
+            <span class="action-icon">🔍</span>
+            <span>Przeglądaj książki</span>
+          </a>
+          <a href="/biezace-wypozyczenia" class="action-btn">
+            <span class="action-icon">📖</span>
+            <span>Bieżące wypożyczenia</span>
+          </a>
+          <a href="/historia" class="action-btn">
+            <span class="action-icon">📊</span>
+            <span>Historia wypożyczeń</span>
+          </a>
+        </div>
+      </div>
+
+        <div class="section-card">
+        <h2>Informacje o koncie</h2>
+        <div class="action-buttons">
+          <div class="info-item">
+            <span class="info-label">Numer karty:</span>
+            <span class="info-value"><%= locals.uzytkownik.numer_karty %></span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Nazwa użytkownika:</span>
+            <span class="info-value"><%= locals.uzytkownik.nazwa_uzytkownika %></span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Email:</span>
+              <span class="info-value"><%= locals.uzytkownik.email %></span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Data dołączenia:</span>
+              <span class="info-value"><%= new Date().toLocaleDateString('pl-PL') %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+      
+</div>

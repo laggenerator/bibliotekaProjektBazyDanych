@@ -1,0 +1,215 @@
+.ksiazka-szczegoly-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.ksiazka-header {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 40px;
+    margin-bottom: 50px;
+    align-items: start;
+}
+
+.ksiazka-duzy-obraz {
+    width: 100%;
+    max-width: 300px;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.ksiazka-info {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.ksiazka-tytul {
+    color: var(--font-color);
+    font-size: 2.2rem;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.ksiazka-autor {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.2rem;
+}
+
+.ksiazka-autor .label {
+    color: var(--bg-contrast);
+    opacity: 0.8;
+}
+
+.ksiazka-autor .value {
+    color: var(--font-color);
+    font-weight: 500;
+}
+
+.ksiazka-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.detail-item .label {
+    color: var(--bg-contrast);
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.detail-item .value {
+    color: var(--font-color);
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.value.isbn {
+    font-family: monospace;
+    background: color-mix(in srgb, var(--dashboard-color) 10%, transparent);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.dostepnosc-stats {
+    display: flex;
+    gap: 30px;
+    margin: 20px 0;
+}
+
+.stat-dostepne, .stat-lacznie {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--green-accent);
+}
+
+.stat-lacznie .stat-number {
+    color: var(--font-color);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--bg-contrast);
+}
+
+.btn-large {
+    padding: 15px 30px;
+    font-size: 1.1rem;
+}
+
+.kopie-section {
+    margin-top: 50px;
+}
+
+.kopie-section h2 {
+    color: var(--font-color);
+    margin-bottom: 25px;
+    font-size: 1.5rem;
+}
+
+.kopie-lista {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 15px;
+}
+
+.kopia-item {
+    background: color-mix(in srgb, var(--dashboard-color) 5%, transparent);
+    border: 1px solid color-mix(in srgb, var(--dashboard-color) 10%, transparent);
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.kopia-item.dostepna {
+    border-left: 4px solid var(--green-accent);
+}
+
+.kopia-item.niedostepna {
+    border-left: 4px solid #e74c3c;
+    opacity: 0.7;
+}
+
+.kopia-info {
+    flex: 1;
+}
+
+.kopia-numer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.numer {
+    font-weight: 600;
+    color: var(--font-color);
+}
+
+.status {
+    font-size: 0.8rem;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.status-dostepna {
+    background: color-mix(in srgb, var(--dashbaord-secondary) 20%, transparent);
+    color: var(--green-accent);
+}
+
+.status-niedostepna {
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+}
+
+.kopia-id {
+    color: var(--bg-contrast);
+    font-size: 0.9rem;
+}
+
+.kopia-akcje {
+    flex-shrink: 0;
+}
+.ksiazka-autor-obraz {
+    width: 80px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+    margin-right: 10px;
+}
+
+.tytul-link, .autor-link {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  font-weight: bold;
+}
+
+.tytul-link:hover, .autor-link:hover{
+  color: var(--green-accent);
+}

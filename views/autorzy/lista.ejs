@@ -1,0 +1,30 @@
+<div class="autorzy-container">
+    <div class="autorzy-header">
+        <h1>Katalog wszystkich autorów</h1>
+        <div class="autorzy-stats">
+            <span class="stat-number"><%= liczbaAutorow %></span>
+            <span class="stat-label">autorów w bibliotece</span>
+        </div>
+    </div>
+
+    <div class="autorzy-lista">
+        <% autorzy.forEach(function(autor, index) { %>
+            <a href="/autorzy/<%= encodeURIComponent(autor) %>" class="autor-item">
+                <div class="autor-inicjal">
+                    <%= autor.charAt(0).toUpperCase() %>
+                </div>
+                <div class="autor-info">
+                    <h3 class="autor-nazwa"><%= autor %></h3>
+                    <span class="autor-link">Zobacz książki →</span>
+                </div>
+            </a>
+        <% }); %>
+    </div>
+
+    <% if (autorzy.length === 0) { %>
+        <div class="brak-autorow">
+            <h3>Brak autorów w bibliotece</h3>
+            <p>Nie znaleziono żadnych autorów w bazie danych</p>
+        </div>
+    <% } %>
+</div>

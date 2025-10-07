@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="pl">
   <head>
     <meta charset="UTF-8" />
@@ -18,55 +18,50 @@
       <button type="submit" class="wyszukiwarka-btn" onclick="document.location='./roadmap'">Wyszukaj</button>
     </div>
     <div class="przyciski">
-      <button class="modern-login-btn">
+      <% if(!locals.user) { %>
+      <button class="login-btn">
         <svg class="user-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
           <path d="M20 21V19C20 16.7909 18.2091 15 16 15H8C5.79086 15 4 16.7909 4 19V21" stroke="currentColor" stroke-width="2"/>
           <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
         </svg><span>Zaloguj się</span>
       </button>
+      <% } else { %>
     </div>
-  </header>
+  </header> -->
 
   <div id="noweksiazki" class="ksiazki-container">
     <h2>Nowe nabytki w bibliotece</h2>
     <div class="ksiazki-grid">
-      <div class="ksiazka-karta">
-        <img class="ksiazka-obraz" src="assets/okladki/fizyka1.png">
-        <h3 class="ksiazka-tytul">Fizyka 1</h3>
-        <p class="ksiazka-autor">Robert Resnick, David Halliday</p>
-      </div>
-
-      <div class="ksiazka-karta">
-        <img class="ksiazka-obraz" src="assets/okladki/fizyka1.png">
-        <h3 class="ksiazka-tytul">1984</h3>
-        <p class="ksiazka-autor">jorjor well</p>
-      </div>
-
-      <div class="ksiazka-karta">
-        <img class="ksiazka-obraz" src="assets/okladki/fizyka1.png">
-        <h3 class="ksiazka-tytul">Modele dynamiki układów fizycznych dla inżynierów</h3>
-        <p class="ksiazka-autor">Anna Czemplik</p>
-      </div>
-
-      <div class="ksiazka-karta">
-        <img class="ksiazka-obraz" src="assets/okladki/fizyka1.png">
-        <h3 class="ksiazka-tytul">Maszyny elektryczne</h3>
-        <p class="ksiazka-autor">Antoni M. Plamitzer</p>
-      </div>
-
-      <div class="ksiazka-karta">
-        <img class="ksiazka-obraz" src="assets/okladki/fizyka1.png">
-        <h3 class="ksiazka-tytul">Nie znam wiecej ksiazek</h3>
-        <p class="ksiazka-autor">Tomasz Gąsior</p>
-      </div>
+        <% ksiazki.forEach(function(ksiazka) { %>
+            <div class="ksiazka-karta">
+                <img class="ksiazka-obraz" src="<%= ksiazka.img %>" alt="<%= ksiazka.tytul %>">
+                <h3 class="ksiazka-tytul"><%= ksiazka.tytul %></h3>
+                <p class="ksiazka-autor">
+                  <% if (Array.isArray(ksiazka.autor)) { %>
+                      <%= ksiazka.autor.join(', ') %>
+                  <% } else { %>
+                      <%= ksiazka.autor %>
+                  <% } %>
+                </p>
+            </div>
+        <% }); %>
     </div>
-  </div>
+</div>
 
   <div id="najchetniejwypozyczane" class="ksiazki-container">
     <h2>Najnowsze wypożyczenie</h2>
     <ul>
-      <li>Fizyka 1</li>
+      <% najnowsze.forEach(function(ksiazka) { %>
+          <li>
+              <%= ksiazka.tytul %> - 
+              <% if (Array.isArray(ksiazka.autor)) { %>
+                  <%= ksiazka.autor.join(', ') %>
+              <% } else { %>
+                  <%= ksiazka.autor %>
+              <% } %>
+          </li>
+      <% }); %>
     </ul>
   </div>
-</body>
-</html>
+<!-- </body>
+</html> -->

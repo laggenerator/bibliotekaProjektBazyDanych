@@ -1,0 +1,12 @@
+<div class="error-container">
+    <div class="error-card">
+        <h1><%= typeof tytul !== 'undefined' ? tytul : 'Błąd' %></h1>
+        <p class="error-message">
+            <%= typeof error !== 'undefined' ? error : (typeof wiadomosc !== 'undefined' ? wiadomosc : 'Wystąpił nieoczekiwany błąd') %>
+        </p>
+        <div class="error-actions">
+            <a href="/" class="btn btn-primary">Strona główna</a>
+            <a href="javascript:history.back()" class="btn btn-secondary">Powrót</a>
+        </div>
+    </div>
+</div>

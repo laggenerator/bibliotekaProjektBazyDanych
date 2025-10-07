@@ -1,0 +1,27 @@
+<div class="autorzy-container">
+    <div class="autorzy-header">
+        <h1>Katalog wszystkich kategorii</h1>
+        <div class="autorzy-stats">
+            <span class="stat-number"><%= liczbaKategorii %></span>
+            <span class="stat-label">kategorii w bibliotece</span>
+        </div>
+    </div>
+
+    <div class="autorzy-lista">
+        <% kategorie.forEach(function(kategoria, index) { %>
+            <a href="/kategorie/<%= encodeURIComponent(kategoria) %>" class="autor-item">
+                <div class="autor-info">
+                    <h3 class="autor-nazwa"><%= kategoria %></h3>
+                    <span class="autor-link">Zobacz książki →</span>
+                </div>
+            </a>
+        <% }); %>
+    </div>
+
+    <% if (kategorie.length === 0) { %>
+        <div class="brak-autorow">
+            <h3>Brak kategorii w bibliotece</h3>
+            <p>Nie znaleziono żadnych kategorii w bazie danych</p>
+        </div>
+    <% } %>
+</div>

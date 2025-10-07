@@ -1,0 +1,64 @@
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Panel admina</h1>
+        <p>Witaj, <strong class="admin-highlight"><%= locals.uzytkownik.nazwa_uzytkownika %></strong>!</p>
+    </div>
+<!-- 
+    <div class="dashboard-stats">
+        <div class="stat-card">
+          <div class="stat-icon">📚</div>
+          <div class="stat-info">
+            <h3>Aktualnie wypożyczone</h3>
+            <p class="stat-number">0</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">⏰</div>
+          <div class="stat-info">
+            <h3>Po terminie oddania</h3>
+            <p class="stat-number">0</p>
+          </div>
+        </div>
+    </div> -->
+
+    <div class="dashboard-sections">
+      <div class="section-card">
+        <h2>Szybkie akcje</h2>
+        <div class="action-buttons">
+          <a href="/admin/ksiazki" class="action-btn">
+            <span class="action-icon">📚</span>
+            <span>Zarządzaj książkami</span>
+          </a>
+          <a href="/admin/zamowienia" class="action-btn">
+            <span class="action-icon">📦</span>
+            <span>Zarządzaj zamówieniami</span>
+          </a>
+          <a href="/admin/uzytkownicy" class="action-btn">
+            <span class="action-icon">👤</span>
+            <span>Zarządzaj użytkownikami</span>
+          </a>
+        </div>
+      </div>
+
+        <div class="section-card">
+        <h2>Podsumowanie</h2>
+        <div class="action-buttons">
+          <div class="info-item">
+            <span class="info-label">Liczba aktywnych zamówień:</span>
+            <span class="info-value"><%= "PLACEHOLDER" %></span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Liczba użytkowników:</span>
+            <span class="info-value"><%= liczbaUzytkownikow %></span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Liczba książek z przekroczonym terminem oddania:</span>
+              <span class="info-value"><%= "PLACEHOLDER" %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+      
+</div>

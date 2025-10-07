@@ -1,0 +1,39 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2>Logowanie</h2>
+      <p>Zaloguj się do swojego konta</p>
+    </div>
+
+    <% if (locals.error) { %>
+      <div class="alert alert-error">
+        <%= locals.error %>
+      </div>
+    <% } %>
+
+    <% if (locals.sukces) { %>
+      <div class="alert alert-sukces">
+        <%= locals.sukces %>
+      </div>
+    <% } %>
+
+    <form action="/auth/login" method="POST" class="auth-form"> 
+      <div class="form-group">
+        <label for="nazwa_uzytkownika" class="form-label">Nazwa użytkownika lub email</label>
+        <input type="text" id="nazwa_uzytkownika" name="nazwa_uzytkownika" class="form-input" value="<%= formData && formData.nazwa_uzytkownika || ''%>" required>
+      </div>
+      <div class="form-group">
+        <label for="haslo" class="form-label">Hasło</label>
+        <input type="password" id="haslo" name="haslo" class="form-input" required>
+      </div>
+
+      <button type="submit" class="auth-btn">
+        Zaloguj się
+      </button>
+    </form>
+
+    <div class="auth-links">
+      <p>Nie masz konta? <a href="/auth/register" class="auth-link">Zarejestruj się</a></p>
+    </div>
+  </div>
+</div>
