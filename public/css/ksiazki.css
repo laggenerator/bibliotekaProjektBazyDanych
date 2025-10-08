@@ -31,7 +31,7 @@
 .ksiazka-lista-item:hover {
   transform: translateY(-3px);
   border-color: var(--green-accent);
-  background: color-mix(in srgb, var(--dashboard-color), transparent 8%);
+  background: color-mix(in srgb, var(--dashboard-color) 8%, transparent);
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
 }
 

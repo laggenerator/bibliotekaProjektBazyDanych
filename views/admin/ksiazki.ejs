@@ -1,0 +1,114 @@
+<div id="noweksiazki" class="ksiazki-lista-container">
+  <% if (locals.error) { %>
+    <div class="alert alert-error">
+      <%= locals.error %>
+    </div>
+  <% } %>
+
+  <% if (locals.sukces) { %>
+    <div class="alert alert-sukces">
+      <%= locals.sukces %>
+    </div>
+  <% } %>
+  
+  <% if (locals.query) { %>
+    <h2>Wyniki wyszukiwania dla: <%= query %></h2>
+  <% } else if (locals.dodawanie) { %> 
+    <h2>Dodano poniższe książki</h2>
+  <% } else { %> 
+    <h2>Zarządzanie książkami</h2>
+  <% } %>
+  <% if (!locals.dodawanie) { %>
+    <div class="admin-actions">
+      <a href="/admin/ksiazki/dodaj" class="btn btn-success">Dodaj nową książkę</a>
+    </div>
+  <% } %>
+  
+  <div class="ksiazki-lista">
+    <% ksiazki.forEach(function(ksiazka) { %>
+      <div class="ksiazka-lista-item">
+        <div class="ksiazka-lista-lewa">
+          <a href="/ksiazki/<%= ksiazka.isbn %>">
+            <img class="ksiazka-lista-obraz" src="<%= ksiazka.img_link %>" alt="Okładka: <%= ksiazka.tytul %>" onerror="this.src='/assets/okladki/placeholder.webp'">
+          </a>
+        </div>
+        
+        <div class="ksiazka-lista-prawa">
+          <h3 class="ksiazka-lista-tytul">
+            <a href="/ksiazki/<%= ksiazka.isbn %>" class="tytul-link"><%= ksiazka.tytul %></a>
+          </h3>
+          
+          <div class="ksiazka-lista-autor">
+            <span class="label">
+                <% if (Array.isArray(ksiazka.autor) && ksiazka.autor.length > 1) { %>
+                    Autorzy:
+                <% } else { %>
+                    Autor:
+                <% } %>
+            </span>
+            <span class="value">
+                <% if (Array.isArray(ksiazka.autor)) { %>
+                    <% ksiazka.autor.forEach(function(autor, index) { %>
+                        <a href="/autorzy/<%= encodeURIComponent(autor) %>" class="autor-link">
+                            <%= autor %>
+                        </a>
+                        <% if (index < ksiazka.autor.length - 1) { %>, <% } %>
+                    <% }); %>
+                <% } else { %>
+                    <a href="/autorzy/<%= encodeURIComponent(ksiazka.autor) %>" class="autor-link">
+                        <%= ksiazka.autor || "Nie wiem" %>
+                    </a>
+                <% } %>
+            </span>
+          </div>
+          
+          <div class="ksiazka-lista-details">
+            <div class="detail-group">
+                <span class="label">
+                <% if (Array.isArray(ksiazka.kategorie) && ksiazka.kategorie.length > 1) { %>
+                    Kategorie:
+                <% } else { %>
+                    Kategoria:
+                <% } %>
+              </span>
+              <span class="value">
+                <% if (Array.isArray(ksiazka.kategorie) && ksiazka.kategorie.length > 1) { %>
+                  <% ksiazka.kategorie.forEach(function(kategoria, index) { %>
+                    <a href="/kategoria/<%= encodeURIComponent(kategoria) %>" class="autor-link">
+                      <%= kategoria %>
+                    </a>
+                  <% if (index < ksiazka.kategorie.length - 1) { %>, <% } %>
+                  <% }); %>
+                <% } else { %>
+                  <a href="/kategoria/<%= encodeURIComponent(ksiazka.kategorie) %>" class="autor-link">
+                    <%= ksiazka.kategorie || "Nie wiem" %>
+                  </a>
+                <% } %>
+              </span>
+            </div>
+            
+            <div class="detail-group">
+              <span class="label">Rok wydania:</span>
+              <span class="value"><%= ksiazka.rok_wydania %></span>
+            </div>
+            
+            <div class="detail-group">
+              <span class="label">Ilość stron:</span>
+              <span class="value"><%= ksiazka.ilosc_stron %> stron</span>
+            </div>
+            
+            <div class="detail-group">
+              <span class="label">ISBN:</span>
+              <span class="value isbn"><%= ksiazka.isbn %></span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="ksiazka-lista-actions admin-actions">
+          <a href="/admin/ksiazki/<%= ksiazka.isbn %>/edytuj" class="btn btn-primary">Modyfikuj</a>
+          <button class="btn btn-danger usun-ksiazke" data-isbn="<%= ksiazka.isbn %>" data-tytul="<%= ksiazka.tytul %>">Usuń</button>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+</div>

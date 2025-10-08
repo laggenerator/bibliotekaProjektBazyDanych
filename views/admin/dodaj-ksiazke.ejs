@@ -1,0 +1,196 @@
+<div class="admin-container">
+        <div class="admin-header">
+            <h1>Dodaj nową książkę</h1>
+            <a href="/admin/ksiazki" class="btn btn-secondary">← Powrót do listy</a>
+        </div>
+
+        <% if (locals.error) { %>
+            <div class="alert alert-error">
+                <%= locals.error %>
+            </div>
+        <% } %>
+
+        <% if (locals.sukces) { %>
+            <div class="alert alert-sukces">
+                <%= locals.sukces %>
+            </div>
+        <% } %>
+
+        <form action="/admin/ksiazki/dodaj" method="POST" class="book-form" enctype="multipart/form-data">
+            <div class="form-grid">
+                <!-- Tytuł -->
+                <div class="form-group">
+                    <label for="tytul_ksiazki" class="form-label">Tytuł</label>
+                    <input 
+                        type="text" 
+                        id="tytul_ksiazki" 
+                        name="tytul_ksiazki" 
+                        class="form-input" 
+                        required 
+                        value="<%= locals.tytul_ksiazki || '' %>"
+                        placeholder="Wprowadź tytuł książki"
+                    >
+                </div>
+
+                <!-- Autor/Autorzy -->
+                <div class="form-group">
+                    <label for="autor" class="form-label">Autor/Autorzy</label>
+                    <textarea 
+                        id="autor" 
+                        name="autor" 
+                        class="form-textarea" 
+                        required 
+                        placeholder="Wprowadź imię i nazwisko autora. Jeśli jest wielu autorów, oddziel ich przecinkami"
+                        rows="3"
+                    ><%= locals.autor || '' %></textarea>
+                    <small class="form-hint">Oddziel wielu autorów przecinkami</small>
+                </div>
+
+                <!-- ISBN -->
+                <div class="form-group">
+                    <label for="isbn" class="form-label">ISBN</label>
+                    <input 
+                        type="text" 
+                        id="isbn" 
+                        name="isbn" 
+                        class="form-input" 
+                        required 
+                        value="<%= locals.isbn || '' %>"
+                        placeholder="np. 978-83-123-4567-8"
+                        pattern="[0-9\-]+"
+                    >
+                    <small class="form-hint">Format: 13-cyfrowy ISBN z myślnikami</small>
+                </div>
+
+                <!-- Rok wydania -->
+                <div class="form-group">
+                    <label for="rok_wydania" class="form-label">Rok wydania</label>
+                    <input 
+                        type="number" 
+                        id="rok_wydania" 
+                        name="rok_wydania" 
+                        class="form-input" 
+                        required 
+                        value="<%= locals.rok_wydania || '' %>"
+                        min="1000" 
+                        max="<%= new Date().getFullYear() + 1 %>"
+                        placeholder="1789"
+                    >
+                </div>
+
+                <!-- Ilość stron -->
+                <div class="form-group">
+                    <label for="ilosc_stron" class="form-label">Ilość stron</label>
+                    <input 
+                        type="number" 
+                        id="ilosc_stron" 
+                        name="ilosc_stron" 
+                        class="form-input" 
+                        required 
+                        value="<%= locals.ilosc_stron || '' %>"
+                        min="1" 
+                        max="10000"
+                        placeholder="67"
+                    >
+                </div>
+
+                <!-- Kategorie -->
+                <div class="form-group">
+                    <label for="kategorie" class="form-label">Kategorie</label>
+                    <textarea 
+                        id="kategorie" 
+                        name="kategorie" 
+                        class="form-textarea" 
+                        placeholder="Wprowadź kategorie, oddzielając je przecinkami"
+                        rows="2"
+                    ><%= locals.kategorie || '' %></textarea>
+                    <small class="form-hint">np. Naukowa, Literatura piękna</small>
+                </div>
+
+                <!-- Zdjęcie okładki -->
+                <div class="form-group">
+                    <label for="okladka" class="form-label">Zdjęcie okładki</label>
+                    <input 
+                        type="file" 
+                        id="okladka" 
+                        name="okladka" 
+                        class="form-input-file" 
+                        accept="image/*"
+                    >
+                    <small class="form-hint">Akceptowane formaty: JPG, PNG, WEBP. Maksymalny rozmiar: 5MB</small>
+                </div>
+
+                <!-- Liczba kopii -->
+                <div class="form-group">
+                    <label for="liczba_kopii" class="form-label">Liczba kopii</label>
+                    <input 
+                        type="number" 
+                        id="liczba_kopii" 
+                        name="liczba_kopii" 
+                        class="form-input" 
+                        required 
+                        value="<%= locals.liczba_kopii || 1 %>"
+                        min="1" 
+                        max="100"
+                        placeholder="1"
+                    >
+                    <small class="form-hint">Liczba identycznych egzemplarzy do dodania</small>
+                </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">Dodaj książkę</button>
+                <button type="reset" class="btn btn-secondary">Wyczyść formularz</button>
+                <a href="/admin/ksiazki" class="btn btn-secondary">Anuluj</a>
+            </div>
+        </form>
+      </div>
+
+        <script>
+        // Walidacja formularza
+        document.querySelector('.book-form').addEventListener('submit', function(e) {
+            const isbn = document.getElementById('isbn').value;
+            const rok = document.getElementById('rok_wydania').value;
+            const strony = document.getElementById('ilosc_stron').value;
+            
+            // Walidacja roku
+            if (rok < 0 || rok > new Date().getFullYear() + 1) {
+                alert('Proszę podać poprawny rok wydania');
+                e.preventDefault();
+                return;
+            }
+            
+            // Walidacja liczby stron
+            if (strony < 1 || strony > 10000) {
+                alert('Liczba stron musi być między 1 a 10000');
+                e.preventDefault();
+                return;
+            }
+            
+            // Walidacja ISBN
+            if (!/^[0-9\-]+$/.test(isbn)) {
+                alert('ISBN może zawierać tylko cyfry i myślniki');
+                e.preventDefault();
+                return;
+            }
+        });
+
+        // Podgląd okładki
+        document.getElementById('okladka').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Sprawdzanie rozmiaru pliku (max 5MB)
+                if (file.size > 5 1024 1024) {
+                    alert('Plik jest zbyt duży. Maksymalny rozmiar to 5MB.');
+                    e.target.value = '';
+                    return;
+                }
+                
+                // Sprawdzanie typu pliku
+                if (!file.type.match('image.*')) {
+                    alert('Proszę wybrać plik obrazu');
+                    e.target.value = '';
+                    return;
+                }
+            }
+        });
+    </script>

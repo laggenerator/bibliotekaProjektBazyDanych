@@ -87,6 +87,30 @@ class Ksiazka {
     const result = await pool.query(query, [ksiazkaId]);
     return result.rows[0];
   }
+
+  static async dodaj(ksiazka){
+    try {
+      const dodawanaKsiazka = {
+        ...ksiazka,
+        // podwójna walidacja
+        autor: Array.isArray(ksiazka.autor) ? ksiazka.autor : [ksiazka.autor],
+        kategorie: Array.isArray(ksiazka.kategorie) ? ksiazka.kategorie : [ksiazka.kategorie]
+      }
+
+      const query = `
+      INSERT INTO ksiazki (
+      tytul, autor, isbn, rok_wydania, ilosc_stron, kategorie)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *
+      `;
+
+      const result = await pool.query(query, [dodawanaKsiazka.tytul, dodawanaKsiazka.autor, dodawanaKsiazka.isbn, dodawanaKsiazka.rok_wydania, dodawanaKsiazka.ilosc_stron, dodawanaKsiazka.kategorie])
+      
+      return result.rows.map(row => this.formatKsiazka(row));
+    } catch (error) {
+      throw error;
+    }
+  }
 };
 
 module.exports = Ksiazka;

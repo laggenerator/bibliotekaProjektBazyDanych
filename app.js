@@ -7,12 +7,18 @@ var favicon = require("serve-favicon");
 const { Pool } = require('pg');
 require('dotenv').config();
 
+
+// Ścieżki
 const authRoutes = require("./routes/uwierzytelnianie");
 const mainRoutes = require("./routes/main");
 const adminRoutes = require("./routes/admin");
 const ksiazkiRoutes = require("./routes/ksiazki");
 const autorzyRoutes = require("./routes/autorzy");
 const kategorieRoutes = require("./routes/kategorie");
+
+
+// Middleware
+const setSearchContext = require('./middleware/searchContext');
 const PORT = process.env.PORT;
 
 
@@ -47,6 +53,8 @@ app.use((req, res, next) => {
   } : null;
   next();
 });
+
+app.use(setSearchContext);
 
 app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
