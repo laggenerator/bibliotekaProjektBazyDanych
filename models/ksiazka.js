@@ -2,15 +2,28 @@ const e = require('express');
 const pool = require('../db');
 
 class Ksiazka {
+  static normalizacjaISBN(isbn){
+    const czystyISBN = isbn.replace(/[-\s]/g, '');
+    const len = czystyISBN.length;
+    
+    if (len === 10) {
+        return `${czystyISBN.substring(0, 2)}-${czystyISBN.substring(2, 4)}-${czystyISBN.substring(4, 9)}-${czystyISBN.substring(9)}`;
+    }
+    
+    if (len === 13) {
+        return `${czystyISBN.substring(0, 3)}-${czystyISBN.substring(3, 5)}-${czystyISBN.substring(5, 9)}-${czystyISBN.substring(9, 12)}-${czystyISBN.substring(12)}`;
+    }
+  }
+
   static formatKsiazka(ksiazka) {
     return {
       id: ksiazka.ksiazkaid,
-      isbn: ksiazka.isbn,
+      isbn: this.normalizacjaISBN(ksiazka.isbn),
       tytul: ksiazka.tytul,
       autor: ksiazka.autor, // tablica autorów
       rok_wydania: ksiazka.rok_wydania,
       ilosc_stron: ksiazka.ilosc_stron,
-      img_link: `/assets/okladki/${ksiazka.isbn}.webp`,
+      img_link: `/assets/okladki/${this.normalizacjaISBN(ksiazka.isbn)}.webp`,
       dostepna: ksiazka.dostepna,
       kategorie: ksiazka.kategorie
     };
@@ -37,7 +50,7 @@ class Ksiazka {
     SELECT ksiazkaid, ISBN, tytul, autor, rok_wydania, ilosc_stron, dostepna, kategorie FROM ksiazki WHERE isbn = $1 ORDER BY dostepna;
     `;
 
-    const result = await pool.query(query, [isbn]);
+    const result = await pool.query(query, [this.normalizacjaISBN(ksiazka.isbn)]);
     return result.rows.map(row => this.formatKsiazka(row));
   }
 
@@ -73,7 +86,7 @@ class Ksiazka {
     `;
     let results = [];
     for(let i=0;i<ilosc_kopii;i++){
-      let result = await pool.query(query, [ISBN, tytul, autorArray, rok_wydania, ilosc_stron]);
+      let result = await pool.query(query, [this.normalizacjaISBN(ISBN), tytul, autorArray, rok_wydania, ilosc_stron]);
       results.push(this.formatKsiazka(result.rows[0]));
     }
     return results;
@@ -81,12 +94,15 @@ class Ksiazka {
 
   static async znajdzKsiazki(wyszukiwanie){
     const query = `
-    SELECT DISTINCT ON (ISBN) ksiazkaId, ISBN, tytul, autor, rok_wydania, ilosc_stron, kategorie
-    FROM ksiazki
-    WHERE ISBN = $1 OR tytul ILIKE $2 OR autor::text ILIKE $2
+    SELECT * FROM (
+      SELECT DISTINCT ON (ISBN) ksiazkaId, ISBN, tytul, autor, rok_wydania, ilosc_stron, kategorie
+      FROM ksiazki
+      WHERE ISBN = $1 OR tytul ~* ALL($2::text[]) OR autor::text ~* ALL($2::text[])
+    ) AS wyszukiwanie ORDER BY tytul
     `;
+    const arraySlow = wyszukiwanie.split(" ");
+    const pattern = arraySlow.map(slowo => `\\m${slowo}`);
     
-    const pattern = `%${wyszukiwanie}%`;
     const result = await pool.query(query, [wyszukiwanie, pattern]);
     return result.rows.map(row => this.formatKsiazka(row));
 
@@ -108,6 +124,7 @@ class Ksiazka {
       const dodawanaKsiazka = {
         ...ksiazka,
         // podwójna walidacja
+        isbn: this.normalizacjaISBN(ksiazka.isbn),
         autor: Array.isArray(ksiazka.autor) ? ksiazka.autor : [ksiazka.autor],
         kategorie: Array.isArray(ksiazka.kategorie) ? ksiazka.kategorie : [ksiazka.kategorie]
       }
