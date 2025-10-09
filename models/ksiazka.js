@@ -49,8 +49,7 @@ class Ksiazka {
     const query = `
     SELECT ksiazkaid, ISBN, tytul, autor, rok_wydania, ilosc_stron, dostepna, kategorie FROM ksiazki WHERE isbn = $1 ORDER BY dostepna;
     `;
-
-    const result = await pool.query(query, [this.normalizacjaISBN(ksiazka.isbn)]);
+    const result = await pool.query(query, [this.normalizacjaISBN(isbn)]);
     return result.rows.map(row => this.formatKsiazka(row));
   }
 
