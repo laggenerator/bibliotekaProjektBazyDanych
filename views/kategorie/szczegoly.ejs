@@ -1,8 +1,8 @@
 <div class="ksiazka-szczegoly-container">
-    <div class="ksiazka-header">
+    <div class="ksiazka-header" style="display: flex;">
         
         <div class="ksiazka-info">
-            <h1 class="ksiazka-tytul"><%= autor %></h1>
+            <h1 class="ksiazka-tytul"><%= tytul %></h1>
         </div>
     </div>
 
@@ -62,56 +62,11 @@
           </div>
         </div>
         
-        <!-- <div class="ksiazka-lista-actions">
+        <div class="ksiazka-lista-actions">
           <a href="/ksiazki/<%= ksiazka.id %>" class="btn btn-primary">Szczegóły</a>
           <button class="btn btn-secondary">Rezerwuj</button>
-        </div> -->
+        </div>
       </div>
     <% }); %>
   </div>
-<!-- 
-    <div class="kopie-section">
-        <h2>Kopie w bibliotece</h2>
-        <div class="dostepnosc-stats">
-                <div class="stat-dostepne">
-                    <span class="stat-number"><%= dostepneKopie.length %></span>
-                    <span class="stat-label">dostępnych kopii</span>
-                </div>
-                <div class="stat-lacznie">
-                    <span class="stat-number"><%= kopie.length %></span>
-                    <span class="stat-label">łącznie w bibliotece</span>
-                </div>
-            </div>
-        <div class="kopie-lista">
-            <% kopie.forEach(function(kopia, index) { %>
-                <div class="kopia-item <%= kopia.dostepna ? 'dostepna' : 'niedostepna' %>">
-                    <a href="/ksiazki/<%= kopia.isbn %>">
-                        <img class="ksiazka-autor-obraz" src="<%= kopia.img_link %>" alt="Okładka: <%= kopia.tytul %>" onerror="this.src='/assets/okladki/placeholder.webp'">
-                    </a>
-                    <div class="kopia-info">
-                        <div class="kopia-numer">
-                            <span class="numer"><%= kopia.tytul %></span>
-                            <span class="status <%= kopia.dostepna ? 'status-dostepna' : 'status-niedostepna' %>">
-                                <%= kopia.dostepna ? 'Dostępna' : 'Wypożyczona' %>
-                            </span>
-                        </div>
-                        
-                        <div class="kopia-id">
-                            <span class="label">Rok wydania:</span>
-                            <span class="value"><%= kopia.rok_wydania %></span>
-                        </div>
-                        <div class="kopia-id">
-                            <span class="label">ISBN:</span>
-                            <span class="value"><%= kopia.isbn %></span>
-                        </div>
-
-                        <div class="kopia-id">
-                            <span class="label">ID książki:</span>
-                            <span class="value"><%= kopia.id %></span>
-                        </div>
-                    </div>
-                </div>
-            <% }); %>
-        </div>
-    </div> -->
 </div>

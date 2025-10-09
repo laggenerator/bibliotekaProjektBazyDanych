@@ -42,10 +42,25 @@ class Ksiazka {
   }
 
   static async najnowsze6Ksiazek(){
+    // const query = `
+    // SELECT DISTINCT ON (tytul) * FROM ksiazki ORDER BY ksiazkaId, tytul DESC LIMIT 6;
+    // `;
     const query = `
-    SELECT DISTINCT ON (tytul) * FROM ksiazki ORDER BY tytul, ksiazkaId DESC LIMIT 6;
+    SELECT * FROM (
+      SELECT DISTINCT ON (tytul) * FROM ksiazki ORDER BY tytul
+    ) AS najnowszeKsiazki
+    ORDER BY ksiazkaId DESC LIMIT 6; 
     `;
     const result = await pool.query(query);
+    return result.rows.map(row => this.formatKsiazka(row));
+  }
+
+  static async wyszukajKategorie(kategoria){
+    const query = `
+    SELECT DISTINCT ON (tytul) * FROM ksiazki WHERE kategorie::text ILIKE $1
+    `;
+    const pattern = `%${kategoria}%`;
+    const result = await pool.query(query, [pattern]);
     return result.rows.map(row => this.formatKsiazka(row));
   }
 

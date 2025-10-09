@@ -2,31 +2,28 @@ const express = require('express');
 const router = express.Router();
 const Ksiazka = require('../models/ksiazka');
 
-// router.get("/:kategoria", async (req, res) => {
-//   try{
-//     const kategoria = req.params;
-//     const ksiazki = await Autor.wyszukajAutora(autor);
-//     const kopie = await Autor.kopieAutora(autor);
-//     if(!ksiazki || ksiazki.length === 0 || !kopie || kopie.length === 0){
-//       return res.render("error", {
-//         error: "Nie posiadamy książek pożądanego autora!"
-//       });
-//     }
-//     res.render("autorzy/szczegoly", {
-//       autor: autor,
-//       ksiazki: ksiazki,
-//       kopie: kopie,
-//       dostepneKopie: kopie.filter(k => k.dostepna),
-//       niedostepneKopie: kopie.filter(k => !k.dostepna),
-//       customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css']
-//     });
-//   } catch (error){
-//     res.render("error", {
-//       error: "Wystąpił błąd podczas pobierania książek",
-//       customCSS: '/css/error.css'
-//     });
-//   }
-// });
+router.get("/:kategoria", async (req, res) => {
+  try{
+    const kategoria = req.params.kategoria;
+    const ksiazki = await Ksiazka.wyszukajKategorie(kategoria);
+    if(!ksiazki || ksiazki.length === 0){
+      return res.render("error", {
+        error: "Nie posiadamy książek w danej kategorii, zachęcamy do sprawdzenia katalogu kategorii!"
+      });
+    }
+    res.render("kategorie/szczegoly", {
+      tytul: kategoria,
+      ksiazki: ksiazki,
+      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css', '/css/szczegolyKsiazka.css']
+    });
+  } catch (error){
+    console.log(error);
+    res.render("error", {
+      error: "Wystąpił błąd podczas pobierania książek",
+      customCSS: '/css/error.css'
+    });
+  }
+});
 
 router.get("/", async (req, res) => {
   try{
