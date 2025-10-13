@@ -36,6 +36,10 @@ router.get("/poterminie", requireAuth, async (req, res) => {
   res.json(listaPoTerminie);
 });
 
+router.get("/koszyk", requireAuth, async (req, res) => {
+  const koszyk = await Uzytkownik.zapodajKoszyk(req.session.userId);
+  res.json(koszyk);
+})
 
 
 

@@ -1,6 +1,7 @@
 const e = require('express');
 const pool = require('../db');
 const bcrypt = require('bcryptjs');
+const Ksiazka = require('./ksiazka');
 
 class Uzytkownik {
   static async create(nazwa_uzytkownika, email, haslo){
@@ -82,6 +83,98 @@ class Uzytkownik {
 
   static async ileZaleglosci(numer_karty){
     return ((await this.listaZaleglosci(numer_karty)).length);
+  }
+
+  static async zapodajKoszyk(numer_karty){
+    const query = `SELECT koszyk FROM uzytkownicy where numer_karty = $1`;
+    const result = await pool.query(query, [numer_karty]);
+    return result.rows[0].koszyk;
+  }
+
+  static async ileWKoszyku(numer_karty){
+    try{
+      let koszyk = await this.zapodajKoszyk(numer_karty)
+      return koszyk.length;
+    } catch (error){
+      return 0;
+    }
+  }
+
+  static async dodajDoKoszyka(numer_karty, isbn){
+      let koszyk = await this.zapodajKoszyk(numer_karty);
+      
+      const istnieje = koszyk.some(item => item.isbn == isbn);
+      if(istnieje){
+        throw new Error("Dana książka jest już w koszyku :)");
+      }
+      
+      let query = `SELECT * FROM ksiazki WHERE isbn = $1 AND dostepna = True`;
+      const ksiazkaResult = await pool.query(query, [isbn]);
+      if(ksiazkaResult.rows.length === 0){
+        throw new Error("Nie mamy dostępnej żadnej kopii tej książki :(");
+      }
+
+      const ksiazka = Ksiazka.formatKsiazka(ksiazkaResult.rows[0]);
+      
+      koszyk.push(ksiazka);
+
+      query = `UPDATE ksiazki SET dostepna = FALSE WHERE ksiazkaId = $1`;
+      await pool.query(query, [ksiazka.id]);
+      
+      const koszykJson = JSON.stringify(koszyk);
+      
+      query = `UPDATE uzytkownicy SET koszyk = $1 WHERE numer_karty = $2`;
+      await pool.query(query, [koszykJson, numer_karty]);
+      
+      return await this.zapodajKoszyk(numer_karty);
+  }
+
+  static async dodajDoKoszykaPoId(numer_karty, ksiazkaId){
+      let koszyk = await this.zapodajKoszyk(numer_karty);
+      let ksiazka = await Ksiazka.pobierzPoID(ksiazkaId);
+      let isbn = ksiazka.isbn;
+      const istnieje = koszyk.some(item => item.isbn === isbn);
+      if(istnieje){
+        throw new Error("Książka z tego wydania jest już w koszyku :)");
+      }
+      let query = `SELECT * FROM ksiazki WHERE ksiazkaId = $1 AND dostepna = True`;
+      const ksiazkaResult = await pool.query(query, [ksiazkaId]);
+      if(ksiazkaResult.rows.length === 0){
+        throw new Error("Wybrana kopia nie jest dostępna :(");
+      }
+      ksiazka = Ksiazka.formatKsiazka(ksiazkaResult.rows[0]);
+      
+      koszyk.push(ksiazka);
+
+      query = `UPDATE ksiazki SET dostepna = FALSE WHERE ksiazkaId = $1`;
+      await pool.query(query, [ksiazka.id]);
+      
+      const koszykJson = JSON.stringify(koszyk);
+      
+      query = `UPDATE uzytkownicy SET koszyk = $1 WHERE numer_karty = $2`;
+      await pool.query(query, [koszykJson, numer_karty]);
+      
+      return await this.zapodajKoszyk(numer_karty);
+  }
+
+  static async usunZKoszyka(numer_karty, ksiazkaId){
+    let koszyk = await this.zapodajKoszyk(numer_karty);
+    koszyk = koszyk.filter(item => item.id != ksiazkaId);
+    let query = `UPDATE ksiazki SET dostepna = TRUE WHERE ksiazkaId = $1`;
+    await pool.query(query, [ksiazkaId]);
+    
+    const koszykJson = JSON.stringify(koszyk);
+    query = `UPDATE uzytkownicy SET koszyk = $1 WHERE numer_karty = $2`;
+    await pool.query(query, [koszykJson, numer_karty]);
+    return koszyk;
+  }
+
+  static async wyczyscKoszyk(numer_karty){
+    let koszyk = await this.zapodajKoszyk(numer_karty);
+    for(const item of koszyk){
+      await this.usunZKoszyka(numer_karty, item.id);
+    }
+    return await this.zapodajKoszyk(numer_karty);
   }
 }
 

@@ -11,17 +11,17 @@ router.get("/", async (req, res) => {
     res.render("ksiazki/lista", {
       tytul: "Wszystkie książki",
       ksiazki: Array.isArray(ksiazki) ? ksiazki : [],
-      customCSS: '/css/ksiazki.css'
+      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css']
     });
   } catch (error) {
     res.render("ksiazki/lista", {
       tytul: "Wszystkie książki",
       ksiazki: [],
-      customCSS: '/css/ksiazki.css',
+      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css'],
       error: error
     })
   }
-})
+});
 
 router.get("/:isbn", async (req, res) => {
   try{
@@ -41,7 +41,7 @@ router.get("/:isbn", async (req, res) => {
       kopie: ksiazki,
       dostepneKopie: ksiazki.filter(k => k.dostepna),
       niedostepneKopie: ksiazki.filter(k => !k.dostepna),
-      customCSS: '/css/szczegolyKsiazka.css'
+      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css']
     });
   } catch (error){
     res.render("error", {
@@ -59,7 +59,7 @@ router.post("/wyszukaj", async (req, res) => {
       tytul: `Wyniki dla: ${query}`,
       query: query,
       ksiazki: ksiazki,
-      customCSS: '/css/ksiazki.css'
+      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css']
     });
   } catch (error) {
       res.render("ksiazki/lista", {
@@ -67,7 +67,7 @@ router.post("/wyszukaj", async (req, res) => {
       query: req.query.q || '',
       ksiazki: [],
       error: 'Wystąpił błąd podczas wyszukiwania',
-      customCSS: '/css/ksiazki.css'
+      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css']
     });
   }
 });

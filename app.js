@@ -15,10 +15,12 @@ const adminRoutes = require("./routes/admin");
 const ksiazkiRoutes = require("./routes/ksiazki");
 const autorzyRoutes = require("./routes/autorzy");
 const kategorieRoutes = require("./routes/kategorie");
+const koszykRoutes = require("./routes/koszyk");
 
 
 // Middleware
 const setSearchContext = require('./middleware/searchContext');
+const Uzytkownik = require("./models/uzytkownik");
 const PORT = process.env.PORT;
 
 
@@ -43,13 +45,14 @@ app.use(session({
 }));
 
 
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   res.locals.uzytkownik = req.session.userId ? {
     numer_karty: req.session.userId,
     nazwa_uzytkownika: req.session.nazwa_uzytkownika,
     email: req.session.email,
     rola: req.session.rola,
-    poterminie: req.session.poterminie
+    poterminie: req.session.poterminie,
+    koszykCount: await Uzytkownik.ileWKoszyku(req.session.userId)
   } : null;
   next();
 });
@@ -61,6 +64,7 @@ app.use("/admin", adminRoutes);
 app.use("/ksiazki", ksiazkiRoutes);
 app.use("/autorzy", autorzyRoutes);
 app.use("/kategorie", kategorieRoutes);
+app.use("/koszyk", koszykRoutes);
 app.use("/", mainRoutes);
 
 app.get("/roadmap", (req, res) => {

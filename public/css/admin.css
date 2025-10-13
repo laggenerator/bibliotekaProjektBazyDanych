@@ -12,6 +12,9 @@
     padding: 20px;
     background: color-mix(in srgb, var(--dashboard-color) 8%, transparent);
     border-radius: 12px;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
 }
 
 .btn-success {

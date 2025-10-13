@@ -28,12 +28,11 @@ body('tytul_ksiazki')
     .notEmpty()
     .withMessage("ISBN nie może być pusty")
     .matches(/^(?:\d{3}-)?\d{1,5}-\d{1,7}-\d{1,7}-\d{1}$|^\d{13}$/)
-    .withMessage("Podaj poprawny format ISBN (13 cyfr lub format z myślnikami)")
+    .withMessage("Podaj poprawny format ISBN (10/13 cyfr lub format z myślnikami)")
     .custom((value) => {
-      // Usuń myślniki i sprawdź czy ma 13 cyfr
       const cleanIsbn = value.replace(/-/g, '');
-      if (cleanIsbn.length !== 13) {
-        throw new Error('ISBN musi zawierać 13 cyfr');
+      if (cleanIsbn.length !== 13 && cleanIsbn.length !== 10) {
+        throw new Error('ISBN musi zawierać 10/13 cyfr');
       }
       
       return true;

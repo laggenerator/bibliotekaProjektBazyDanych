@@ -46,6 +46,7 @@ router.post('/register', registerValidation, validateRequest, async (req, res) =
     req.session.email = uzytkownik.email;
     req.session.rola = uzytkownik.rola;
     req.session.poterminie = uzytkownik.numer_karty;
+    req.session.koszyk = uzytkownik.koszyk;
     
     res.redirect("/");
   } catch(error){
@@ -85,6 +86,8 @@ router.post('/login', loginValidation, validateRequest, async (req, res) => {
     req.session.nazwa_uzytkownika = uzytkownik.nazwa_uzytkownika;
     req.session.email = uzytkownik.email;
     req.session.rola = uzytkownik.rola;
+    req.session.poterminie = uzytkownik.numer_karty;
+    req.session.koszyk = uzytkownik.koszyk;
     // res.json({
     //   sukces: true,
     //   wiadomosc: "Logowanie pomyślne",

@@ -47,10 +47,18 @@ class Ksiazka {
 
   static async pobierzPoISBN(isbn){
     const query = `
-    SELECT ksiazkaid, ISBN, tytul, autor, rok_wydania, ilosc_stron, dostepna, kategorie FROM ksiazki WHERE isbn = $1 ORDER BY dostepna;
+    SELECT * FROM ksiazki WHERE isbn = $1 ORDER BY ksiazkaId;
     `;
     const result = await pool.query(query, [this.normalizacjaISBN(isbn)]);
     return result.rows.map(row => this.formatKsiazka(row));
+  }
+
+  static async pobierzPoID(ksiazkaId){
+    const query = `
+    SELECT * FROM ksiazki WHERE ksiazkaId = $1;
+    `;
+    const result = await pool.query(query, [ksiazkaId]);
+    return this.formatKsiazka(result.rows[0]);
   }
 
   static async najnowsze6Ksiazek(){
@@ -74,21 +82,6 @@ class Ksiazka {
     const pattern = `%${kategoria}%`;
     const result = await pool.query(query, [pattern]);
     return result.rows.map(row => this.formatKsiazka(row));
-  }
-
-  static async create(ISBN, tytul, autor, rok_wydania, ilosc_stron, ilosc_kopii){
-    const autorArray = Array.isArray(autor) ? autor : [autor];
-    const query = `
-    INSERT INTO ksiazki (ISBN, tytul, autor, rok_wydania, ilosc_stron)
-    VALUES ($1, $2, $3, $4, $5)
-    RETURNING ksiazkaId
-    `;
-    let results = [];
-    for(let i=0;i<ilosc_kopii;i++){
-      let result = await pool.query(query, [this.normalizacjaISBN(ISBN), tytul, autorArray, rok_wydania, ilosc_stron]);
-      results.push(this.formatKsiazka(result.rows[0]));
-    }
-    return results;
   }
 
   static async znajdzKsiazki(wyszukiwanie){

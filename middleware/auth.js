@@ -36,16 +36,17 @@ const requireAuth = (req, res, next) => {
     //   sukces: false,
     //   wiadomosc: "Potrzebne uwierzytelnienie"
     // })
-    return res.render("error", {
-      tytul: "Błąd",
-      error: "Musisz być zalogowany!",
-      customCSS: '/css/error.css'
-    });
-    // res.render("auth/login", {
-    //   tytul: "Login",
-    //   error: "Musisz się zalogować",
-    //   formData: {}
-    // })
+    // return res.render("error", {
+    //   tytul: "Błąd",
+    //   error: "Musisz być zalogowany!",
+    //   customCSS: '/css/error.css'
+    // });
+    return res.render("auth/login", {
+      tytul: "Login",
+      error: "Musisz się zalogować",
+      formData: {},
+      customCSS: ['/css/error.css', '/css/auth.css']
+    })
   }
   next();
 };

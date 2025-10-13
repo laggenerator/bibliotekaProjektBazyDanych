@@ -68,7 +68,7 @@
 
             <div class="ksiazka-actions">
                 <% if (dostepneKopie.length > 0) { %>
-                    <button class="btn btn-primary btn-large">Rezerwuj książkę</button>
+                              <a href="/koszyk/dodaj/<%= ksiazka.isbn %>" class="btn btn-primary">Rezerwuj</a>
                 <% } else { %>
                     <button class="btn btn-secondary btn-large" disabled>Brak dostępnych kopii</button>
                 <% } %>
@@ -98,7 +98,7 @@
                     
                     <div class="kopia-akcje">
                         <% if (kopia.dostepna) { %>
-                            <button class="btn btn-sm btn-primary">Rezerwuj tę kopię</button>
+                          <a href="/koszyk/dodajpoID/<%= kopia.id %>" class="btn btn-primary">Rezerwuj</a>
                         <% } else { %>
                             <button class="btn btn-sm btn-secondary" disabled>Niedostępna</button>
                         <% } %>

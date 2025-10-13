@@ -145,6 +145,18 @@
   transform: translateY(-2px);
 }
 
+.usun {
+  background: rgba(33, 161, 121, 0.2);
+  border: 1px solid var(--red-accent);
+  color: var(--red-accent);
+}
+
+.usun:hover {
+  background: var(--red-accent);
+  color: white;
+  transform: translateY(-2px);
+}
+
 .btn-secondary {
   background: color-mix(in srgb, var(--dashboard-color) 10%, transparent);
   border: 1px solid color-mix(in srgb, var(--dashboard-color), transparent 30%);

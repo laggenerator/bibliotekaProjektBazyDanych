@@ -271,3 +271,31 @@
     color: var(--red-accent-highlight);
     font-weight: bold;
 }
+
+.koszyk-btn {
+  background: rgba(33, 161, 121, 0.2);
+  border: 1px solid var(--green-accent);
+  color: var(--green-accent);
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  margin-left: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Montserrat", sans-serif;
+}
+
+.koszyk-btn:hover {
+  background: var(--green-accent);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(33, 161, 121, 0.3);
+}
+
+#pokaz-koszyk {
+    color: var(--green-accent)
+}

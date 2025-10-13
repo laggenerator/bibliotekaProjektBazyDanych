@@ -14,7 +14,7 @@ router.get("/:kategoria", async (req, res) => {
     res.render("kategorie/szczegoly", {
       tytul: kategoria,
       ksiazki: ksiazki,
-      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css', '/css/szczegolyKsiazka.css']
+      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css']
     });
   } catch (error){
     console.log(error);
