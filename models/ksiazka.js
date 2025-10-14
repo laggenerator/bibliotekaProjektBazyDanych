@@ -25,13 +25,15 @@ class Ksiazka {
       ilosc_stron: ksiazka.ilosc_stron,
       img_link: `/assets/okladki/${this.normalizacjaISBN(ksiazka.isbn)}.webp`,
       dostepna: ksiazka.dostepna,
+      wKoszyku: ksiazka.wkoszyku,
       kategorie: ksiazka.kategorie
     };
   }
 
   static async pobierzWszystkie(){
+    // SELECT DISTINCT ON (isbn) * FROM ksiazki ORDER BY isbn, tytul;
     const query = `
-    SELECT DISTINCT ON (isbn) * FROM ksiazki ORDER BY isbn, tytul;
+    SELECT DISTINCT ON (isbn) * FROM ksiazki ORDER BY isbn, dostepna desc;
     `;
     const result = await pool.query(query);
     return result.rows.map(row => this.formatKsiazka(row));

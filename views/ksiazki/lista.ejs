@@ -98,7 +98,12 @@
         
         <div class="ksiazka-lista-actions">
           <a href="/ksiazki/<%= ksiazka.isbn %>" class="btn btn-primary">Szczegóły</a>
-          <a href="/koszyk/dodaj/<%= ksiazka.isbn %>" class="btn btn-primary">Rezerwuj</a>
+          <!-- <a href="/koszyk/dodaj/<%= ksiazka.isbn %>" class="btn btn-primary"><%= ksiazka.dostepna ? 'Rezerwuj' : 'Niedostępna' %></a> -->
+          <% if (ksiazka.dostepna) { %>
+            <a href="/koszyk/dodaj/<%= ksiazka.isbn %>" class="btn btn-primary">Rezerwuj</a>
+          <% } else { %>
+              <button class="btn btn-sm btn-secondary" disabled>Niedostępna</button>
+          <% } %>
         </div>
       </div>
     <% }); %>

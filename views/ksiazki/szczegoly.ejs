@@ -86,7 +86,7 @@
                         <div class="kopia-numer">
                             <span class="numer">Kopia #<%= index + 1 %></span>
                             <span class="status <%= kopia.dostepna ? 'status-dostepna' : 'status-niedostepna' %>">
-                                <%= kopia.dostepna ? 'Dostępna' : 'Wypożyczona' %>
+                                <%= kopia.dostepna ? 'Dostępna' : kopia.wKoszyku ? 'Rezerwowana' : 'Wypożyczona' %>
                             </span>
                         </div>
                         

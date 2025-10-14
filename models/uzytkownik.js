@@ -108,7 +108,7 @@ class Uzytkownik {
         throw new Error("Dana książka jest już w koszyku :)");
       }
       
-      let query = `SELECT * FROM ksiazki WHERE isbn = $1 AND dostepna = True`;
+      let query = `SELECT * FROM ksiazki WHERE isbn = $1 AND dostepna = True AND wkoszyku = False ORDER BY ksiazkaId`;
       const ksiazkaResult = await pool.query(query, [isbn]);
       if(ksiazkaResult.rows.length === 0){
         throw new Error("Nie mamy dostępnej żadnej kopii tej książki :(");
@@ -118,7 +118,7 @@ class Uzytkownik {
       
       koszyk.push(ksiazka);
 
-      query = `UPDATE ksiazki SET dostepna = FALSE WHERE ksiazkaId = $1`;
+      query = `UPDATE ksiazki SET dostepna = false, wKoszyku = true WHERE ksiazkaId = $1`;
       await pool.query(query, [ksiazka.id]);
       
       const koszykJson = JSON.stringify(koszyk);
@@ -137,8 +137,9 @@ class Uzytkownik {
       if(istnieje){
         throw new Error("Książka z tego wydania jest już w koszyku :)");
       }
-      let query = `SELECT * FROM ksiazki WHERE ksiazkaId = $1 AND dostepna = True`;
+      let query = `SELECT * FROM ksiazki WHERE ksiazkaId = $1 AND dostepna = true AND wkoszyku = false`;
       const ksiazkaResult = await pool.query(query, [ksiazkaId]);
+      console.log(ksiazkaResult.rows);
       if(ksiazkaResult.rows.length === 0){
         throw new Error("Wybrana kopia nie jest dostępna :(");
       }
@@ -146,7 +147,7 @@ class Uzytkownik {
       
       koszyk.push(ksiazka);
 
-      query = `UPDATE ksiazki SET dostepna = FALSE WHERE ksiazkaId = $1`;
+      query = `UPDATE ksiazki SET dostepna = false, wkoszyku = true WHERE ksiazkaId = $1`;
       await pool.query(query, [ksiazka.id]);
       
       const koszykJson = JSON.stringify(koszyk);
@@ -160,7 +161,7 @@ class Uzytkownik {
   static async usunZKoszyka(numer_karty, ksiazkaId){
     let koszyk = await this.zapodajKoszyk(numer_karty);
     koszyk = koszyk.filter(item => item.id != ksiazkaId);
-    let query = `UPDATE ksiazki SET dostepna = TRUE WHERE ksiazkaId = $1`;
+    let query = `UPDATE ksiazki SET dostepna = true, wkoszyku = false WHERE ksiazkaId = $1`;
     await pool.query(query, [ksiazkaId]);
     
     const koszykJson = JSON.stringify(koszyk);
