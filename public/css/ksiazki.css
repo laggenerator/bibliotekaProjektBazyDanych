@@ -209,3 +209,25 @@
 .tytul-link:hover, .autor-link:hover{
   color: var(--green-accent);
 }
+.form-control {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--dashboard-color) 20%, transparent);
+  background: color-mix(in srgb, var(--dashboard-color) 5%, transparent);
+  color: var(--font-color);
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--green-accent);
+  background: color-mix(in srgb, var(--dashboard-color) 3%, transparent);
+  box-shadow: 0 0 0 2px rgba(33, 161, 121, 0.2);
+}
+
+.form-control::placeholder {
+  color: color-mix(in srgb, var(--font-color) 50%, transparent);
+  opacity: 0.7;
+}

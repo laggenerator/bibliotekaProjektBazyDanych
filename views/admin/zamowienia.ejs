@@ -1,0 +1,122 @@
+<div id="noweksiazki" class="ksiazki-lista-container">
+  <% if (locals.error) { %>
+    <div class="alert alert-error">
+      <%= locals.error %>
+    </div>
+  <% } %>
+
+  <% if (locals.sukces) { %>
+    <div class="alert alert-sukces">
+      <%= locals.sukces %>
+    </div>
+  <% } %>
+  
+  <% if (locals.query) { %>
+    <h2>Wyniki wyszukiwania dla: <%= query %></h2>
+  <% } else { %> 
+    <h2>Zarządzanie zamówieniami</h2>
+  <% } %>
+  <% if (!locals.dodawanie) { %>
+    <div class="admin-actions">
+      <form action="/admin/zamowienia/szukaj" method="GET" class="d-inline">
+        <div class="input-group">
+          <input type="text" name="query" class="form-control" placeholder="Szukaj zamówień..." required>
+          <button type="submit" class="btn btn-success">Szukaj</button>
+        </div>
+      </form>
+    </div>
+  <% } %>
+  
+  <div class="ksiazki-lista">
+    <% zamowienia.forEach(function(zamowienie) { %>
+      <div class="ksiazka-lista-item">
+        
+        <div class="ksiazka-lista-prawa">
+          <h3 class="ksiazka-lista-tytul">
+            <a href="/zamowienia/<%= zamowienie.zamowienie_id %>" class="tytul-link">
+              Zamówienie #<%= zamowienie.zamowienie_id %>
+            </a>
+          </h3>
+          
+          <div class="ksiazka-lista-autor">
+            <span class="label">Klient:</span>
+            <span class="value">
+              <a href="/uzytkownicy/<%= zamowienie.numer_karty %>" class="autor-link">
+                <%= zamowienie.nazwa_uzytkownika %> (Karta: <%= zamowienie.numer_karty %>)
+              </a>
+            </span>
+          </div>
+          
+          <div class="ksiazka-lista-details">
+            <div class="detail-group">
+              <span class="label">Data zamówienia:</span>
+              <span class="value"><%= new Date(zamowienie.data_zamowienia).toLocaleDateString('pl-PL') %></span>
+            </div>
+            
+            <% if (zamowienie.data_zwrotu) { %>
+            <div class="detail-group">
+              <span class="label">Data zwrotu:</span>
+              <span class="value"><%= new Date(zamowienie.data_zwrotu).toLocaleDateString('pl-PL') %></span>
+            </div>
+            <% } %>
+            
+            <div class="detail-group">
+              <span class="label">Deadline zwrotu:</span>
+              <span class="value <%= zamowienie.czy_przekroczony ? 'isbn' : '' %>">
+                <%= new Date(zamowienie.deadline_zwrotu).toLocaleDateString('pl-PL') %>
+                <% if (zamowienie.czy_przekroczony) { %>
+                  <span style="color: #e74c3c; margin-left: 8px;">PRZERKOCZONY</span>
+                <% } %>
+              </span>
+            </div>
+            
+            <div class="detail-group">
+              <span class="label">Status:</span>
+              <span class="value"><%= zamowienie.status %></span>
+            </div>
+            
+            <% if (zamowienie.ksiazka_tytul) { %>
+            <div class="detail-group">
+              <span class="label">Książka:</span>
+              <span class="value">
+                <a href="/ksiazki/<%= zamowienie.isbn %>" class="autor-link">
+                  <%= zamowienie.ksiazka_tytul %>
+                </a>
+              </span>
+            </div>
+            <% } %>
+            
+            <% if (zamowienie.egzemplarz_id) { %>
+            <div class="detail-group">
+              <span class="label">Egzemplarz:</span>
+              <span class="value">#<%= zamowienie.egzemplarz_id %></span>
+            </div>
+            <% } %>
+            
+            <% if (zamowienie.uwagi) { %>
+            <div class="detail-group">
+              <span class="label">Uwagi:</span>
+              <span class="value"><%= zamowienie.uwagi %></span>
+            </div>
+            <% } %>
+          </div>
+        </div>
+        
+        <div class="ksiazka-lista-actions admin-actions">
+          <a href="/admin/zamowienia/<%= zamowienie.zamowienie_id %>/edytuj" class="btn btn-primary">Modyfikuj</a>
+          <% if (zamowienie.status === 'w_trakcie' || zamowienie.status === 'oczekujace') { %>
+            <a href="/admin/zamowienia/<%= zamowienie.zamowienie_id %>/zatwierdz" class="btn btn-primary">Zatwierdź</a>
+          <% } %>
+          <% if (zamowienie.status === 'wypozyczone' && !zamowienie.data_zwrotu) { %>
+            <a href="/admin/zamowienia/<%= zamowienie.zamowienie_id %>/zwrot" class="btn btn-primary">Zarejestruj zwrot</a>
+          <% } %>
+          <button class="btn usun usun-zamowienie" 
+                  data-zamowienie-id="<%= zamowienie.zamowienie_id %>" 
+                  data-tytul="Zamówienie #<%= zamowienie.zamowienie_id %>">
+            Usuń
+          </button>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+</div>

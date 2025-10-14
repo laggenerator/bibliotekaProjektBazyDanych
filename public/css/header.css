@@ -267,8 +267,18 @@
     margin: 0;
 }
 
-.admin-highlight{
+.rola-ADMIN, .admin-highlight{
     color: var(--red-accent-highlight);
+    font-weight: bold;
+}
+
+.rola-USER{
+    color: var(--header-color);
+    font-weight: bold;
+}
+
+.rola-USER-light{
+    color: var(--font-color);
     font-weight: bold;
 }
 

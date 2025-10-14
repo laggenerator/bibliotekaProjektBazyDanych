@@ -21,6 +21,12 @@
   <% if (!locals.dodawanie) { %>
     <div class="admin-actions">
       <a href="/admin/ksiazki/dodaj" class="btn btn-success">Dodaj nową książkę</a>
+      <form action="/admin/ksiazki/szukaj" method="POST" class="d-inline">
+        <div class="input-group">
+          <input type="text" name="query" class="form-control" placeholder="Szukaj książek..." required>
+          <button type="submit" class="btn btn-success">Szukaj</button>
+        </div>
+      </form>
     </div>
   <% } %>
   

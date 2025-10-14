@@ -67,9 +67,77 @@ router.get("/ksiazki", requireAdmin, async (req, res) => {
   }
 });
 
+router.get("/uzytkownicy", requireAdmin, async (req, res) => {
+  try{
+    const uzytkownicy = [];
+    res.render("admin/uzytkownicy", {
+      tytul: "Zarządzanie użytkownikami",
+      customCSS: ['/css/dashboard.css', '/css/ksiazki.css', '/css/admin.css'],
+      uzytkownicy: Array.isArray(uzytkownicy) ? uzytkownicy : [],
+    });
+  } catch (error) {
+    res.render("admin/uzytkownicy", {
+      tytul: "Zarządzanie użytkownikami",
+      uzytkownicy: [],
+      customCSS: ['/css/dashboard.css', '/css/ksiazki.css', '/css/admin.css'],
+      error: error
+    });
+  }
+});
+
+router.get("/zamowienia", requireAdmin, async (req, res) => {
+  try{
+    const zamowienia = [];
+    res.render("admin/zamowienia", {
+      tytul: "Zarządzanie zamówieniami",
+      customCSS: ['/css/dashboard.css', '/css/ksiazki.css', '/css/admin.css'],
+      zamowienia: Array.isArray(zamowienia) ? zamowienia : [],
+    });
+  } catch (error) {
+    res.render("admin/zamowienia", {
+      tytul: "Zarządzanie zamówieniami",
+      zamowienia: [],
+      customCSS: ['/css/dashboard.css', '/css/ksiazki.css', '/css/admin.css'],
+      error: error
+    });
+  }
+});
+
 router.post("/wyszukaj-ksiazke", async (req, res) => {
   try {
     const query = req.body.query;
+    const ksiazki = await Ksiazka.znajdzKsiazki(query);
+    res.render("admin/ksiazki", {
+      tytul: `Wyniki dla: ${query}`,
+      query: query,
+      ksiazki: ksiazki,
+      customCSS: ['/css/dashboard.css', '/css/ksiazki.css', '/css/admin.css'],
+    });
+  } catch (error) {
+      res.render("admin/ksiazki", {
+      tytul: 'Wyszukiwanie',
+      query: req.query.q || '',
+      ksiazki: [],
+      error: 'Wystąpił błąd podczas wyszukiwania',
+      customCSS: ['/css/dashboard.css', '/css/ksiazki.css', '/css/admin.css'],
+    });
+  }
+});
+
+
+router.get("/zamowienia/szukaj", (req, res) => {
+  const query = req.body.query;
+});
+
+
+router.get("/uzytkownicy/szukaj", (req, res) => {
+  const query = req.body.query;
+});
+
+router.post("/ksiazki/szukaj", async (req, res) => {
+  try{
+    const query = req.body.query;
+    console.log(query)
     const ksiazki = await Ksiazka.znajdzKsiazki(query);
     res.render("admin/ksiazki", {
       tytul: `Wyniki dla: ${query}`,

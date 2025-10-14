@@ -63,7 +63,7 @@
             <% } else { %>
                 <div class="user-menu">
                     <a href="/dashboard" class="user-btn">
-                        <span class="user-name <%= locals.uzytkownik.rola === 'ADMIN' ? 'admin-highlight' : '' %>"><%= locals.uzytkownik.nazwa_uzytkownika %></span>
+                        <span class="user-name <%= locals.uzytkownik.rola === 'ADMIN' ? 'rola-ADMIN' : 'rola-USER' %>"><%= locals.uzytkownik.nazwa_uzytkownika %></span>
                     </a>
                     <div class="user-dropdown">
                         <% if(locals.uzytkownik.rola === 'ADMIN') {%>
