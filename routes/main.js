@@ -23,7 +23,7 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/dashboard", requireAuth, async (req, res) => {
-  const liczbaPoTerminie = await Uzytkownik.ileZaleglosci(req.session.userId);
+  const liczbaPoTerminie = await Uzytkownik.ilePoTerminie(req.session.userId);
   res.render("dashboard", {
     tytul: "Panel użytkownika",
     poterminie: liczbaPoTerminie,

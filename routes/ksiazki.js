@@ -4,6 +4,7 @@ const Uzytkownik = require("../models/uzytkownik");
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 const { localsName } = require('ejs');
 const Ksiazka = require('../models/ksiazka');
+const Egzemplarz = require('../models/egzemplarz');
 
 router.get("/", async (req, res) => {
   try{
@@ -26,26 +27,44 @@ router.get("/", async (req, res) => {
 router.get("/:isbn", async (req, res) => {
   try{
     const { isbn } = req.params;
-    const ksiazki = await Ksiazka.pobierzPoISBN(isbn);
+    const ksiazka = await Ksiazka.pobierzPoISBN(isbn);
 
-    if(!ksiazki || ksiazki.length === 0){
+    if(!ksiazka){
       return res.render("error", {
         error: "Książka o danym ISBN nie istnieje!",
-      customCSS: '/css/error.css'
+        customCSS: '/css/error.css'
       });
     }
-    const ksiazka = ksiazki[0];
+
+    const egzemplarze = await Egzemplarz.znajdzDlaKsiazki(ksiazka.id_ksiazki);
+    
+    const kopie = egzemplarze.map(e => ({
+      id: e.id_egzemplarza,
+      dostepna: e.status === 'Wolna',
+      wKoszyku: e.status === 'W_koszyku',
+      status: e.status,
+      lokalizacja: e.pokoj && e.polka ? `Pokój ${e.pokoj}, półka ${e.polka}` : 'Brak lokalizacji'
+    }));
+    let uzytkownikDalRecenzje = null;
+    if(req.session.userId){
+      uzytkownikDalRecenzje = ksiazka.recenzje.find(recenzja => recenzja.numer_karty === req.session.userId);
+    }
+
     res.render("ksiazki/szczegoly", {
       tytul: ksiazka.tytul,
       ksiazka: ksiazka,
-      kopie: ksiazki,
-      dostepneKopie: ksiazki.filter(k => k.dostepna),
-      niedostepneKopie: ksiazki.filter(k => !k.dostepna),
-      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css']
+      kopie: kopie,
+      dostepneKopie: kopie.filter(k => k.dostepna),
+      niedostepneKopie: kopie.filter(k => !k.dostepna),
+      recenzje: ksiazka.recenzje || [],
+      zmiennaKtorejNieMaJeszcze: uzytkownikDalRecenzje,
+      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css', '/css/recenzje.css']
     });
-  } catch (error){
+  } catch (error) {
+    console.error('Błąd:', error);
     res.render("error", {
-      error: "Wystąpił błąd podczas pobierania książek"
+      error: "Wystąpił błąd serwera",
+      customCSS: '/css/error.css'
     });
   }
 });

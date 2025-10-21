@@ -15,29 +15,182 @@ class Ksiazka {
     }
   }
 
-  static formatKsiazka(ksiazka) {
-    return {
-      id: ksiazka.ksiazkaid,
-      isbn: this.normalizacjaISBN(ksiazka.isbn),
-      tytul: ksiazka.tytul,
-      autor: ksiazka.autor, // tablica autorów
-      rok_wydania: ksiazka.rok_wydania,
-      ilosc_stron: ksiazka.ilosc_stron,
-      img_link: `/assets/okladki/${this.normalizacjaISBN(ksiazka.isbn)}.webp`,
-      dostepna: ksiazka.dostepna,
-      wKoszyku: ksiazka.wkoszyku,
-      kategorie: ksiazka.kategorie
-    };
+  static denormalizacjaISBN(isbn){
+    const czystyISBN = isbn.replace(/[-\s]/g, '');
+    return czystyISBN;
   }
 
+  // static formatKsiazka(ksiazka) {
+  //   return {
+  //     id: ksiazka.ksiazkaid,
+  //     isbn: this.normalizacjaISBN(ksiazka.isbn),
+  //     tytul: ksiazka.tytul,
+  //     autor: ksiazka.autor, // tablica autorów
+  //     rok_wydania: ksiazka.rok_wydania,
+  //     ilosc_stron: ksiazka.ilosc_stron,
+  //     img_link: `/assets/okladki/${this.normalizacjaISBN(ksiazka.isbn)}.webp`,
+  //     dostepna: ksiazka.dostepna,
+  //     wKoszyku: ksiazka.wkoszyku,
+  //     kategorie: ksiazka.kategorie
+  //   };
+  // }
+
+  static formatKsiazka(ksiazka) {
+  return {
+    // Podstawowe informacje o książce
+    id_ksiazki: ksiazka.id_ksiazki,
+    isbn: this.normalizacjaISBN(ksiazka.isbn),
+    tytul: ksiazka.tytul,
+    rok_wydania: ksiazka.rok_wydania,
+    ilosc_stron: ksiazka.ilosc_stron,
+    
+    // Autorzy i kategorie
+    autor: ksiazka.autor || [],
+    kategorie: ksiazka.kategorie || [],
+    
+    // Link do okładki
+    img_link: ksiazka.img_link || `/assets/okladki/${this.normalizacjaISBN(ksiazka.isbn)}.webp`,
+    
+    // Informacje o dostępności
+    dostepna: parseInt(ksiazka.liczba_dostepnych_egzemplarzy) > 0,
+    wKoszyku: ksiazka.wKoszyku || false,
+    
+    // Statystyki recenzji
+    srednia_ocena: ksiazka.srednia_ocena ? parseFloat(ksiazka.srednia_ocena) : 0,
+    liczba_recenzji: parseInt(ksiazka.liczba_recenzji) || 0,
+    
+    // Recenzje
+    recenzje: ksiazka.recenzje || [],
+    
+    // Informacje o egzemplarzach
+    laczna_liczba_egzemplarzy: parseInt(ksiazka.liczba_egzemplarzy) || 0,
+    dostepne_egzemplarze: parseInt(ksiazka.liczba_dostepnych_egzemplarzy) || 0
+  };
+}
+
   static async pobierzWszystkie(){
-    // SELECT DISTINCT ON (isbn) * FROM ksiazki ORDER BY isbn, tytul;
+    // const query = `
+    // SELECT * FROM ksiazka ORDER BY id_ksiazki desc;
+    // `;
     const query = `
-    SELECT DISTINCT ON (isbn) * FROM ksiazki ORDER BY isbn, dostepna desc;
+    SELECT
+      k.*,
+      ARRAY_AGG(DISTINCT a.imie || ' ' || a.nazwisko) AS autor,
+      ARRAY_AGG(DISTINCT kat.opis) AS kategorie,
+      COUNT(DISTINCT e.id_egzemplarza) AS liczba_egzemplarzy,
+      COUNT(DISTINCT CASE WHEN e.status = 'Wolna' THEN e.id_egzemplarza END) AS lizcba_dostepnych_egzemplarzy,
+      AVG(r.ocena) AS srednia_ocena,
+      COUNT(r.id_recenzji) AS liczba_recenzji
+    FROM ksiazka k
+    LEFT JOIN ksiazka_autor ka ON k.id_ksiazki = ka.id_ksiazki
+    LEFT JOIN autor a ON ka.id_autora = a.id_autora
+    LEFT JOIN ksiazka_kategoria kk ON k.id_ksiazki = kk.id_ksiazki
+    LEFT JOIN kategoria kat ON kk.id_kategorii = kat.id_kategorii
+    LEFT JOIN egzemplarz e ON k.id_ksiazki = e.id_ksiazki
+    LEFT JOIN recenzja r ON k.id_ksiazki = r.id_ksiazki
+    GROUP BY k.id_ksiazki
+    ORDER BY k.id_ksiazki DESC
     `;
     const result = await pool.query(query);
     return result.rows.map(row => this.formatKsiazka(row));
   }
+
+  static async pobierzPoISBN(isbn){
+    const query = `
+    SELECT
+      k.*,
+      ARRAY_AGG(DISTINCT a.imie || ' ' || a.nazwisko) AS autor,
+      ARRAY_AGG(DISTINCT kat.opis) AS kategorie,
+      COUNT(DISTINCT e.id_egzemplarza) AS liczba_egzemplarzy,
+      COUNT(DISTINCT CASE WHEN e.status = 'Wolna' THEN e.id_egzemplarza END) AS liczba_dostepnych_egzemplarzy,
+      AVG(r.ocena) AS srednia_ocena,
+      COUNT(r.id_recenzji) AS liczba_recenzji,
+      JSON_AGG(
+        DISTINCT JSONB_BUILD_OBJECT(
+          'id_recenzji', r.id_recenzji,
+          'tekst', r.tekst,
+          'ocena', r.ocena,
+          'numer_karty', r.numer_karty,
+          'nazwa_uzytkownika', u.nazwa_uzytkownika,
+          'data_dodania', r.data_dodania
+        )
+      ) FILTER (WHERE r.id_recenzji IS NOT NULL) AS recenzje
+    FROM ksiazka k
+    LEFT JOIN ksiazka_autor ka ON k.id_ksiazki = ka.id_ksiazki
+    LEFT JOIN autor a ON ka.id_autora = a.id_autora
+    LEFT JOIN ksiazka_kategoria kk ON k.id_ksiazki = kk.id_ksiazki
+    LEFT JOIN kategoria kat ON kk.id_kategorii = kat.id_kategorii
+    LEFT JOIN egzemplarz e ON k.id_ksiazki = e.id_ksiazki
+    LEFT JOIN recenzja r ON k.id_ksiazki = r.id_ksiazki
+    LEFT JOIN uzytkownik u ON r.numer_karty = u.numer_karty
+    WHERE k.isbn = $1
+    GROUP BY k.id_ksiazki
+  `;
+    const result = await pool.query(query, [this.denormalizacjaISBN(isbn)]);
+    return this.formatKsiazka(result.rows[0]);
+  }
+
+  static async pobierzPoID(ksiazkaId){
+    const query = `
+    SELECT
+      k.*,
+      ARRAY_AGG(DISTINCT a.imie || ' ' || a.nazwisko) AS autor,
+      ARRAY_AGG(DISTINCT kat.opis) AS kategorie,
+      COUNT(DISTINCT e.id_egzemplarza) AS liczba_egzemplarzy,
+      COUNT(DISTINCT CASE WHEN e.status = 'Wolna' THEN e.id_egzemplarza END) AS liczba_dostepnych_egzemplarzy,
+      AVG(r.ocena) AS srednia_ocena,
+      COUNT(r.id_recenzji) AS liczba_recenzji,
+      JSON_AGG(
+        DISTINCT JSONB_BUILD_OBJECT(
+          'id_recenzji', r.id_recenzji,
+          'tekst', r.tekst,
+          'ocena', r.ocena,
+          'numer_karty', r.numer_karty,
+          'nazwa_uzytkownika', u.nazwa_uzytkownika,
+          'data_dodania', r.data_dodania
+        )
+      ) FILTER (WHERE r.id_recenzji IS NOT NULL) AS recenzje
+    FROM ksiazka k
+    LEFT JOIN ksiazka_autor ka ON k.id_ksiazki = ka.id_ksiazki
+    LEFT JOIN autor a ON ka.id_autora = a.id_autora
+    LEFT JOIN ksiazka_kategoria kk ON k.id_ksiazki = kk.id_ksiazki
+    LEFT JOIN kategoria kat ON kk.id_kategorii = kat.id_kategorii
+    LEFT JOIN egzemplarz e ON k.id_ksiazki = e.id_ksiazki
+    LEFT JOIN recenzja r ON k.id_ksiazki = r.id_ksiazki
+    LEFT JOIN uzytkownik u ON r.numer_karty = u.numer_karty
+    WHERE k.id_ksiazki = $1
+    GROUP BY k.id_ksiazki
+  `;
+    const result = await pool.query(query, [ksiazkaId]);
+    return this.formatKsiazka(result.rows[0]);
+  }
+
+  static async najnowsze6Ksiazek(){
+    const query = `
+    SELECT
+      k.*,
+      ARRAY_AGG(DISTINCT a.imie || ' ' || a.nazwisko) AS autor,
+      ARRAY_AGG(DISTINCT kat.opis) AS kategorie,
+      COUNT(DISTINCT e.id_egzemplarza) AS liczba_egzemplarzy,
+      COUNT(DISTINCT CASE WHEN e.status = 'Wolna' THEN e.id_egzemplarza END) AS lizcba_dostepnych_egzemplarzy,
+      AVG(r.ocena) AS srednia_ocena,
+      COUNT(r.id_recenzji) AS liczba_recenzji
+    FROM ksiazka k
+    LEFT JOIN ksiazka_autor ka ON k.id_ksiazki = ka.id_ksiazki
+    LEFT JOIN autor a ON ka.id_autora = a.id_autora
+    LEFT JOIN ksiazka_kategoria kk ON k.id_ksiazki = kk.id_ksiazki
+    LEFT JOIN kategoria kat ON kk.id_kategorii = kat.id_kategorii
+    LEFT JOIN egzemplarz e ON k.id_ksiazki = e.id_ksiazki
+    LEFT JOIN recenzja r ON k.id_ksiazki = r.id_ksiazki
+    GROUP BY k.id_ksiazki
+    ORDER BY k.id_ksiazki DESC
+    LIMIT 6
+    `;
+    const result = await pool.query(query);
+    return result.rows.map(row => this.formatKsiazka(row));
+  }
+
+  // PONIŻEJ SĄ JESZCZE STARE DO PRZERÓBKI NA PORZĄDNĄ BAZĘ
 
   static async kategorie(){
     const query = `
@@ -46,36 +199,6 @@ class Ksiazka {
     const result = await pool.query(query);
     return result.rows.map(row => row.kategorie);
   };
-
-  static async pobierzPoISBN(isbn){
-    const query = `
-    SELECT * FROM ksiazki WHERE isbn = $1 ORDER BY ksiazkaId;
-    `;
-    const result = await pool.query(query, [this.normalizacjaISBN(isbn)]);
-    return result.rows.map(row => this.formatKsiazka(row));
-  }
-
-  static async pobierzPoID(ksiazkaId){
-    const query = `
-    SELECT * FROM ksiazki WHERE ksiazkaId = $1;
-    `;
-    const result = await pool.query(query, [ksiazkaId]);
-    return this.formatKsiazka(result.rows[0]);
-  }
-
-  static async najnowsze6Ksiazek(){
-    // const query = `
-    // SELECT DISTINCT ON (tytul) * FROM ksiazki ORDER BY ksiazkaId, tytul DESC LIMIT 6;
-    // `;
-    const query = `
-    SELECT * FROM (
-      SELECT DISTINCT ON (tytul) * FROM ksiazki ORDER BY tytul
-    ) AS najnowszeKsiazki
-    ORDER BY ksiazkaId DESC LIMIT 6; 
-    `;
-    const result = await pool.query(query);
-    return result.rows.map(row => this.formatKsiazka(row));
-  }
 
   static async wyszukajKategorie(kategoria){
     const query = `

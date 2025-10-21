@@ -1,0 +1,189 @@
+.recenzje-section {
+    margin-top: 3rem;
+    padding: 2.5rem;
+    background: color-mix(in srgb, var(--dashboard-color) 5%, transparent);
+    border-radius: 12px;
+    border: 1px solid color-mix(in srgb, var(--dashboard-color) 10%, transparent);
+}
+
+.recenzje-section h2 {
+    margin-bottom: 1.5rem;
+    color: var(--font-color);
+    border-bottom: 2px solid var(--green-accent);
+    padding-bottom: 0.5rem;
+    font-size: 1.5rem;
+}
+
+.dodaj-recenzje-form {
+    background: color-mix(in srgb, var(--dashboard-color) 3%, transparent);
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    border: 1px solid color-mix(in srgb, var(--dashboard-color) 15%, transparent);
+}
+
+.dodaj-recenzje-form h3 {
+    margin-bottom: 1rem;
+    color: var(--font-color);
+    font-size: 1.2rem;
+}
+
+.recenzja-form .form-group {
+    margin-bottom: 1.2rem;
+}
+
+.recenzja-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--font-color);
+    font-size: 0.95rem;
+}
+
+.form-select, .form-textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid color-mix(in srgb, var(--dashboard-color) 20%, transparent);
+    border-radius: 8px;
+    font-size: 1rem;
+    background: color-mix(in srgb, var(--dashboard-color) 2%, transparent);
+    color: var(--font-color);
+    transition: border-color 0.3s ease;
+}
+
+.form-select:focus, .form-textarea:focus {
+    outline: none;
+    border-color: var(--green-accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--green-accent) 20%, transparent);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 120px;
+    font-family: inherit;
+}
+
+.char-counter {
+    text-align: right;
+    font-size: 0.8rem;
+    color: var(--bg-contrast);
+    margin-top: 0.25rem;
+    opacity: 0.7;
+}
+
+.recenzje-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.recenzja-item {
+    background: color-mix(in srgb, var(--dashboard-color) 3%, transparent);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--dashboard-color) 15%, transparent);
+    transition: all 0.3s ease;
+}
+
+.recenzja-item:hover {
+    border-color: color-mix(in srgb, var(--dashboard-color) 25%, transparent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.recenzja-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 1rem;
+}
+
+.recenzja-uzytkownik {
+    flex: 1;
+}
+
+.uzytkownik-nazwa {
+    font-weight: 600;
+    color: var(--font-color);
+    display: block;
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.recenzja-data {
+    font-size: 0.85rem;
+    color: var(--bg-contrast);
+    opacity: 0.8;
+}
+
+.recenzja-ocena {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.gwiazdka {
+    color: color-mix(in srgb, var(--dashboard-color) 40%, transparent);
+    font-size: 1.3rem;
+    margin-right: 2px;
+}
+
+.gwiazdka.aktywna {
+    color: #ffc107;
+    text-shadow: 0 0 8px rgba(255, 193, 7, 0.3);
+}
+
+.ocena-wartosc {
+    margin-left: 0.5rem;
+    font-weight: 600;
+    color: var(--font-color);
+    font-size: 0.9rem;
+}
+
+.recenzja-tresc {
+    margin-top: 1rem;
+}
+
+.recenzja-tresc p {
+    line-height: 1.6;
+    color: var(--font-color);
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.recenzja-akcje {
+    margin-top: 1rem;
+    text-align: right;
+}
+
+.usun-recenzje-form {
+    display: inline;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+}
+
+.twoja-recenzja-info, .zaloguj-sie-info, .brak-recenzji {
+    background: color-mix(in srgb, var(--dashboard-color) 3%, transparent);
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: var(--bg-contrast);
+    border: 1px solid color-mix(in srgb, var(--dashboard-color) 15%, transparent);
+    font-size: 0.95rem;
+}
+
+.btn-link {
+    color: var(--green-accent);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.btn-link:hover {
+    color: color-mix(in srgb, var(--green-accent) 80%, transparent);
+    text-decoration: underline;
+}

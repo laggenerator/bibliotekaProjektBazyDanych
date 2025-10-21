@@ -42,10 +42,12 @@ const upload = multer({
 
 router.get("/dashboard", requireAdmin, async (req, res) => {
   const liczbaUzytkownikow = await Admin.ileUzytkownikow();
+  const poTerminie = await Admin.ilePoTerminie();
   res.render("admin/dashboard", {
     tytul: "Panel admina",
     customCSS: '/css/dashboard.css',
-    liczbaUzytkownikow: liczbaUzytkownikow
+    liczbaUzytkownikow: liczbaUzytkownikow,
+    poTerminie: poTerminie
   });
 });
 
