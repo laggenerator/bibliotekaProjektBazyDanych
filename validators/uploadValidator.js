@@ -27,7 +27,6 @@ body('tytul_ksiazki')
   body('isbn')
     .notEmpty()
     .withMessage("ISBN nie może być pusty")
-    .matches(/^(?:\d{3}-)?\d{1,5}-\d{1,7}-\d{1,7}-\d{1}$|^\d{13}$/)
     .withMessage("Podaj poprawny format ISBN (10/13 cyfr lub format z myślnikami)")
     .custom((value) => {
       const cleanIsbn = value.replace(/-/g, '');

@@ -170,7 +170,8 @@ router.post("/ksiazki/dodaj", requireAdmin, upload.single('okladka'), uploadVali
     const errors = validationResult(req);
     if(!errors.isEmpty()){
       return res.render('admin/dodaj-ksiazke', {
-        error: errors.array()[0].msg, ...req.body
+        error: errors.array()[0].msg, ...req.body,
+        customCSS: '/css/error.css'
       });
     }
     const liczbaKopii = parseInt(req.body.liczba_kopii) || 1;
@@ -181,18 +182,25 @@ router.post("/ksiazki/dodaj", requireAdmin, upload.single('okladka'), uploadVali
       rok_wydania: req.body.rok_wydania,
       ilosc_stron: req.body.ilosc_stron,
       kategorie: req.body.kategorie ? req.body.kategorie.split(',').map(k => k.trim()) : [],
+      liczba_kopii: liczbaKopii      
     }
-    const results = [];
-    for(let i=0;i<liczbaKopii;i++){
-      let result = await Ksiazka.dodaj(ksiazka);
-      results.push(result[0]);
+    await Ksiazka.dodaj(ksiazka);
+    try{
+      const ksiazki = await Ksiazka.pobierzWszystkie();
+      res.render("admin/ksiazki", {
+        tytul: "Zarządzanie książkami",
+        customCSS: ['/css/dashboard.css', '/css/ksiazki.css', '/css/admin.css'],
+        sukces: `Dodano ${liczbaKopii}x ${ksiazka.tytul}!`,
+        ksiazki: Array.isArray(ksiazki) ? ksiazki : [],
+      });
+    } catch (error) {
+      res.render("admin/ksiazki", {
+        tytul: "Zarządzanie książkami",
+        ksiazki: [],
+        customCSS: ['/css/dashboard.css', '/css/ksiazki.css', '/css/admin.css'],
+        error: error
+      });
     }
-    res.render("admin/ksiazki", {
-      tytul: `Dodane książki`,
-      dodawanie: true,
-      ksiazki: results,
-      customCSS: ['/css/ksiazki.css', '/css/admin.css']
-    });
   } catch (error){
     res.render("admin/dodaj-ksiazke", {
       error: 'Wystąpił błąd podczas dodawania: ' + error.message, ...req.body, customCSS: ['/css/ksiazki.css', '/css/admin.css']

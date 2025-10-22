@@ -49,7 +49,7 @@ class Ksiazka {
     kategorie: ksiazka.kategorie || [],
     
     // Link do okładki
-    img_link: ksiazka.img_link || `/assets/okladki/${this.normalizacjaISBN(ksiazka.isbn)}.webp`,
+    img_link: ksiazka.img_link || `/assets/okladki/${this.denormalizacjaISBN(ksiazka.isbn)}.webp`,
     
     // Informacje o dostępności
     dostepna: parseInt(ksiazka.liczba_dostepnych_egzemplarzy) > 0,
@@ -78,7 +78,7 @@ class Ksiazka {
       ARRAY_AGG(DISTINCT a.imie || ' ' || a.nazwisko) AS autor,
       ARRAY_AGG(DISTINCT kat.opis) AS kategorie,
       COUNT(DISTINCT e.id_egzemplarza) AS liczba_egzemplarzy,
-      COUNT(DISTINCT CASE WHEN e.status = 'Wolna' THEN e.id_egzemplarza END) AS lizcba_dostepnych_egzemplarzy,
+      COUNT(DISTINCT CASE WHEN e.status = 'Wolna' THEN e.id_egzemplarza END) AS liczba_dostepnych_egzemplarzy,
       AVG(r.ocena) AS srednia_ocena,
       COUNT(r.id_recenzji) AS liczba_recenzji
     FROM ksiazka k
@@ -89,7 +89,7 @@ class Ksiazka {
     LEFT JOIN egzemplarz e ON k.id_ksiazki = e.id_ksiazki
     LEFT JOIN recenzja r ON k.id_ksiazki = r.id_ksiazki
     GROUP BY k.id_ksiazki
-    ORDER BY k.id_ksiazki DESC
+    ORDER BY liczba_dostepnych_egzemplarzy DESC
     `;
     const result = await pool.query(query);
     return result.rows.map(row => this.formatKsiazka(row));
@@ -172,7 +172,7 @@ class Ksiazka {
       ARRAY_AGG(DISTINCT a.imie || ' ' || a.nazwisko) AS autor,
       ARRAY_AGG(DISTINCT kat.opis) AS kategorie,
       COUNT(DISTINCT e.id_egzemplarza) AS liczba_egzemplarzy,
-      COUNT(DISTINCT CASE WHEN e.status = 'Wolna' THEN e.id_egzemplarza END) AS lizcba_dostepnych_egzemplarzy,
+      COUNT(DISTINCT CASE WHEN e.status = 'Wolna' THEN e.id_egzemplarza END) AS liczba_dostepnych_egzemplarzy,
       AVG(r.ocena) AS srednia_ocena,
       COUNT(r.id_recenzji) AS liczba_recenzji
     FROM ksiazka k
@@ -190,24 +190,35 @@ class Ksiazka {
     return result.rows.map(row => this.formatKsiazka(row));
   }
 
-  // PONIŻEJ SĄ JESZCZE STARE DO PRZERÓBKI NA PORZĄDNĄ BAZĘ
-
   static async kategorie(){
     const query = `
-    SELECT DISTINCT unnest(kategorie) as kategorie FROM ksiazki ORDER BY kategorie;
+    SELECT opis FROM kategoria ORDER BY id_kategorii ASC;
     `;
     const result = await pool.query(query);
-    return result.rows.map(row => row.kategorie);
+    return result.rows.map(row => row.opis);
   };
 
   static async wyszukajKategorie(kategoria){
     const query = `
-    SELECT DISTINCT ON (tytul) * FROM ksiazki WHERE kategorie::text ILIKE $1
+    SELECT
+      k.*,
+      ARRAY_AGG(DISTINCT a.imie || ' ' || a.nazwisko) AS autor,
+      ARRAY_AGG(DISTINCT kat.opis) AS kategorie
+    FROM ksiazka k
+    LEFT JOIN ksiazka_autor ka ON k.id_ksiazki = ka.id_ksiazki
+    LEFT JOIN autor a ON ka.id_autora = a.id_autora
+    LEFT JOIN ksiazka_kategoria kk ON k.id_ksiazki = kk.id_ksiazki
+    LEFT JOIN kategoria kat ON kk.id_kategorii = kat.id_kategorii
+    WHERE kat.opis ILIKE $1
+    GROUP BY k.id_ksiazki
+    ORDER BY k.tytul
     `;
     const pattern = `%${kategoria}%`;
     const result = await pool.query(query, [pattern]);
     return result.rows.map(row => this.formatKsiazka(row));
   }
+
+  // PONIŻEJ SĄ JESZCZE STARE DO PRZERÓBKI NA PORZĄDNĄ BAZĘ
 
   static async znajdzKsiazki(wyszukiwanie){
     const query = `
@@ -237,27 +248,137 @@ class Ksiazka {
   }
 
   static async dodaj(ksiazka){
-    try {
+    const client = await pool.connect();
+    try{
+      await client.query("BEGIN");
       const dodawanaKsiazka = {
         ...ksiazka,
-        // podwójna walidacja
-        isbn: this.normalizacjaISBN(ksiazka.isbn),
+        isbn: this.denormalizacjaISBN(ksiazka.isbn),
         autor: Array.isArray(ksiazka.autor) ? ksiazka.autor : [ksiazka.autor],
-        kategorie: Array.isArray(ksiazka.kategorie) ? ksiazka.kategorie : [ksiazka.kategorie]
+        kategorie: Array.isArray(ksiazka.kategorie) ? ksiazka.kategorie : [ksiazka.kategorie]  
+      
       }
 
-      const query = `
-      INSERT INTO ksiazki (
-      tytul, autor, isbn, rok_wydania, ilosc_stron, kategorie)
-      VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING *
+      // Dodawania książki do ksiazka
+      const ksiazkaQuery = `
+        INSERT INTO ksiazka (isbn, tytul, rok_wydania, ilosc_stron)
+        SELECT $1::varchar(13), $2, $3, $4
+        WHERE NOT EXISTS (
+            SELECT 1 FROM ksiazka WHERE isbn = $1
+        )
+        RETURNING id_ksiazki
       `;
+      const ksiazkaResult = await client.query(ksiazkaQuery, [
+        dodawanaKsiazka.isbn,
+        dodawanaKsiazka.tytul,
+        parseInt(dodawanaKsiazka.rok_wydania),
+        parseInt(dodawanaKsiazka.ilosc_stron)
+      ]);
+      if (ksiazkaResult.rows.length === 0) {
+        throw new Error('Książka o takim ISBN już istnieje w bazie');
+      }
 
-      const result = await pool.query(query, [dodawanaKsiazka.tytul, dodawanaKsiazka.autor, dodawanaKsiazka.isbn, dodawanaKsiazka.rok_wydania, dodawanaKsiazka.ilosc_stron, dodawanaKsiazka.kategorie])
-      
-      return result.rows.map(row => this.formatKsiazka(row));
-    } catch (error) {
-      throw error;
+      const idKsiazki = ksiazkaResult.rows[0].id_ksiazki;
+
+      // Dodawanie autorów do autor
+      for (const autorStr of dodawanaKsiazka.autor){
+        const pociety_autor = autorStr.trim().split(" ");
+        if(pociety_autor.length < 1){
+          throw new Error("TO AUTOR NAWET IMIENIA NIE MA!!!???")
+        }
+        let nazwisko = '';
+        if(pociety_autor.length > 1){
+          nazwisko = pociety_autor.pop();
+        }
+        const imie = pociety_autor.join(" ");
+        const autorQuery = `
+        INSERT INTO autor(imie, nazwisko)
+        SELECT $1, $2
+        WHERE NOT EXISTS(
+          SELECT 1 FROM autor WHERE imie = $1 AND nazwisko = $2
+        )
+        RETURNING id_autora
+        `;
+        
+
+        const autorResult = await client.query(autorQuery, [imie, nazwisko]);
+
+        const idAutora = autorResult.rows.length > 0 
+        ? autorResult.rows[0].id_autora
+        : (await client.query(
+          `SELECT id_autora FROM autor WHERE imie = $1::text AND nazwisko = $2::text`, [imie, nazwisko]
+        )).rows[0].id_autora;
+        // DOBRA A CO ROBIMY JAK DWOCH SIE TAK SAMO NAZYWA TO TRZEBA ROZWIAZAC A NIE ZE LACZYMY LUDZI
+        const autorKsiazkaQuery = `
+        INSERT INTO ksiazka_autor (id_ksiazki, id_autora)
+        VALUES($1, $2)
+        `;
+        const autorKsiazkaResult = await client.query(autorKsiazkaQuery, [idKsiazki, idAutora]);
+      }
+      // Dodawanie kategorii do kategoria
+      for(const kategoriaStr of dodawanaKsiazka.kategorie){
+        const opis = kategoriaStr.trim();
+        if(!opis) continue;
+
+        const kategoriaQuery = `
+        INSERT INTO kategoria(opis)
+        VALUES ($1::text)
+        ON CONFLICT (opis) DO NOTHING
+        RETURNING id_kategorii
+        `;
+
+        const kategoriaResult = await client.query(kategoriaQuery, [opis]);
+        const idKategorii = kategoriaResult.rows.length > 0 
+        ? kategoriaResult.rows[0].id_kategorii
+        : (await client.query(
+          `SELECT id_kategorii FROM kategoria WHERE opis ILIKE $1`, [opis]
+        )).rows[0].id_kategorii;
+
+        const kategoriaKsiazkaQuery = `
+        INSERT INTO ksiazka_kategoria (id_ksiazki, id_kategorii)
+        VALUES ($1, $2)
+        `;
+
+        const kategoriaKsiazkaResult = await client.query(kategoriaKsiazkaQuery, [idKsiazki, idKategorii]);
+      }
+      let dodaneItemy = [];
+      // Dodawania egezemplarzy do egzemplarze
+      if(dodawanaKsiazka.liczba_kopii && dodawanaKsiazka.liczba_kopii > 0){
+        const domyslnyPokoj = 21;
+        const domyslnaPolka = 37;
+
+        const lokalizacjaQuery = `
+        INSERT INTO magazyn (pokoj, polka)
+        SELECT $1, $2
+        WHERE NOT EXISTS (
+          SELECT 1 FROM magazyn WHERE pokoj = $1 AND polka = $2
+        ) RETURNING id_lokalizacji
+        `;
+
+        const lokalizacjaResult = await client.query(lokalizacjaQuery, [domyslnyPokoj, domyslnaPolka]);
+        const idLokalizacji = lokalizacjaResult.rows.length > 0 
+        ? lokalizacjaResult.rows[0].id_lokalizacji
+        : (await client.query(`
+          SELECT id_lokalizacji FROM magazyn WHERE pokoj = $1 AND polka = $2`, [domyslnyPokoj, domyslnaPolka]
+        )).rows[0].id_lokalizacji;
+
+        const egzemplarzQuery = `
+        INSERT INTO egzemplarz(id_ksiazki, id_lokalizacji)
+        VALUES ($1, $2)
+        RETURNING id_ksiazki
+        `;
+        for(let i=0;i<dodawanaKsiazka.liczba_kopii;i++){
+          let placeholder = await client.query(egzemplarzQuery, [idKsiazki, idLokalizacji]);
+        }
+      }
+      await client.query("COMMIT");
+      return idKsiazki;
+    } catch (error){
+      await client.query("ROLLBACK");
+      console.log([error])
+      throw new Error(`Błąd podczas dodawania książki: ${error}`);
+    } finally {
+      client.release();
     }
   }
 };

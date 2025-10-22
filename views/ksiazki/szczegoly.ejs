@@ -179,7 +179,7 @@
                         <% } %>
                         
                         <!-- Usuwanie swojej recenzji -->
-                        <% if (locals.uzytkownik && locals.uzytkownik.numer_karty === recenzja.numer_karty) { %>
+                        <% if ((locals.uzytkownik.rola == 'ADMIN') || (locals.uzytkownik && locals.uzytkownik.numer_karty === recenzja.numer_karty)) { %>
                             <div class="recenzja-akcje">
                                 <form action="/recenzje/usun/<%= recenzja.id_recenzji %>" method="POST" class="usun-recenzje-form">
                                     <input type="hidden" name="_method" value="DELETE">

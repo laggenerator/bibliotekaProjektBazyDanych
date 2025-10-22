@@ -18,7 +18,7 @@ router.get("/", async (req, res) => {
     tytul: "Strona główna", 
     ksiazki: ksiazki, 
     najnowsze: najnowsze,
-    customCSS: '/css/index.css'
+    customCSS: ['/css/index.css']
   });
 });
 
@@ -28,6 +28,13 @@ router.get("/dashboard", requireAuth, async (req, res) => {
     tytul: "Panel użytkownika",
     poterminie: liczbaPoTerminie,
     customCSS: '/css/dashboard.css'
+  });
+});
+
+router.get("/wyszukiwarka", async (req, res) => {
+  res.render("wyszukiwarka", {
+    tytul: "Wyszukiwarka",
+    customCSS: ['/css/dashboard.css', '/css/ksiazki.css', '/css/admin.css']
   });
 });
 

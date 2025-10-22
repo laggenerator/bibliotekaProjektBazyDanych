@@ -6,9 +6,17 @@ const Autor = require('../models/autor');
 router.get("/:autor", async (req, res) => {
   try{
     const autor = decodeURIComponent(req.params.autor);
-    const ksiazki = await Autor.wyszukajAutora(autor);
-    const kopie = await Autor.kopieAutora(autor);
-    if(!ksiazki || ksiazki.length === 0 || !kopie || kopie.length === 0){
+    const pociety_autor = autor.trim().split(" ");
+    if(pociety_autor.length < 1){
+      throw new Error("TO AUTOR NAWET IMIENIA NIE MA!!!???")
+    }
+    let nazwisko = '';
+    if(pociety_autor.length > 1){
+      nazwisko = pociety_autor.pop();
+    }
+    const imie = pociety_autor.join(" ");
+    const ksiazki = await Autor.kopieAutora(imie, nazwisko);
+    if(!ksiazki || ksiazki.length === 0){
       return res.render("error", {
         error: "Nie posiadamy książek pożądanego autora!"
       });
@@ -17,14 +25,11 @@ router.get("/:autor", async (req, res) => {
       tytul: autor,
       autor: autor,
       ksiazki: ksiazki,
-      kopie: kopie,
-      dostepneKopie: kopie.filter(k => k.dostepna),
-      niedostepneKopie: kopie.filter(k => !k.dostepna),
-      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css']
+      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css', '/css/admin.css']
     });
   } catch (error){
     res.render("error", {
-      error: "Wystąpił błąd podczas pobierania książek",
+      error: `Wystąpił błąd podczas pobierania książek: ${error}`,
       customCSS: '/css/error.css'
     });
   }

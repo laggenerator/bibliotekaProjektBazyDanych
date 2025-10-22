@@ -214,3 +214,11 @@
 .tytul-link:hover, .autor-link:hover{
   color: var(--green-accent);
 }
+
+.ksiazki-dostepne {
+    color: var(--green-accent) !important;
+}
+
+.ksiazki-niedostepne {
+    color: var(--red-accent) !important;
+}

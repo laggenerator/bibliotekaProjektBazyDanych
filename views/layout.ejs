@@ -6,6 +6,7 @@
     <title><%= typeof tytul !== 'undefined' ? tytul : 'Błąd' %> - Biblioteka</title>
     <link rel="stylesheet" href="/css/main.css" />
     <link rel="stylesheet" href="/css/header.css" />
+    <link rel="stylesheet" href="/css/ksiazki.css" />
     <% if (typeof customCSS !== 'undefined') { %>
         <% if (Array.isArray(customCSS)) { %>
             <% customCSS.forEach(function(plikCSS) { %>
@@ -33,26 +34,20 @@
                 <a href="/ksiazki" class="nav-link">Książki</a>
                 <a href="/autorzy" class="nav-link">Autorzy</a>
                 <a href="/kategorie" class="nav-link">Kategorie</a>
+                <a href="/wyszukiwarka" class="nav-link">Wyszukiwarka</a>
             </nav>
         </div>
 
-        <div class="header-center">
-            <form method="POST" action="<%= locals.searchEndpoint %>" class="wyszukiwarka-container" id="wyszukiwarka-form">
-                <input 
-                type="text" 
-                name="query" 
-                placeholder="<%= locals.searchPlaceholder %>" 
-                class="wyszukiwarka-input"
-                id="wyszukiwarka-input"
-                >
-                <button type="submit" class="wyszukiwarka-btn">
+        <!-- <div class="header-center">
+            <a href="/wyszukiwarka" class="btn btn-primary">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="11" cy="11" r="8"></circle>
                     <path d="m21 21-4.3-4.3"></path>
                 </svg>
-                </button>
-            </form>
-        </div>
+                Wyszukaj książki
+            </a>
+        </div> -->
+
 
         <div class="header-right">
             <% if(!locals.uzytkownik) { %>
@@ -101,4 +96,5 @@
     <%- body %>
   </div>
 </body>
+
 </html>

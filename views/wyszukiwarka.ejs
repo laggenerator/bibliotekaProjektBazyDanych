@@ -1,0 +1,78 @@
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>Wyszukiwanie książek</h1>
+        <a href="/" class="btn btn-secondary">← Powrót do strony głównej</a>
+    </div>
+
+    <% if (locals.error) { %>
+        <div class="alert alert-error">
+            <%= locals.error %>
+        </div>
+    <% } %>
+
+    <form action="/ksiazki/wyszukaj" method="POST" class="book-form">
+        <div class="form-grid">
+            <!-- Tytuł -->
+            <div class="form-group">
+                <label for="tytulksiazki" class="form-label">Tytuł</label>
+                <input 
+                    type="text" 
+                    id="tytulksiazki" 
+                    name="tytulksiazki" 
+                    class="form-input" 
+                    value="<%= locals.tytulksiazki || '' %>"
+                    placeholder="Wprowadź tytuł książki"
+                >
+            </div>
+
+            <!-- Autor -->
+            <div class="form-group">
+                <label for="autor" class="form-label">Autor</label>
+                <input 
+                    type="text" 
+                    id="autor" 
+                    name="autor" 
+                    class="form-input" 
+                    value="<%= locals.autor || '' %>"
+                    placeholder="Wprowadź imię i nazwisko autora"
+                >
+                <small class="form-hint">Możesz wpisać dowolny fragment</small>
+            </div>
+
+            <!-- ISBN -->
+            <div class="form-group">
+                <label for="isbn" class="form-label">ISBN</label>
+                <input 
+                    type="text" 
+                    id="isbn" 
+                    name="isbn" 
+                    class="form-input" 
+                    value="<%= locals.isbn || '' %>"
+                    placeholder="np. 978-83-123-4567-8"
+                >
+                <small class="form-hint">Format: 13-cyfrowy ISBN bez lub z myślnikami</small>
+            </div>
+
+            <!-- Kategorie -->
+            <div class="form-group">
+                <label for="kategoria" class="form-label">Kategoria</label>
+                <input 
+                    type="text" 
+                    id="kategoria" 
+                    name="kategoria" 
+                    class="form-input" 
+                    value="<%= locals.kategoria || '' %>"
+                    placeholder="Wprowadź kategorię"
+                >
+                <small class="form-hint">np. Naukowa, Literatura piękna, Fantastyka</small>
+            </div>
+
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success">Szukaj książek</button>
+            <!-- <a href="/ksiazki" class="btn btn-secondary">Przejdź do katalogu książek</a>
+            <a href="/kategorie" class="btn btn-secondary">Przejdź do katalogu kategorii</a>
+            <a href="/autorzy" class="btn btn-secondary">Przejdź do katalogu autorów</a> -->
+        </div>
+    </form>

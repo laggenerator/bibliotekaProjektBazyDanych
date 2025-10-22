@@ -5,10 +5,18 @@
             <h1 class="ksiazka-tytul"><%= autor %></h1>
         </div>
     </div>
-
+    <div class="admin-actions">
+        <div class="dynamiczny-filtr">
+        <div class="input-group">
+            <input type="text" id="filtr-ksiazki" class="form-control" placeholder="Filtruj książki...">
+            <button type="button" class="btn btn-outline-secondary" disabled style="visibility: hidden;">
+            </button><span class="filtr-info input-group-text" id="filtr-info"></span>
+        </div>
+        </div>
+    </div>
     <div class="ksiazki-lista">
     <% ksiazki.forEach(function(ksiazka) { %>
-      <div class="ksiazka-lista-item">
+      <div class="ksiazka-lista-item" data-tytul="<%= ksiazka.tytul.toLowerCase() %>" data-autor="<%= Array.isArray(ksiazka.autor) ? ksiazka.autor.join(' ').toLowerCase() : ksiazka.autor.toLowerCase() %>" data-kategorie="<%= Array.isArray(ksiazka.kategorie) ? ksiazka.kategorie.join(' ').toLowerCase() : ksiazka.kategorie.toLowerCase() %>" data-isbn="<%= ksiazka.isbn.toLowerCase() %>">
         <div class="ksiazka-lista-lewa">
           <a href="/ksiazki/<%= ksiazka.isbn %>">
             <img class="ksiazka-lista-obraz" src="<%= ksiazka.img_link %>" alt="Okładka: <%= ksiazka.tytul %>" onerror="this.src='/assets/okladki/placeholder.webp'">
@@ -54,6 +62,11 @@
               <span class="label">Ilość stron:</span>
               <span class="value"><%= ksiazka.ilosc_stron %> stron</span>
             </div>
+
+            <div class="detail-group">
+              <span class="label">Ilość egzemplarzy:</span>
+              <span class="value <%= ksiazka.dostepne_egzemplarze > 0 ? 'ksiazki-dostepne' : 'ksiazki-niedostepne' %>"><%= ksiazka.dostepne_egzemplarze %>/<%= ksiazka.laczna_liczba_egzemplarzy %> dostępnych</span>
+            </div>
             
             <div class="detail-group">
               <span class="label">ISBN:</span>
@@ -69,49 +82,9 @@
       </div>
     <% }); %>
   </div>
-<!-- 
-    <div class="kopie-section">
-        <h2>Kopie w bibliotece</h2>
-        <div class="dostepnosc-stats">
-                <div class="stat-dostepne">
-                    <span class="stat-number"><%= dostepneKopie.length %></span>
-                    <span class="stat-label">dostępnych kopii</span>
-                </div>
-                <div class="stat-lacznie">
-                    <span class="stat-number"><%= kopie.length %></span>
-                    <span class="stat-label">łącznie w bibliotece</span>
-                </div>
-            </div>
-        <div class="kopie-lista">
-            <% kopie.forEach(function(kopia, index) { %>
-                <div class="kopia-item <%= kopia.dostepna ? 'dostepna' : 'niedostepna' %>">
-                    <a href="/ksiazki/<%= kopia.isbn %>">
-                        <img class="ksiazka-autor-obraz" src="<%= kopia.img_link %>" alt="Okładka: <%= kopia.tytul %>" onerror="this.src='/assets/okladki/placeholder.webp'">
-                    </a>
-                    <div class="kopia-info">
-                        <div class="kopia-numer">
-                            <span class="numer"><%= kopia.tytul %></span>
-                            <span class="status <%= kopia.dostepna ? 'status-dostepna' : 'status-niedostepna' %>">
-                                <%= kopia.dostepna ? 'Dostępna' : 'Wypożyczona' %>
-                            </span>
-                        </div>
-                        
-                        <div class="kopia-id">
-                            <span class="label">Rok wydania:</span>
-                            <span class="value"><%= kopia.rok_wydania %></span>
-                        </div>
-                        <div class="kopia-id">
-                            <span class="label">ISBN:</span>
-                            <span class="value"><%= kopia.isbn %></span>
-                        </div>
 
-                        <div class="kopia-id">
-                            <span class="label">ID książki:</span>
-                            <span class="value"><%= kopia.id %></span>
-                        </div>
-                    </div>
-                </div>
-            <% }); %>
-        </div>
-    </div> -->
 </div>
+
+
+<script src="/js/filtracja.js">
+</script>

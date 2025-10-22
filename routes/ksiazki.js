@@ -12,13 +12,13 @@ router.get("/", async (req, res) => {
     res.render("ksiazki/lista", {
       tytul: "Wszystkie książki",
       ksiazki: Array.isArray(ksiazki) ? ksiazki : [],
-      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css']
+      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css', '/css/admin.css']
     });
   } catch (error) {
     res.render("ksiazki/lista", {
       tytul: "Wszystkie książki",
       ksiazki: [],
-      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css'],
+      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css', '/css/admin.css'],
       error: error
     })
   }
@@ -72,21 +72,21 @@ router.get("/:isbn", async (req, res) => {
 
 router.post("/wyszukaj", async (req, res) => {
   try {
-    const query = req.body.query;
+    const {tytulksiazki, autor, isbn, kategoria} = req.body.body;
     const ksiazki = await Ksiazka.znajdzKsiazki(query);
     return res.render("ksiazki/lista", {
       tytul: `Wyniki dla: ${query}`,
       query: query,
       ksiazki: ksiazki,
-      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css']
+      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css', '/css/admin.css']
     });
   } catch (error) {
-      res.render("ksiazki/lista", {
+      res.render("wyszukiwarka", {
       tytul: 'Wyszukiwanie',
       query: req.query.q || '',
       ksiazki: [],
       error: 'Wystąpił błąd podczas wyszukiwania',
-      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css']
+      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css', '/css/error.css', '/css/admin.css']
     });
   }
 });

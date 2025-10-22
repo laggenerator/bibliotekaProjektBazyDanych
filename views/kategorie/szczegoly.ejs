@@ -5,10 +5,18 @@
             <h1 class="ksiazka-tytul"><%= tytul %></h1>
         </div>
     </div>
-
+  <div class="admin-actions">
+    <div class="dynamiczny-filtr">
+      <div class="input-group">
+        <input type="text" id="filtr-ksiazki" class="form-control" placeholder="Filtruj książki...">
+        <button type="button" class="btn btn-outline-secondary" disabled style="visibility: hidden;">
+        </button><span class="filtr-info input-group-text" id="filtr-info"></span>
+      </div>
+    </div>
+  </div>
     <div class="ksiazki-lista">
     <% ksiazki.forEach(function(ksiazka) { %>
-      <div class="ksiazka-lista-item">
+      <div class="ksiazka-lista-item" data-tytul="<%= ksiazka.tytul.toLowerCase() %>" data-autor="<%= Array.isArray(ksiazka.autor) ? ksiazka.autor.join(' ').toLowerCase() : ksiazka.autor.toLowerCase() %>" data-kategorie="<%= Array.isArray(ksiazka.kategorie) ? ksiazka.kategorie.join(' ').toLowerCase() : ksiazka.kategorie.toLowerCase() %>" data-isbn="<%= ksiazka.isbn.toLowerCase() %>">
         <div class="ksiazka-lista-lewa">
           <a href="/ksiazki/<%= ksiazka.isbn %>">
             <img class="ksiazka-lista-obraz" src="<%= ksiazka.img_link %>" alt="Okładka: <%= ksiazka.tytul %>" onerror="this.src='/assets/okladki/placeholder.webp'">
@@ -70,3 +78,7 @@
     <% }); %>
   </div>
 </div>
+
+
+<script src="/js/filtracja.js">
+</script>
