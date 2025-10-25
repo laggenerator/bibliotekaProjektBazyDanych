@@ -16,14 +16,14 @@
     <h2>Katalog wszystich książek</h2>
   <% } %>
   <div class="admin-actions">
-      <div class="dynamiczny-filtr">
-        <div class="input-group">
-          <input type="text" id="filtr-ksiazki" class="form-control" placeholder="Filtruj książki...">
-          <button type="button" class="btn btn-outline-secondary" disabled style="visibility: hidden;">
-          </button><span class="filtr-info input-group-text" id="filtr-info"></span>
-        </div>
+    <div class="dynamiczny-filtr">
+      <div class="input-group">
+        <input type="text" id="filtr-ksiazki" class="form-control" placeholder="Filtruj książki...">
+        <button type="button" class="btn btn-outline-secondary" disabled style="visibility: hidden;">
+        </button><span class="filtr-info input-group-text" id="filtr-info"></span>
       </div>
     </div>
+  </div>
   <div class="ksiazki-lista">
     <% ksiazki.forEach(function(ksiazka) { %>
       <div class="ksiazka-lista-item" data-tytul="<%= ksiazka.tytul.toLowerCase() %>" data-autor="<%= Array.isArray(ksiazka.autor) ? ksiazka.autor.join(' ').toLowerCase() : ksiazka.autor.toLowerCase() %>" data-kategorie="<%= Array.isArray(ksiazka.kategorie) ? ksiazka.kategorie.join(' ').toLowerCase() : ksiazka.kategorie.toLowerCase() %>" data-isbn="<%= ksiazka.isbn.toLowerCase() %>">

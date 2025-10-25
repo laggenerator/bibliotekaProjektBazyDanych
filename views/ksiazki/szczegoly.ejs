@@ -121,7 +121,7 @@
         <% if (locals.uzytkownik && !zmiennaKtorejNieMaJeszcze) { %>
             <div class="dodaj-recenzje-form">
                 <h3>Dodaj swoją recenzję</h3>
-                <form action="/recenzje/dodaj/<%= ksiazka.id_ksiazki %>" method="POST" class="recenzja-form">
+                <form action="/ksiazki/dodaj-recenzje/<%= ksiazka.id_ksiazki %>" method="POST" class="recenzja-form">
                     <div class="form-group">
                         <label for="ocena">Ocena (1-5):</label>
                         <select name="ocena" id="ocena" class="form-select" required>
@@ -178,13 +178,13 @@
                             </div>
                         <% } %>
                         
-                        <!-- Usuwanie swojej recenzji -->
+                        <!-- Usuwanie swojej recenzji (admin też może) -->
                         <% if ((locals.uzytkownik.rola == 'ADMIN') || (locals.uzytkownik && locals.uzytkownik.numer_karty === recenzja.numer_karty)) { %>
                             <div class="recenzja-akcje">
-                                <form action="/recenzje/usun/<%= recenzja.id_recenzji %>" method="POST" class="usun-recenzje-form">
+                                <form action="/ksiazki/usun-recenzje/<%= recenzja.id_recenzji %>" method="POST" class="usun-recenzje-form">
                                     <input type="hidden" name="_method" value="DELETE">
                                     <button type="submit" class="btn btn-sm btn-danger" 
-                                            onclick="return confirm('Czy na pewno chcesz usunąć swoją recenzję?')">
+                                            onclick="return confirm('Czy na pewno chcesz usunąć tę recenzję?')">
                                         Usuń recenzję
                                     </button>
                                 </form>

@@ -31,6 +31,24 @@ router.get("/dashboard", requireAuth, async (req, res) => {
   });
 });
 
+router.get("/dashboard/moje-recenzje", requireAuth, async (req, res) => {
+  try {
+    const recenzje = await Uzytkownik.podajRecenzje(req.session.userId);
+    res.render("ksiazki/moje-recenzje", {
+      tytul: "Moje recenzje",
+      customCSS: ['/css/dashboard.css', '/css/ksiazki.css', '/css/admin.css', '/css/recenzje.css'],
+      recenzje: recenzje
+    })
+  } catch (error) {
+    res.render("ksiazki/moje-recenzje", {
+      tytul: "Moje recenzje",
+      customCSS: ['/css/dashboard.css', '/css/ksiazki.css', '/css/admin.css', '/css/recenzje.css'],
+      recenzje: [],
+      error: `Nastąpił błąd podczas wyświetlania recenzji: ${error}`
+    })
+  }
+})
+
 router.get("/wyszukiwarka", async (req, res) => {
   res.render("wyszukiwarka", {
     tytul: "Wyszukiwarka",
@@ -47,7 +65,6 @@ router.get("/koszyk", requireAuth, async (req, res) => {
   const koszyk = await Uzytkownik.zapodajKoszyk(req.session.userId);
   res.json(koszyk);
 })
-
 
 
 module.exports = router;

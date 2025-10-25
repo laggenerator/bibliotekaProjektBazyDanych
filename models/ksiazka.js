@@ -127,7 +127,8 @@ class Ksiazka {
     GROUP BY k.id_ksiazki
   `;
     const result = await pool.query(query, [this.denormalizacjaISBN(isbn)]);
-    return this.formatKsiazka(result.rows[0]);
+    const ksiazka = this.formatKsiazka(result.rows[0])
+    return ksiazka;
   }
 
   static async pobierzPoID(ksiazkaId){
@@ -218,36 +219,7 @@ class Ksiazka {
     return result.rows.map(row => this.formatKsiazka(row));
   }
 
-  // PONIŻEJ SĄ JESZCZE STARE DO PRZERÓBKI NA PORZĄDNĄ BAZĘ
-
-  static async znajdzKsiazki(wyszukiwanie){
-    const query = `
-    SELECT * FROM (
-      SELECT DISTINCT ON (ISBN) ksiazkaId, ISBN, tytul, autor, rok_wydania, ilosc_stron, kategorie
-      FROM ksiazki
-      WHERE ISBN = $1 OR tytul ~* ALL($2::text[]) OR autor::text ~* ALL($2::text[])
-    ) AS wyszukiwanie ORDER BY tytul
-    `;
-    const arraySlow = wyszukiwanie.split(" ");
-    const pattern = arraySlow.map(slowo => `\\m${slowo}`);
-    
-    const result = await pool.query(query, [wyszukiwanie, pattern]);
-    return result.rows.map(row => this.formatKsiazka(row));
-
-    console.log(result.rows.length);
-    return result.rows[0];
-  }
-
-  static async zaklepKsiazke(ksiazkaId){
-    const query = `
-    UPDATE ksiazki SET dostepna = false WHERE ksiazkaId = $1
-    `;
-
-    const result = await pool.query(query, [ksiazkaId]);
-    return result.rows[0];
-  }
-
-  static async dodaj(ksiazka){
+    static async dodaj(ksiazka){
     const client = await pool.connect();
     try{
       await client.query("BEGIN");
@@ -380,6 +352,88 @@ class Ksiazka {
     } finally {
       client.release();
     }
+  }
+
+  static async dodajRecenzje(recenzja){
+    const client = await pool.connect();
+    try{
+      client.query("BEGIN")
+      const recenzjaQuery = `
+      INSERT INTO recenzja(id_ksiazki, numer_karty, ocena, tekst)
+      VALUES ($1, $2, $3, $4)
+      ON CONFLICT (id_ksiazki, numer_karty) DO NOTHING
+      RETURNING (
+        SELECT isbn FROM ksiazka
+        WHERE id_ksiazki = $1
+      ) AS isbn
+      `;
+
+      const result = await client.query(recenzjaQuery, [recenzja.id_ksiazki, recenzja.numer_karty, recenzja.ocena, recenzja.tekst]);
+      client.query("COMMIT");
+      return this.denormalizacjaISBN(result.rows[0].isbn);
+    } catch (error){
+      console.log(error)
+      client.query("ROLLBACK");
+    } finally {
+      client.release();
+    }
+  }
+
+  static async usunRecenzje(recenzja){
+    const client = await pool.connect();
+    try{
+      client.query("BEGIN")
+      const recenzjaQuery = `
+      DELETE FROM recenzja r
+      WHERE id_recenzji = $1 AND (
+        numer_karty = $2 
+        OR EXISTS (
+          SELECT 1 FROM uzytkownik
+          WHERE numer_karty = $2 AND rola = 'ADMIN'
+        )
+      ) RETURNING ( 
+        SELECT isbn FROM ksiazka WHERE id_ksiazki = r.id_ksiazki
+      ) AS isbn
+      `;
+
+      const result = await client.query(recenzjaQuery, [recenzja.id_recenzji, recenzja.numer_karty]);
+      client.query("COMMIT");
+      return this.denormalizacjaISBN(result.rows[0].isbn);
+    } catch (error){
+      console.log(error)
+      client.query("ROLLBACK");
+    } finally {
+      client.release();
+    }
+  }
+
+  // PONIŻEJ SĄ JESZCZE STARE DO PRZERÓBKI NA PORZĄDNĄ BAZĘ
+
+  static async znajdzKsiazki(wyszukiwanie){
+    const query = `
+    SELECT * FROM (
+      SELECT DISTINCT ON (ISBN) ksiazkaId, ISBN, tytul, autor, rok_wydania, ilosc_stron, kategorie
+      FROM ksiazki
+      WHERE ISBN = $1 OR tytul ~* ALL($2::text[]) OR autor::text ~* ALL($2::text[])
+    ) AS wyszukiwanie ORDER BY tytul
+    `;
+    const arraySlow = wyszukiwanie.split(" ");
+    const pattern = arraySlow.map(slowo => `\\m${slowo}`);
+    
+    const result = await pool.query(query, [wyszukiwanie, pattern]);
+    return result.rows.map(row => this.formatKsiazka(row));
+
+    console.log(result.rows.length);
+    return result.rows[0];
+  }
+
+  static async zaklepKsiazke(ksiazkaId){
+    const query = `
+    UPDATE ksiazki SET dostepna = false WHERE ksiazkaId = $1
+    `;
+
+    const result = await pool.query(query, [ksiazkaId]);
+    return result.rows[0];
   }
 };
 

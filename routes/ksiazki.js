@@ -69,6 +69,49 @@ router.get("/:isbn", async (req, res) => {
   }
 });
 
+router.post("/dodaj-recenzje/:id_ksiazki", requireAuth, async (req, res) => {
+  try{
+    const { ocena, tekst } = req.body;
+    const ksiazka = {
+      id_ksiazki: req.params.id_ksiazki,
+      ocena: parseInt(ocena),
+      tekst: tekst || null,
+      numer_karty: req.session.userId
+    }
+
+    const isbn = await Ksiazka.dodajRecenzje(ksiazka);
+
+    res.redirect(`/ksiazki/${isbn}`)
+
+  } catch (error) {
+    console.error('Błąd:', error);
+    res.render("error", {
+      error: "Wystąpił błąd serwera",
+      customCSS: '/css/error.css'
+    });
+  }
+})
+
+router.post("/usun-recenzje/:id_recenzji", requireAuth, async (req, res) => {
+  try{
+    const ksiazka = {
+      id_recenzji: req.params.id_recenzji,
+      numer_karty: req.session.userId
+    }
+
+    const isbn = await Ksiazka.usunRecenzje(ksiazka);
+
+    res.redirect(`/ksiazki/${isbn}`)
+
+  } catch (error) {
+    console.error('Błąd:', error);
+    res.render("error", {
+      error: "Wystąpił błąd serwera",
+      customCSS: '/css/error.css'
+    });
+  }
+})
+
 
 router.post("/wyszukaj", async (req, res) => {
   try {

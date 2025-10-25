@@ -136,17 +136,28 @@ class Uzytkownik {
     }
   }
 
-  // NIŻEJ SĄ JESZCZE STARE DO PRZERÓBKI NA PORZĄDNĄ BAZĘ
-
-  static async znajdzPrzezKarte(numer_karty){
-    const query = `
-    SELECT numer_karty, nazwa_uzytkownika, email, stworzono, ostatnie_logowanie, rola
-    FROM uzytkownicy
-    WHERE numer_karty = $1 AND czyaktywny = true
-    `;
-
-    const result = await pool.query(query, [id]);
-    return result.rows[0];
+  static async podajRecenzje(numer_karty){
+    try{
+      const query = `
+      SELECT 
+        r.id_recenzji,
+        r.ocena,
+        r.tekst,
+        r.data_dodania,
+        k.tytul AS tytul_ksiazki,
+        k.isbn,
+        u.nazwa_uzytkownika
+      FROM recenzja r
+      JOIN ksiazka k ON r.id_ksiazki = k.id_ksiazki
+      JOIN uzytkownik u ON r.numer_karty = u.numer_karty
+      WHERE r.numer_karty = $1
+      ORDER BY r.data_dodania DESC
+      `;
+      const result = await pool.query(query, [numer_karty]);
+      return result.rows;
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   static async istnieje(nazwa_uzytkownika, email){
@@ -159,6 +170,19 @@ class Uzytkownik {
     return result.rows[0].istnieje;
   }
 
+  static async znajdzPrzezKarte(numer_karty){
+    const query = `
+    SELECT numer_karty, nazwa_uzytkownika, email, stworzono, ostatnie_logowanie, rola
+    FROM uzytkownicy
+    WHERE numer_karty = $1 AND aktywny = true
+    `;
+
+    const result = await pool.query(query, [id]);
+    return result.rows[0];
+  }
+
+
+  // NIŻEJ SĄ JESZCZE STARE DO PRZERÓBKI NA PORZĄDNĄ BAZĘ
   static async zapodajKoszyk(numer_karty){
     const query = `SELECT koszyk FROM uzytkownicy where numer_karty = $1`;
     const result = await pool.query(query, [numer_karty]);
