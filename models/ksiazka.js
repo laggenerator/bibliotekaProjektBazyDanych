@@ -354,6 +354,7 @@ class Ksiazka {
     }
   }
 
+
   static async dodajRecenzje(recenzja){
     const client = await pool.connect();
     try{

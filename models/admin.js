@@ -3,6 +3,22 @@ const pool = require('../db');
 const Ksiazka = require("./ksiazka")
 
 class Admin {
+  static async pobierzUzytkownikow(){
+    const query = `
+    SELECT
+      numer_karty,
+      nazwa_uzytkownika,
+      email,
+      rola,
+      stworzono,
+      ostatnie_logowanie
+    FROM uzytkownik
+    ORDER BY rola DESC;
+    `;
+
+    const result = await pool.query(query);
+    return result.rows;
+  }
   static async ileUzytkownikow(){
     const query = `
     SELECT COUNT(numer_karty) FROM uzytkownik;
@@ -18,8 +34,15 @@ class Admin {
 
       const query = `
       UPDATE uzytkownik
-      SET aktywny = FALSE
-      WHERE numer_karty = $1
+        SET aktywny = FALSE
+        WHERE numer_karty = $1
+        AND NOT EXISTS (
+            SELECT 1 
+            FROM wypozyczenie w
+            JOIN wypozyczenie_egzemplarz we ON w.id_wypozyczenia = we.id_wypozyczenia
+            WHERE w.numer_karty = $1 
+            AND we.oddanie IS NULL
+        ) RETURNING numer_karty, nazwa_uzytkownika, aktywny;
       `;
       const result = await client.query(query, [numer_karty]);
 
@@ -77,7 +100,6 @@ class Admin {
         return 0;
       }
     }
-
 };
 
 module.exports = Admin;

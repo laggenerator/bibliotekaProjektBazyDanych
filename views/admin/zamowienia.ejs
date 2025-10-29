@@ -24,6 +24,13 @@
           <button type="submit" class="btn btn-success">Szukaj</button>
         </div>
       </form>
+      <div class="dynamiczny-filtr">
+        <div class="input-group">
+          <input type="text" id="filtr-ksiazki" class="form-control" placeholder="Filtruj zamówienia...">
+          <button type="button" class="btn btn-outline-secondary" disabled style="visibility: hidden;">
+          </button><span class="filtr-info input-group-text" id="filtr-info"></span>
+        </div>
+      </div>
     </div>
   <% } %>
   
@@ -86,18 +93,8 @@
             </div>
             <% } %>
             
-            <% if (zamowienie.egzemplarz_id) { %>
-            <div class="detail-group">
-              <span class="label">Egzemplarz:</span>
-              <span class="value">#<%= zamowienie.egzemplarz_id %></span>
-            </div>
-            <% } %>
-            
-            <% if (zamowienie.uwagi) { %>
-            <div class="detail-group">
-              <span class="label">Uwagi:</span>
-              <span class="value"><%= zamowienie.uwagi %></span>
-            </div>
+            <% if (zamowienie.egzemplarze) { %>
+            <!-- TU TRZEBA ZROBIC FOREACH DLA EGZEMPLARZY JAKOS SCHLUDNIE WYSWIETLIC -->
             <% } %>
           </div>
         </div>

@@ -24,12 +24,23 @@
           <button type="submit" class="btn btn-success">Szukaj</button>
         </div>
       </form>
+      <div class="dynamiczny-filtr">
+        <div class="input-group">
+          <input type="text" id="filtr-ksiazki" class="form-control" placeholder="Filtruj użytkowników...">
+          <button type="button" class="btn btn-outline-secondary" disabled style="visibility: hidden;">
+          </button><span class="filtr-info input-group-text" id="filtr-info"></span>
+        </div>
+      </div>
     </div>
   <% } %>
   
   <div class="ksiazki-lista">
     <% uzytkownicy.forEach(function(uzytkownik) { %>
-      <div class="ksiazka-lista-item">
+      <div class="ksiazka-lista-item uzytkownik-lista-item" 
+           data-nazwa="<%= uzytkownik.nazwa_uzytkownika.toLowerCase() %>"
+           data-email="<%= uzytkownik.email.toLowerCase() %>"
+           data-numer-karty="<%= uzytkownik.numer_karty %>"
+           data-rola="<%= (uzytkownik.rola || '').toLowerCase() %>">
         
         <div class="ksiazka-lista-prawa">
           <h3 class="ksiazka-lista-tytul">
@@ -44,11 +55,7 @@
           <div class="ksiazka-lista-details">
             <div class="detail-group">
               <span class="label">Email:</span>
-              <span class="value">
-                <a href="mailto:<%= uzytkownik.email %>" class="email-link">
-                  <%= uzytkownik.email %>
-                </a>
-              </span>
+              <span class="value"><%= uzytkownik.email %></span>
             </div>
             
             <% if (uzytkownik.stworzono) { %>
@@ -75,10 +82,11 @@
         </div>
         
         <div class="ksiazka-lista-actions admin-actions">
-          <a href="/admin/ksiazki/<%= ksiazka.isbn %>/edytuj" class="btn btn-primary">Modyfikuj</a>
-          <button class="btn btn-danger usun-ksiazke" data-isbn="<%= ksiazka.isbn %>" data-tytul="<%= ksiazka.tytul %>">Usuń</button>
+          <button class="btn btn-danger usun-ksiazke" data-numer_karty="<%= uzytkownik.numer_karty%>">Dezaktywuj konto</button>
         </div>
       </div>
     <% }); %>
   </div>
 </div>
+
+<script src="/js/filtracja-uzytkownicy.js"></script>

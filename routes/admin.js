@@ -71,7 +71,7 @@ router.get("/ksiazki", requireAdmin, async (req, res) => {
 
 router.get("/uzytkownicy", requireAdmin, async (req, res) => {
   try{
-    const uzytkownicy = [];
+    const uzytkownicy = await Admin.pobierzUzytkownikow();
     res.render("admin/uzytkownicy", {
       tytul: "Zarządzanie użytkownikami",
       customCSS: ['/css/dashboard.css', '/css/ksiazki.css', '/css/admin.css'],
