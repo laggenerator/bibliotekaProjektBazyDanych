@@ -115,11 +115,16 @@ router.post("/usun-recenzje/:id_recenzji", requireAuth, async (req, res) => {
 
 router.post("/wyszukaj", async (req, res) => {
   try {
-    const {tytulksiazki, autor, isbn, kategoria} = req.body.body;
-    const ksiazki = await Ksiazka.znajdzKsiazki(query);
+    const { tytulksiazki, autor, isbn, kategoria } = req.body;
+    const zapytanie = [
+      tytulksiazki || null,
+      autor || null, 
+      Ksiazka.denormalizacjaISBN(isbn) || null, 
+      kategoria || null
+    ];
+    const ksiazki = await Ksiazka.znajdzKsiazki(zapytanie);
     return res.render("ksiazki/lista", {
-      tytul: `Wyniki dla: ${query}`,
-      query: query,
+      tytul: `Wyniki wyszukiwania`,
       ksiazki: ksiazki,
       customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css', '/css/admin.css']
     });
@@ -128,7 +133,7 @@ router.post("/wyszukaj", async (req, res) => {
       tytul: 'Wyszukiwanie',
       query: req.query.q || '',
       ksiazki: [],
-      error: 'Wystąpił błąd podczas wyszukiwania',
+      error: `Wystąpił błąd podczas wyszukiwania: ${error}`,
       customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css', '/css/error.css', '/css/admin.css']
     });
   }

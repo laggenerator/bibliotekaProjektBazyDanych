@@ -407,25 +407,54 @@ class Ksiazka {
     }
   }
 
+  static async znajdzKsiazki(zapytanie){
+    try{
+      const query = `
+      SELECT 
+        k.*,
+        ARRAY_AGG(DISTINCT a.imie || ' ' || a.nazwisko) AS autor,
+        ARRAY_AGG(DISTINCT kat.opis) AS kategorie
+      FROM ksiazka k
+      LEFT JOIN ksiazka_autor ka ON k.id_ksiazki = ka.id_ksiazki
+      LEFT JOIN autor a ON ka.id_autora = a.id_autora
+      LEFT JOIN ksiazka_kategoria kk ON k.id_ksiazki = kk.id_ksiazki
+      LEFT JOIN kategoria kat ON kk.id_kategorii = kat.id_kategorii
+      WHERE
+        ($1::text IS NULL OR $1 = '' OR k.tytul ILIKE '%' || $1 || '%')
+        AND ($2::text IS NULL OR $2 = '' OR (a.imie || ' ' || a.nazwisko ILIKE '%' || $2 || '%' OR a.nazwisko || ' ' || a.imie ILIKE '%' || $2 || '%'))
+        AND ($3::text IS NULL OR $3 = '' OR REPLACE(k.isbn, '-', '') ILIKE '%' || REPLACE($3, '-', '') || '%')
+        AND ($4::text IS NULL OR $4 = '' OR kat.opis ILIKE '%' || $4 || '%')
+      GROUP BY k.id_ksiazki, k.tytul, k.isbn, k.rok_wydania
+      ORDER BY k.tytul
+      `;
+  
+      const result = await pool.query(query, zapytanie);
+      return result.rows.map(row => this.formatKsiazka(row));
+    } catch (error) {
+      console.log(error);
+      throw new Error(error);
+    }
+  }
+
   // PONIŻEJ SĄ JESZCZE STARE DO PRZERÓBKI NA PORZĄDNĄ BAZĘ
 
-  static async znajdzKsiazki(wyszukiwanie){
-    const query = `
-    SELECT * FROM (
-      SELECT DISTINCT ON (ISBN) ksiazkaId, ISBN, tytul, autor, rok_wydania, ilosc_stron, kategorie
-      FROM ksiazki
-      WHERE ISBN = $1 OR tytul ~* ALL($2::text[]) OR autor::text ~* ALL($2::text[])
-    ) AS wyszukiwanie ORDER BY tytul
-    `;
-    const arraySlow = wyszukiwanie.split(" ");
-    const pattern = arraySlow.map(slowo => `\\m${slowo}`);
+  // static async znajdzKsiazki(wyszukiwanie){
+  //   const query = `
+  //   SELECT * FROM (
+  //     SELECT DISTINCT ON (ISBN) ksiazkaId, ISBN, tytul, autor, rok_wydania, ilosc_stron, kategorie
+  //     FROM ksiazki
+  //     WHERE ISBN = $1 OR tytul ~* ALL($2::text[]) OR autor::text ~* ALL($2::text[])
+  //   ) AS wyszukiwanie ORDER BY tytul
+  //   `;
+  //   const arraySlow = wyszukiwanie.split(" ");
+  //   const pattern = arraySlow.map(slowo => `\\m${slowo}`);
     
-    const result = await pool.query(query, [wyszukiwanie, pattern]);
-    return result.rows.map(row => this.formatKsiazka(row));
+  //   const result = await pool.query(query, [wyszukiwanie, pattern]);
+  //   return result.rows.map(row => this.formatKsiazka(row));
 
-    console.log(result.rows.length);
-    return result.rows[0];
-  }
+  //   console.log(result.rows.length);
+  //   return result.rows[0];
+  // }
 
   static async zaklepKsiazke(ksiazkaId){
     const query = `
