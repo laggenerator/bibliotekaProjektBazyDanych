@@ -47,7 +47,30 @@ class Admin {
       const result = await client.query(query, [numer_karty]);
 
       await client.query('COMMIT');
-      return result;
+      return result.rows[0];
+    } catch (error){
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      await client.release();
+    }
+  }
+
+  static async aktywujUzytkownika(numer_karty){
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      const query = `
+      UPDATE uzytkownik
+      SET aktywny = TRUE
+      WHERE numer_karty = $1
+      RETURNING numer_karty, nazwa_uzytkownika, aktywny;
+      `;
+      const result = await client.query(query, [numer_karty]);
+
+      await client.query('COMMIT');
+      return result.rows[0];
     } catch (error){
       await client.query('ROLLBACK');
       throw error;

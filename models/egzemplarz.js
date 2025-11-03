@@ -3,6 +3,35 @@ const pool = require('../db');
 const Ksiazka = require("./ksiazka")
 
 class Egzemplarz {
+  static async dodajEgzemplarz(id_ksiazki){
+    const client = await pool.connect();
+    try{
+      const egz = await this.znajdzDlaKsiazki(id_ksiazki);
+      const lokalizacje = egz.map(e => ({
+        pokoj: e.pokoj,
+        polka: e.polka
+      }));
+      const losowaLokalizacja = lokalizacje[Math.floor(Math.random() * lokalizacje.length)];
+      await client.query('BEGIN');
+      const query = `
+      INSERT INTO egzemplarz(id_ksiazki, id_lokalizacji, wlasciciel)
+      SELECT $1, id_lokalizacji, NULL FROM magazyn WHERE pokoj = $2 AND polka = $3
+      AND EXISTS (
+        SELECT 1 FROM ksiazka WHERE id_ksiazki = $1
+      ) RETURNING id_egzemplarza;
+      `;
+      const result = await client.query(query, [id_ksiazki, losowaLokalizacja.pokoj, losowaLokalizacja.polka]);
+      await client.query('COMMIT');
+      return result.rows[0].id_egzemplarza;
+    } catch(error){
+      await client.query('ROLLBACK');
+      throw new Error(error);
+    } finally{
+      client.release();
+    }
+  }
+
+
   static async znajdzDlaKsiazki(id_ksiazki) {
     const query = `
       SELECT 

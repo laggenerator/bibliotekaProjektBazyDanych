@@ -4,6 +4,8 @@ const Uzytkownik = require('../models/uzytkownik');
 const { requireAuth } = require('../middleware/auth');
 const { normalizacjaISBN } = require('../models/ksiazka');
 const {pokazowka} = require('../zmienna');
+const pool = require('../db');
+const Zamowienie = require('../models/zamowienie');
 
 router.get('/', requireAuth, async (req, res) => {
     try {
@@ -75,5 +77,30 @@ router.post('/wyczysc', requireAuth, async (req, res) => {
         }); 
     }
 });
+
+router.post('/wypozycz', requireAuth, async (req, res) => {
+    try{
+        const result = await Zamowienie.zlozZamowienie(req.session.userId);
+        if(pokazowka) return res.json(result);
+    } catch (error) {
+        res.render("error", {
+            error: `Wystąpił błąd podczas wypożyczania koszyka: ${error.message}`,
+            customCSS: '/css/error.css'
+        }); 
+    }
+})
+
+router.post('/oddajKsiazki', requireAuth, async (req, res) => {
+    try{
+        const {id_egzemplarzy} = req.body;
+        const result = await Zamowienie.oddajKsiazki(id_egzemplarzy);
+        if(pokazowka) return res.json(result);
+    } catch (error) {
+        res.render("error", {
+            error: `Wystąpił błąd podczas wypożyczania koszyka: ${error.message}`,
+            customCSS: '/css/error.css'
+        }); 
+    }
+})
 
 module.exports = router;

@@ -5,6 +5,7 @@ const { requireAuth, requireAdmin } = require('../middleware/auth');
 const uploadValidation = require('../validators/uploadValidator');
 const { localsName } = require('ejs');
 const Ksiazka = require('../models/ksiazka');
+const Egzemplarz = require('../models/egzemplarz');
 const multer = require('multer');
 const path = require('path');
 const { validationResult } = require('express-validator');
@@ -91,6 +92,74 @@ router.get("/uzytkownicy", requireAdmin, async (req, res) => {
   }
 });
 
+router.post("/uzytkownicy/dezaktywuj", requireAdmin, async (req, res) => {
+  try{
+    const {numer_karty} = req.body;
+    const result = await Admin.dezaktywujUzytkownika(numer_karty);
+    let zwrot;
+    if(!result){
+      zwrot = {
+        sukces: false,
+        wiadomosc: "Nie udało się dezaktywować użytkownika (nie istnieje lub ma wypożyczone książki)",
+        numer_karty: numer_karty
+      }
+    } else {
+      zwrot = {
+        sukces: true, 
+        wiadomosc: "Dezaktywowano użytkownika",
+        numer_karty: numer_karty
+      }
+    }
+    if(pokazowka) return res.json(zwrot);
+  } catch (error) {
+    if (pokazowka) return res.json({ 
+      sukces: false, 
+      error: error.message 
+    });
+    res.render("admin/uzytkownicy", {
+      tytul: "Zarządzanie użytkownikami",
+      uzytkownicy: [],
+      customCSS: ['/css/dashboard.css', '/css/ksiazki.css', '/css/admin.css'],
+      error: error
+    });
+  }
+})
+
+router.post("/uzytkownicy/aktywuj", requireAdmin, async (req, res) => {
+  try{
+    const {numer_karty} = req.body;
+    const result = await Admin.aktywujUzytkownika(numer_karty);
+        let zwrot;
+    if(!result){
+      zwrot = {
+        sukces: false,
+        wiadomosc: "Nie udało się aktywować użytkownika (nie istnieje)",
+        numer_karty: numer_karty
+      }
+    } else {
+      zwrot = {
+        sukces: true, 
+        wiadomosc: "Aktywowano użytkownika",
+        nazwa_uzytkownika: result.nazwa_uzytkownika,
+        numer_karty: result.numer_karty,
+        aktywny: result.aktywny
+      }
+    }
+    if(pokazowka) return res.json(zwrot);
+  } catch (error) {
+    if (pokazowka) return res.json({ 
+      sukces: false, 
+      error: error.message 
+    });
+    res.render("admin/uzytkownicy", {
+      tytul: "Zarządzanie użytkownikami",
+      uzytkownicy: [],
+      customCSS: ['/css/dashboard.css', '/css/ksiazki.css', '/css/admin.css'],
+      error: error
+    });
+  }
+})
+
 router.get("/zamowienia", requireAdmin, async (req, res) => {
   try{
     const zamowienia = [];
@@ -165,6 +234,16 @@ router.post("/ksiazki/szukaj", async (req, res) => {
   }
 });
 
+router.post("/ksiazki/dodajEgzemplarz", requireAdmin, async (req, res) => {
+  try{
+    const {id_ksiazki} = req.body;
+    const result = await Egzemplarz.dodajEgzemplarz(id_ksiazki);
+    if(pokazowka) return res.json({result});
+  } catch (error){
+    throw new Error(error);
+  }
+});
+
 router.get("/ksiazki/dodaj", requireAdmin, (req, res) => {
   res.render("admin/dodaj-ksiazke.ejs", {
     tytul: "Dodawanie książki",
@@ -176,6 +255,7 @@ router.post("/ksiazki/dodaj", requireAdmin, upload.single('okladka'), uploadVali
   try{
     const errors = validationResult(req);
     if(!errors.isEmpty()){
+      if(pokazowka) return res.json(errors.array()[0].msg);
       return res.render('admin/dodaj-ksiazke', {
         error: errors.array()[0].msg, ...req.body,
         customCSS: '/css/error.css'
@@ -191,9 +271,20 @@ router.post("/ksiazki/dodaj", requireAdmin, upload.single('okladka'), uploadVali
       kategorie: req.body.kategorie ? req.body.kategorie.split(',').map(k => k.trim()) : [],
       liczba_kopii: liczbaKopii      
     }
-    await Ksiazka.dodaj(ksiazka);
+    let result;
     try{
-      const ksiazki = await Ksiazka.pobierzWszystkie();
+      result = await Ksiazka.dodaj(ksiazka);
+    } catch (error) {
+      if(pokazowka) return res.json(error.message);
+      res.render("admin/ksiazki", {
+        tytul: "Zarządzanie książkami",
+        ksiazki: [],
+        customCSS: ['/css/dashboard.css', '/css/ksiazki.css', '/css/admin.css'],
+        error: error
+      });
+    }
+    try{
+      const ksiazki = await Ksiazka.pobierzPoID(result);
       if(pokazowka) return res.json(ksiazki);
       res.render("admin/ksiazki", {
         tytul: "Zarządzanie książkami",
@@ -202,6 +293,7 @@ router.post("/ksiazki/dodaj", requireAdmin, upload.single('okladka'), uploadVali
         ksiazki: Array.isArray(ksiazki) ? ksiazki : [],
       });
     } catch (error) {
+      if(pokazowka) return res.json(error);
       res.render("admin/ksiazki", {
         tytul: "Zarządzanie książkami",
         ksiazki: [],
@@ -210,10 +302,12 @@ router.post("/ksiazki/dodaj", requireAdmin, upload.single('okladka'), uploadVali
       });
     }
   } catch (error){
+    if(pokazowka) return res.json(error);
     res.render("admin/dodaj-ksiazke", {
       error: 'Wystąpił błąd podczas dodawania: ' + error.message, ...req.body, customCSS: ['/css/ksiazki.css', '/css/admin.css']
     })
   }
 })
+
 
 module.exports = router;
