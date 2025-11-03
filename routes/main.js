@@ -4,6 +4,7 @@ const Uzytkownik = require("../models/uzytkownik");
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 const { localsName } = require('ejs');
 const Ksiazka = require('../models/ksiazka');
+const {pokazowka} = require('../zmienna');
 
 router.get("/", async (req, res) => {
   const ksiazki = await Ksiazka.najnowsze6Ksiazek();
@@ -24,6 +25,7 @@ router.get("/", async (req, res) => {
 
 router.get("/dashboard", requireAuth, async (req, res) => {
   const liczbaPoTerminie = await Uzytkownik.ilePoTerminie(req.session.userId);
+  if(pokazowka) return res.json(liczbaPoTerminie);
   res.render("dashboard", {
     tytul: "Panel użytkownika",
     poterminie: liczbaPoTerminie,
@@ -34,6 +36,7 @@ router.get("/dashboard", requireAuth, async (req, res) => {
 router.get("/dashboard/moje-recenzje", requireAuth, async (req, res) => {
   try {
     const recenzje = await Uzytkownik.podajRecenzje(req.session.userId);
+    if(pokazowka) return res.json(recenzje);
     res.render("ksiazki/moje-recenzje", {
       tytul: "Moje recenzje",
       customCSS: ['/css/dashboard.css', '/css/ksiazki.css', '/css/admin.css', '/css/recenzje.css'],

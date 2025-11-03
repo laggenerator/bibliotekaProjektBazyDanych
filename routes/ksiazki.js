@@ -5,10 +5,13 @@ const { requireAuth, requireAdmin } = require('../middleware/auth');
 const { localsName } = require('ejs');
 const Ksiazka = require('../models/ksiazka');
 const Egzemplarz = require('../models/egzemplarz');
+const {pokazowka} = require('../zmienna');
 
 router.get("/", async (req, res) => {
   try{
     const ksiazki = await Ksiazka.pobierzWszystkie();
+    console.log({pokazowka})
+    if(pokazowka) return res.json(ksiazki);
     res.render("ksiazki/lista", {
       tytul: "Wszystkie książki",
       ksiazki: Array.isArray(ksiazki) ? ksiazki : [],
@@ -49,7 +52,15 @@ router.get("/:isbn", async (req, res) => {
     if(req.session.userId){
       uzytkownikDalRecenzje = ksiazka.recenzje.find(recenzja => recenzja.numer_karty === req.session.userId);
     }
-
+    if(pokazowka) return res.json({
+      tytul: ksiazka.tytul,
+      ksiazka: ksiazka,
+      kopie: kopie,
+      dostepneKopie: kopie.filter(k => k.dostepna),
+      niedostepneKopie: kopie.filter(k => !k.dostepna),
+      recenzje: ksiazka.recenzje || [],
+      zmiennaKtorejNieMaJeszcze: uzytkownikDalRecenzje
+    })
     res.render("ksiazki/szczegoly", {
       tytul: ksiazka.tytul,
       ksiazka: ksiazka,
@@ -123,6 +134,7 @@ router.post("/wyszukaj", async (req, res) => {
       kategoria || null
     ];
     const ksiazki = await Ksiazka.znajdzKsiazki(zapytanie);
+    if(pokazowka) return res.json(ksiazki);
     return res.render("ksiazki/lista", {
       tytul: `Wyniki wyszukiwania`,
       ksiazki: ksiazki,

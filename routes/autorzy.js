@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Ksiazka = require('../models/ksiazka');
 const Autor = require('../models/autor');
+const {pokazowka} = require('../zmienna');
 
 router.get("/:autor", async (req, res) => {
   try{
@@ -21,6 +22,7 @@ router.get("/:autor", async (req, res) => {
         error: "Nie posiadamy książek pożądanego autora!"
       });
     }
+    if(pokazowka) return res.json({autor, ksiazki});
     res.render("autorzy/szczegoly", {
       tytul: autor,
       autor: autor,
@@ -38,6 +40,7 @@ router.get("/:autor", async (req, res) => {
 router.get("/", async (req, res) => {
   try{
     const autorzy = await Autor.wszyscy();
+    if(pokazowka) return res.json(autorzy);
     res.render("autorzy/lista", {
       tytul: "Wszyscy autorzy",
       autorzy: autorzy,

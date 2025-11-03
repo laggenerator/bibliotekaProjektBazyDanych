@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Ksiazka = require('../models/ksiazka');
+const {pokazowka} = require('../zmienna');
 
 router.get("/:kategoria", async (req, res) => {
   try{
@@ -11,6 +12,7 @@ router.get("/:kategoria", async (req, res) => {
         error: "Nie posiadamy książek w danej kategorii, zachęcamy do sprawdzenia katalogu kategorii!"
       });
     }
+    if(pokazowka) return res.json({kategoria, ksiazki});
     res.render("kategorie/szczegoly", {
       tytul: kategoria,
       ksiazki: ksiazki,
@@ -28,6 +30,7 @@ router.get("/:kategoria", async (req, res) => {
 router.get("/", async (req, res) => {
   try{
     const kategorie = await Ksiazka.kategorie();
+    if(pokazowka) return res.json(kategorie);
     res.render("kategorie/lista", {
       tytul: "Wszystkie kategorie",
       kategorie: kategorie,

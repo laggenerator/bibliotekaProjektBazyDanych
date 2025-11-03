@@ -3,10 +3,12 @@ const router = express.Router();
 const Uzytkownik = require('../models/uzytkownik');
 const { requireAuth } = require('../middleware/auth');
 const { normalizacjaISBN } = require('../models/ksiazka');
+const {pokazowka} = require('../zmienna');
 
 router.get('/', requireAuth, async (req, res) => {
     try {
         const koszyk = await Uzytkownik.zapodajKoszyk(req.session.userId);
+        if(pokazowka) return res.json(Array.isArray(koszyk) ? koszyk : []);
         res.render("koszyk", {
             tytul: "Koszyk",
             ksiazki: Array.isArray(koszyk) ? koszyk : [],
@@ -24,6 +26,7 @@ router.get('/dodaj/:isbn', requireAuth, async (req, res) => {
         const { isbn } = req.params;
         await Uzytkownik.dodajDoKoszyka(req.session.userId, normalizacjaISBN(isbn));
         req.session.sukces = 'Książka dodana do koszyka';
+        if(pokazowka) return res.json(req.session.sukces);
         res.redirect("/koszyk");
     } catch (error) {
         res.render("error", {
@@ -38,6 +41,7 @@ router.get('/dodajpoID/:ksiazkaId', requireAuth, async (req, res) => {
         const { ksiazkaId } = req.params;
         await Uzytkownik.dodajDoKoszykaPoId(req.session.userId, ksiazkaId);
         req.session.sukces = 'Książka dodana do koszyka';
+        if(pokazowka) return res.json(req.session.sukces);
         res.redirect("/koszyk");
     } catch (error) {
         res.render("error", {
@@ -51,7 +55,7 @@ router.get('/usun/:ksiazkaId', requireAuth, async (req, res) => {
     try {
         const { ksiazkaId } = req.params;
         const koszyk = await Uzytkownik.usunZKoszyka(req.session.userId, ksiazkaId);
-
+        if(pokazowka) return res.json(koszyk);
         res.render("koszyk", { 
             sukces: 'Książka usunięta z koszyka',
             tytul: "Koszyk",
@@ -69,7 +73,7 @@ router.get('/usun/:ksiazkaId', requireAuth, async (req, res) => {
 router.get('/wyczysc', requireAuth, async (req, res) => {
     try {
         const koszyk = await Uzytkownik.wyczyscKoszyk(req.session.userId);
-
+        if(pokazowka) return res.json(koszyk);
         res.render("koszyk", { 
             sukces: 'Koszyk został wyczyszczony',
             tytul: "Koszyk",

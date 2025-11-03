@@ -3,6 +3,7 @@ const router = express.Router();
 const Uzytkownik = require("../models/uzytkownik");
 const { registerValidation, loginValidation } = require('../validators/authValidator');
 const { validateRequest } = require('../middleware/auth');
+const {pokazowka} = require('../zmienna');
 
 router.get("/register", (req, res) => {
   if (req.session.userId) {

@@ -9,6 +9,7 @@ const multer = require('multer');
 const path = require('path');
 const { validationResult } = require('express-validator');
 const { error } = require('console');
+const {pokazowka} = require('../zmienna');
 
 // Konfiguracja multera do okładek
 const storage = multer.diskStorage({
@@ -43,6 +44,7 @@ const upload = multer({
 router.get("/dashboard", requireAdmin, async (req, res) => {
   const liczbaUzytkownikow = await Admin.ileUzytkownikow();
   const poTerminie = await Admin.ilePoTerminie();
+  if(pokazowka) return res.json({liczbaUzytkownikow, poTerminie});
   res.render("admin/dashboard", {
     tytul: "Panel admina",
     customCSS: '/css/dashboard.css',
@@ -54,6 +56,7 @@ router.get("/dashboard", requireAdmin, async (req, res) => {
 router.get("/ksiazki", requireAdmin, async (req, res) => {
   try{
     const ksiazki = await Ksiazka.pobierzWszystkie();
+    if(pokazowka) return res.json(ksiazki);
     res.render("admin/ksiazki", {
       tytul: "Zarządzanie książkami",
       customCSS: ['/css/dashboard.css', '/css/ksiazki.css', '/css/admin.css'],
@@ -72,6 +75,7 @@ router.get("/ksiazki", requireAdmin, async (req, res) => {
 router.get("/uzytkownicy", requireAdmin, async (req, res) => {
   try{
     const uzytkownicy = await Admin.pobierzUzytkownikow();
+    if(pokazowka) return res.json(uzytkownicy);
     res.render("admin/uzytkownicy", {
       tytul: "Zarządzanie użytkownikami",
       customCSS: ['/css/dashboard.css', '/css/ksiazki.css', '/css/admin.css'],
@@ -90,6 +94,7 @@ router.get("/uzytkownicy", requireAdmin, async (req, res) => {
 router.get("/zamowienia", requireAdmin, async (req, res) => {
   try{
     const zamowienia = [];
+    if(pokazowka) return res.json(zamowienia);
     res.render("admin/zamowienia", {
       tytul: "Zarządzanie zamówieniami",
       customCSS: ['/css/dashboard.css', '/css/ksiazki.css', '/css/admin.css'],
@@ -109,6 +114,7 @@ router.post("/wyszukaj-ksiazke", async (req, res) => {
   try {
     const query = req.body.query;
     const ksiazki = await Ksiazka.znajdzKsiazki(query);
+    if(pokazowka) return res.json(ksiazki);
     res.render("admin/ksiazki", {
       tytul: `Wyniki dla: ${query}`,
       query: query,
@@ -141,6 +147,7 @@ router.post("/ksiazki/szukaj", async (req, res) => {
     const query = req.body.query;
     console.log(query)
     const ksiazki = await Ksiazka.znajdzKsiazki(query);
+    if(pokazowka) return res.json(ksiazki);
     res.render("admin/ksiazki", {
       tytul: `Wyniki dla: ${query}`,
       query: query,
@@ -187,6 +194,7 @@ router.post("/ksiazki/dodaj", requireAdmin, upload.single('okladka'), uploadVali
     await Ksiazka.dodaj(ksiazka);
     try{
       const ksiazki = await Ksiazka.pobierzWszystkie();
+      if(pokazowka) return res.json(ksiazki);
       res.render("admin/ksiazki", {
         tytul: "Zarządzanie książkami",
         customCSS: ['/css/dashboard.css', '/css/ksiazki.css', '/css/admin.css'],
