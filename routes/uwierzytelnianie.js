@@ -80,7 +80,6 @@ router.get("/login", (req, res) => {
 router.post('/login', pokazowka ? [] : loginValidation, validateRequest, async (req, res) => {
   try{
     const { nazwa_uzytkownika, haslo } = req.body;
-    console.log({nazwa_uzytkownika, haslo})
     const uzytkownik = await Uzytkownik.auth(nazwa_uzytkownika, haslo);
     
     req.session.userId = uzytkownik.numer_karty;
@@ -114,7 +113,11 @@ router.post('/login', pokazowka ? [] : loginValidation, validateRequest, async (
       statusCode = 403;
       wiadomosc = error.message;
     }
-
+    if(pokazowka) return res.json({
+      sukces: false,
+      wiadomosc: error.message,
+      formData: req.body
+    });
     // res.status(statusCode).json({
     //   sukces: false,
     //   wiadomosc: wiadomosc

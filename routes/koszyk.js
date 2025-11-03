@@ -21,12 +21,14 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 
-router.get('/dodaj/:isbn', requireAuth, async (req, res) => {
+router.post('/dodaj', requireAuth, async (req, res) => {
     try {
-        const { isbn } = req.params;
-        await Uzytkownik.dodajDoKoszyka(req.session.userId, normalizacjaISBN(isbn));
-        req.session.sukces = 'Książka dodana do koszyka';
-        if(pokazowka) return res.json(req.session.sukces);
+        const { id_egzemplarza } = req.body;
+        const result = await Uzytkownik.dodajDoKoszyka(req.session.userId, id_egzemplarza);
+        let wiadomosc;
+        if(result) wiadomosc = 'Udalo sie dodac ksiazke';
+        else wiadomosc = 'Nie udalo sie dodac ksiazki';
+        if(pokazowka) return res.json({result, wiadomosc});
         res.redirect("/koszyk");
     } catch (error) {
         res.render("error", {
@@ -36,12 +38,14 @@ router.get('/dodaj/:isbn', requireAuth, async (req, res) => {
     }
 });
 
-router.get('/dodajpoID/:ksiazkaId', requireAuth, async (req, res) => {
+router.post('/usun', requireAuth, async (req, res) => {
     try {
-        const { ksiazkaId } = req.params;
-        await Uzytkownik.dodajDoKoszykaPoId(req.session.userId, ksiazkaId);
-        req.session.sukces = 'Książka dodana do koszyka';
-        if(pokazowka) return res.json(req.session.sukces);
+        const { id_egzemplarza } = req.body;
+        const result = await Uzytkownik.usunZKoszyka(req.session.userId, id_egzemplarza);
+        let wiadomosc;
+        if(result) wiadomosc = 'Udalo sie wyciagnac ksiazke';
+        else wiadomosc = 'Nie udalo sie wyciagnac ksiazki';
+        if(pokazowka) return res.json({result, wiadomosc});
         res.redirect("/koszyk");
     } catch (error) {
         res.render("error", {
@@ -51,29 +55,13 @@ router.get('/dodajpoID/:ksiazkaId', requireAuth, async (req, res) => {
     }
 });
 
-router.get('/usun/:ksiazkaId', requireAuth, async (req, res) => {
+router.post('/wyczysc', requireAuth, async (req, res) => {
     try {
-        const { ksiazkaId } = req.params;
-        const koszyk = await Uzytkownik.usunZKoszyka(req.session.userId, ksiazkaId);
-        if(pokazowka) return res.json(koszyk);
-        res.render("koszyk", { 
-            sukces: 'Książka usunięta z koszyka',
-            tytul: "Koszyk",
-            ksiazki: koszyk,
-            customCSS: ['/css/auth.css', '/css/admin.css','/css/header.css', '/css/ksiazki.css', '/css/szczegolyKsiazka.css']
-        });
-    } catch (error) {
-        res.render("error", {
-            error: `Wystąpił błąd podczas rezerwacji książki: ${error.message}`,
-            customCSS: '/css/error.css'
-        }); 
-    }
-});
-
-router.get('/wyczysc', requireAuth, async (req, res) => {
-    try {
-        const koszyk = await Uzytkownik.wyczyscKoszyk(req.session.userId);
-        if(pokazowka) return res.json(koszyk);
+        const usuniete = await Uzytkownik.wyczyscKoszyk(req.session.userId);
+        let wiadomosc;
+        if(usuniete > 0) wiadomosc = 'Udalo sie wyczyscic koszyk';
+        else wiadomosc = 'Nie udalo sie wyczyscic koszyka';
+        if(pokazowka) return res.json({usuniete, wiadomosc});
         res.render("koszyk", { 
             sukces: 'Koszyk został wyczyszczony',
             tytul: "Koszyk",
