@@ -17,7 +17,7 @@ router.get("/register", (req, res) => {
   });
 });
 
-router.post('/register', registerValidation, validateRequest, async (req, res) => {
+router.post('/register', pokazowka ? [] : registerValidation, validateRequest, async (req, res) => {
   try{
     const { nazwa_uzytkownika, email, haslo } = req.body;
     const czyIstnieje = await Uzytkownik.istnieje(nazwa_uzytkownika, email);
@@ -77,23 +77,23 @@ router.get("/login", (req, res) => {
   })
 });
 
-router.post('/login', loginValidation, validateRequest, async (req, res) => {
+router.post('/login', pokazowka ? [] : loginValidation, validateRequest, async (req, res) => {
   try{
     const { nazwa_uzytkownika, haslo } = req.body;
-
+    console.log({nazwa_uzytkownika, haslo})
     const uzytkownik = await Uzytkownik.auth(nazwa_uzytkownika, haslo);
-
+    
     req.session.userId = uzytkownik.numer_karty;
     req.session.nazwa_uzytkownika = uzytkownik.nazwa_uzytkownika;
     req.session.email = uzytkownik.email;
     req.session.rola = uzytkownik.rola;
     req.session.poterminie = uzytkownik.numer_karty;
     req.session.koszyk = uzytkownik.koszyk;
-    // res.json({
-    //   sukces: true,
-    //   wiadomosc: "Logowanie pomyślne",
-    //   uzytkownik: uzytkownik
-    // });
+    if(pokazowka) return res.json({
+      sukces: true,
+      wiadomosc: "Logowanie pomyślne",
+      uzytkownik: uzytkownik
+    });
     res.redirect("/dashboard");
     // res.render("dashboard", {
     //   tytul: "Panel użytkownika",
