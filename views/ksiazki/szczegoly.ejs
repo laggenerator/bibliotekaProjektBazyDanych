@@ -1,216 +1,270 @@
 <div class="ksiazka-szczegoly-container">
-    <div class="ksiazka-header">
-        <div class="ksiazka-obraz-container">
-            <img src="<%= ksiazka.img_link %>" alt="Okładka: <%= ksiazka.tytul %>" 
-                 class="ksiazka-duzy-obraz" 
-                 onerror="this.src='/assets/okladki/placeholder.webp'">
-        </div>
-        
-        <div class="ksiazka-info">
-            <h1 class="ksiazka-tytul"><%= ksiazka.tytul %></h1>
-            
-            <div class="ksiazka-autor">
-                <span class="label">
-                <% if (Array.isArray(ksiazka.autor)) { %>
-                    Autorzy:
-                <% } else { %>
-                    Autor:
-                <% } %>
-            </span>
-            <span class="value">
-                <% if (Array.isArray(ksiazka.autor)) { %>
-                    <% ksiazka.autor.forEach(function(autor, index) { %>
-                        <a href="/autorzy/<%= encodeURIComponent(autor) %>" class="autor-link">
-                            <%= autor %>
-                        </a>
-                        <% if (index < ksiazka.autor.length - 1) { %>, <% } %>
-                    <% }); %>
-                <% } else { %>
-                    <a href="/autorzy/<%= encodeURIComponent(ksiazka.autor) %>" class="autor-link">
-                        <%= ksiazka.autor %>
-                    </a>
-                <% } %>
-            </span>
-            </div>
-
-            <div class="ksiazka-details-grid">
-                <div class="detail-item">
-                    <span class="label">ISBN:</span>
-                    <span class="value"><%= ksiazka.isbn %></span>
-                </div>
-                
-                <div class="detail-item">
-                    <span class="label">Rok wydania:</span>
-                    <span class="value"><%= ksiazka.rok_wydania %></span>
-                </div>
-                
-                <div class="detail-item">
-                    <span class="label">Ilość stron:</span>
-                    <span class="value"><%= ksiazka.ilosc_stron %> stron</span>
-                </div>
-                
-                <div class="detail-item">
-                    <span class="label">Kategorie:</span>
-                    <span class="value">
-                        <% if (Array.isArray(ksiazka.kategorie) && ksiazka.kategorie.length > 0) { %>
-                            <%= ksiazka.kategorie.join(', ') %>
-                        <% } else { %>
-                            Brak kategorii
-                        <% } %>
-                    </span>
-                </div>
-            </div>
-
-            <div class="dostepnosc-stats">
-                <div class="stat-dostepne">
-                    <span class="stat-number"><%= dostepneKopie.length %></span>
-                    <span class="stat-label">dostępnych kopii</span>
-                </div>
-                <div class="stat-lacznie">
-                    <span class="stat-number"><%= kopie.length %></span>
-                    <span class="stat-label">łącznie w bibliotece</span>
-                </div>
-            </div>
-
-            <div class="ksiazka-actions">
-                <% if (dostepneKopie.length > 0) { %>
-                    <a href="/koszyk/dodaj/<%= ksiazka.isbn %>" class="btn btn-primary">Rezerwuj</a>
-                <% } else { %>
-                    <button class="btn btn-secondary btn-large" disabled>Brak dostępnych kopii</button>
-                <% } %>
-            </div>
-        </div>
+  <div class="ksiazka-header">
+    <div class="ksiazka-obraz-container">
+      <img
+        src="<%= ksiazka.img_link %>"
+        alt="Okładka: <%= ksiazka.tytul %>"
+        class="ksiazka-duzy-obraz"
+        onerror="this.src='/assets/okladki/placeholder.webp'"
+      />
     </div>
 
-    <div class="kopie-section">
-        <h2>Kopie w bibliotece</h2>
-        
-        <div class="kopie-lista">
-            <% kopie.forEach(function(kopia, index) { %>
-                <div class="kopia-item <%= kopia.dostepna ? 'dostepna' : 'niedostepna' %>">
-                    <div class="kopia-info">
-                        <div class="kopia-numer">
-                            <span class="numer">Kopia #<%= index + 1 %></span>
-                            <span class="status <%= kopia.dostepna ? 'status-dostepna' : 'status-niedostepna' %>">
-                                <%= kopia.dostepna ? 'Dostępna' : kopia.wKoszyku ? 'Rezerwowana' : 'Wypożyczona' %>
-                            </span>
-                        </div>
-                        
-                        <div class="kopia-id">
-                            <span class="label">ID książki:</span>
-                            <span class="value"><%= kopia.id %></span>
-                        </div>
-                    </div>
-                    
-                    <div class="kopia-akcje">
-                        <% if (kopia.dostepna) { %>
-                            <a href="/koszyk/dodajpoID/<%= kopia.id %>" class="btn btn-primary">Rezerwuj</a>
-                        <% } else { %>
-                            <button class="btn btn-sm btn-secondary" disabled>Niedostępna</button>
-                        <% } %>
-                    </div>
-                </div>
-            <% }); %>
+    <div class="ksiazka-info">
+      <h1 class="ksiazka-tytul"><%= ksiazka.tytul %></h1>
+
+      <div class="ksiazka-autor">
+        <span class="label">
+          <% if (Array.isArray(ksiazka.autor)) { %> Autorzy: <% } else { %>
+          Autor: <% } %>
+        </span>
+        <span class="value">
+          <% if (Array.isArray(ksiazka.autor)) { %> <%
+          ksiazka.autor.forEach(function(autor, index) { %>
+          <a
+            href="/autorzy/<%= encodeURIComponent(autor) %>"
+            class="autor-link"
+          >
+            <%= autor %>
+          </a>
+          <% if (index < ksiazka.autor.length - 1) { %>, <% } %> <% }); %> <% }
+          else { %>
+          <a
+            href="/autorzy/<%= encodeURIComponent(ksiazka.autor) %>"
+            class="autor-link"
+          >
+            <%= ksiazka.autor %>
+          </a>
+          <% } %>
+        </span>
+      </div>
+
+      <div class="ksiazka-details-grid">
+        <div class="detail-item">
+          <span class="label">ISBN:</span>
+          <span class="value"><%= ksiazka.isbn %></span>
         </div>
-    </div>
-    <!-- SEKCJA RECENZJI -->
-    <div class="recenzje-section">
-        <h2>Recenzje</h2>
-        
-        <!-- Formularz dodawania recenzji - tylko dla zalogowanych bez recenzji -->
-        <% if (locals.uzytkownik && !zmiennaKtorejNieMaJeszcze) { %>
-            <div class="dodaj-recenzje-form">
-                <h3>Dodaj swoją recenzję</h3>
-                <form action="/ksiazki/dodaj-recenzje/<%= ksiazka.id_ksiazki %>" method="POST" class="recenzja-form">
-                    <div class="form-group">
-                        <label for="ocena">Ocena (1-5):</label>
-                        <select name="ocena" id="ocena" class="form-select" required>
-                            <option value="">Wybierz ocenę</option>
-                            <option value="1">* (1)</option>
-                            <option value="2">** (2)</option>
-                            <option value="3">*** (3)</option>
-                            <option value="4">**** (4)</option>
-                            <option value="5">***** (5)</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="tekst">Treść recenzji:</label>
-                        <textarea name="tekst" id="tekst" class="form-textarea" 
-                                  placeholder="Napisz swoją opinię o książce..." 
-                                  rows="4" maxlength="1000"></textarea>
-                        <div class="char-counter"><span id="charCount">0</span>/1000 znaków</div>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary">Dodaj recenzję</button>
-                </form>
-            </div>
-        <% } else if (locals.uzytkownik && zmiennaKtorejNieMaJeszcze) { %>
-            <div class="twoja-recenzja-info">
-                <p>Już dodałeś recenzję dla tej książki.</p>
-            </div>
+
+        <div class="detail-item">
+          <span class="label">Rok wydania:</span>
+          <span class="value"><%= ksiazka.rok_wydania %></span>
+        </div>
+
+        <div class="detail-item">
+          <span class="label">Ilość stron:</span>
+          <span class="value"><%= ksiazka.ilosc_stron %> stron</span>
+        </div>
+
+        <div class="detail-item">
+          <span class="label">Kategorie:</span>
+          <span class="value">
+            <% if (Array.isArray(ksiazka.kategorie) && ksiazka.kategorie.length
+            > 0) { %> <%= ksiazka.kategorie.join(', ') %> <% } else { %> Brak
+            kategorii <% } %>
+          </span>
+        </div>
+      </div>
+
+      <div class="dostepnosc-stats">
+        <div class="stat-dostepne">
+          <span class="stat-number"><%= dostepneKopie.length %></span>
+          <span class="stat-label">dostępnych kopii</span>
+        </div>
+        <div class="stat-lacznie">
+          <span class="stat-number"><%= kopie.length %></span>
+          <span class="stat-label">łącznie w bibliotece</span>
+        </div>
+      </div>
+
+      <div class="ksiazka-actions">
+        <% if (dostepneKopie.length > 0 && locals.uzytkownik) { %>
+        <form
+          action="/koszyk/dodaj/<%= ksiazka.isbn %>"
+          method="POST"
+          style="display: inline"
+        >
+          <button type="submit" class="btn btn-primary">Rezerwuj</button>
+        </form>
+        <% } else if (dostepneKopie.length > 0 && !locals.uzytkownik) { %>
+        <a href="/auth/login" class="btn btn-primary">Zaloguj się</a>
         <% } else { %>
-            <div class="zaloguj-sie-info">
-                <p><a href="/auth/login" class="btn-link">Zaloguj się</a>, aby dodać recenzję.</p>
-            </div>
+        <button class="btn btn-secondary btn-large" disabled>
+          Brak dostępnych kopii
+        </button>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="kopie-section">
+    <h2>Kopie w bibliotece</h2>
+
+    <div class="kopie-lista">
+      <% kopie.forEach(function(kopia, index) { %>
+      <div
+        class="kopia-item <%= kopia.dostepna ? 'dostepna' : 'niedostepna' %>"
+      >
+        <div class="kopia-info">
+          <div class="kopia-numer">
+            <span class="numer">Kopia #<%= index + 1 %></span>
+            <span
+              class="status <%= kopia.dostepna ? 'status-dostepna' : 'status-niedostepna' %>"
+            >
+              <%= kopia.dostepna ? 'Dostępna' : kopia.wKoszyku ? 'Rezerwowana' :
+              'Wypożyczona' %>
+            </span>
+          </div>
+
+          <div class="kopia-id">
+            <span class="label">ID książki:</span>
+            <span class="value"><%= kopia.id %></span>
+          </div>
+        </div>
+
+        <div class="kopia-akcje">
+          <% if (kopia.dostepna && locals.uzytkownik) { %>
+          <form
+            action="/koszyk/dodajpoID/<%= kopia.id %>"
+            method="POST"
+            style="display: inline"
+          >
+            <button type="submit" class="btn btn-primary">Rezerwuj</button>
+          </form>
+          <% } else if (kopia.dostepna && !locals.uzytkownik) { %>
+          <a href="/auth/login" class="btn btn-primary">Zaloguj się</a>
+          <% } else { %>
+          <button class="btn btn-sm btn-secondary" disabled>Niedostępna</button>
+          <% } %>
+        </div>
+      </div>
+      <% }); %>
+    </div>
+  </div>
+  <!-- SEKCJA RECENZJI -->
+  <div class="recenzje-section">
+    <h2>Recenzje</h2>
+
+    <!-- Formularz dodawania recenzji - tylko dla zalogowanych bez recenzji -->
+    <% if (locals.uzytkownik && !zmiennaKtorejNieMaJeszcze) { %>
+    <div class="dodaj-recenzje-form">
+      <h3>Dodaj swoją recenzję</h3>
+      <form
+        action="/ksiazki/dodaj-recenzje/<%= ksiazka.id_ksiazki %>"
+        method="POST"
+        class="recenzja-form"
+      >
+        <div class="form-group">
+          <label for="ocena">Ocena (1-5):</label>
+          <select name="ocena" id="ocena" class="form-select" required>
+            <option value="">Wybierz ocenę</option>
+            <option value="1">* (1)</option>
+            <option value="2">** (2)</option>
+            <option value="3">*** (3)</option>
+            <option value="4">**** (4)</option>
+            <option value="5">***** (5)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="tekst">Treść recenzji:</label>
+          <textarea
+            name="tekst"
+            id="tekst"
+            class="form-textarea"
+            placeholder="Napisz swoją opinię o książce..."
+            rows="4"
+            maxlength="1000"
+          ></textarea>
+          <div class="char-counter">
+            <span id="charCount">0</span>/1000 znaków
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Dodaj recenzję</button>
+      </form>
+    </div>
+    <% } else if (locals.uzytkownik && zmiennaKtorejNieMaJeszcze) { %>
+    <div class="twoja-recenzja-info">
+      <p>Już dodałeś recenzję dla tej książki.</p>
+    </div>
+    <% } else { %>
+    <div class="zaloguj-sie-info">
+      <p>
+        <a href="/auth/login" class="btn-link">Zaloguj się</a>, aby dodać
+        recenzję.
+      </p>
+    </div>
+    <% } %>
+
+    <!-- Lista recenzji -->
+    <div class="recenzje-lista">
+      <% if (recenzje && recenzje.length > 0) { %> <%
+      recenzje.forEach(function(recenzja) { %>
+      <div class="recenzja-item">
+        <div class="recenzja-header">
+          <div class="recenzja-uzytkownik">
+            <span class="uzytkownik-nazwa"
+              ><%= recenzja.nazwa_uzytkownika %></span
+            >
+            <span class="recenzja-data"
+              ><%= new Date(recenzja.data_dodania).toLocaleDateString('pl-PL')
+              %></span
+            >
+          </div>
+          <div class="recenzja-ocena">
+            <% for (let i = 1; i <= 5; i++) { %>
+            <span class="gwiazdka <%= i <= recenzja.ocena ? 'aktywna' : '' %>"
+              >★</span
+            >
+            <% } %>
+            <span class="ocena-wartosc">(<%= recenzja.ocena %>/5)</span>
+          </div>
+        </div>
+        <% if(recenzja.tekst) { %>
+        <div class="recenzja-tresc">
+          <p><%= recenzja.tekst || '' %></p>
+        </div>
         <% } %>
 
-        <!-- Lista recenzji -->
-        <div class="recenzje-lista">
-            <% if (recenzje && recenzje.length > 0) { %>
-                <% recenzje.forEach(function(recenzja) { %>
-                    <div class="recenzja-item">
-                        <div class="recenzja-header">
-                            <div class="recenzja-uzytkownik">
-                                <span class="uzytkownik-nazwa"><%= recenzja.nazwa_uzytkownika %></span>
-                                <span class="recenzja-data"><%= new Date(recenzja.data_dodania).toLocaleDateString('pl-PL') %></span>
-                            </div>
-                            <div class="recenzja-ocena">
-                                <% for (let i = 1; i <= 5; i++) { %>
-                                    <span class="gwiazdka <%= i <= recenzja.ocena ? 'aktywna' : '' %>">★</span>
-                                <% } %>
-                                <span class="ocena-wartosc">(<%= recenzja.ocena %>/5)</span>
-                            </div>
-                        </div>
-                        <% if(recenzja.tekst) { %>
-                            <div class="recenzja-tresc">
-                                <p><%= recenzja.tekst || '' %></p>
-                            </div>
-                        <% } %>
-                        
-                        <!-- Usuwanie swojej recenzji (admin też może) -->
-                        <% if ((locals.uzytkownik.rola == 'ADMIN') || (locals.uzytkownik && locals.uzytkownik.numer_karty === recenzja.numer_karty)) { %>
-                            <div class="recenzja-akcje">
-                                <form action="/ksiazki/usun-recenzje/<%= recenzja.id_recenzji %>" method="POST" class="usun-recenzje-form">
-                                    <input type="hidden" name="_method" value="DELETE">
-                                    <button type="submit" class="btn btn-sm btn-danger" 
-                                            onclick="return confirm('Czy na pewno chcesz usunąć tę recenzję?')">
-                                        Usuń recenzję
-                                    </button>
-                                </form>
-                            </div>
-                        <% } %>
-                    </div>
-                <% }); %>
-            <% } else { %>
-                <div class="brak-recenzji">
-                    <p>Ta książka nie ma jeszcze żadnych recenzji. Bądź pierwszy ;p</p>
-                </div>
-            <% } %>
+        <!-- Usuwanie swojej recenzji (admin też może) -->
+        <% if (locals.uzytkownik && ((locals.uzytkownik.rola == 'ADMIN') ||
+        (locals.uzytkownik.numer_karty === recenzja.numer_karty))) { %>
+        <div class="recenzja-akcje">
+          <form
+            action="/ksiazki/usun-recenzje/<%= recenzja.id_recenzji %>"
+            method="POST"
+            class="usun-recenzje-form"
+          >
+            <input type="hidden" name="_method" value="DELETE" />
+            <button
+              type="submit"
+              class="btn btn-sm btn-danger"
+              onclick="return confirm('Czy na pewno chcesz usunąć tę recenzję?')"
+            >
+              Usuń recenzję
+            </button>
+          </form>
         </div>
+        <% } %>
+      </div>
+      <% }); %> <% } else { %>
+      <div class="brak-recenzji">
+        <p>Ta książka nie ma jeszcze żadnych recenzji. Bądź pierwszy ;p</p>
+      </div>
+      <% } %>
     </div>
+  </div>
 </div>
 
 <script>
-// Licznik znaków w textarea
-document.addEventListener('DOMContentLoaded', function() {
-    const textarea = document.getElementById('tekst');
-    const charCount = document.getElementById('charCount');
-    
+  // Licznik znaków w textarea
+  document.addEventListener("DOMContentLoaded", function () {
+    const textarea = document.getElementById("tekst");
+    const charCount = document.getElementById("charCount");
+
     if (textarea && charCount) {
-        textarea.addEventListener('input', function() {
-            charCount.textContent = this.value.length;
-        });
+      textarea.addEventListener("input", function () {
+        charCount.textContent = this.value.length;
+      });
     }
-});
+  });
 </script>

@@ -1,152 +1,190 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const Uzytkownik = require("../models/uzytkownik");
-const { requireAuth, requireAdmin } = require('../middleware/auth');
-const { localsName } = require('ejs');
-const Ksiazka = require('../models/ksiazka');
-const Egzemplarz = require('../models/egzemplarz');
-const {pokazowka} = require('../zmienna');
+const { requireAuth, requireAdmin } = require("../middleware/auth");
+const { localsName } = require("ejs");
+const Ksiazka = require("../models/ksiazka");
+const Egzemplarz = require("../models/egzemplarz");
+const { pokazowka } = require("../zmienna");
 
 router.get("/", async (req, res) => {
-  try{
-    const ksiazki = await Ksiazka.pobierzWszystkie();
-    console.log({pokazowka})
-    if(pokazowka) return res.json(ksiazki);
-    res.render("ksiazki/lista", {
+  try {
+    let ksiazki = await Ksiazka.pobierzWszystkie();
+
+    if (req.session.userId) {
+      ksiazki = await Ksiazka.dodajFlagiWKoszyku(ksiazki, req.session.userId);
+    }
+
+    if (pokazowka) return res.json(ksiazki);
+
+    res.render("ksiazki/wspolna-lista", {
       tytul: "Wszystkie książki",
       ksiazki: Array.isArray(ksiazki) ? ksiazki : [],
-      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css', '/css/admin.css']
+      customCSS: [
+        "/css/szczegolyKsiazka.css",
+        "/css/ksiazki.css",
+        "/css/admin.css",
+      ],
     });
   } catch (error) {
+    if (pokazowka) return res.json({ error: error.message });
     res.render("ksiazki/lista", {
       tytul: "Wszystkie książki",
       ksiazki: [],
-      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css', '/css/admin.css'],
-      error: error
-    })
+      customCSS: [
+        "/css/szczegolyKsiazka.css",
+        "/css/ksiazki.css",
+        "/css/admin.css",
+      ],
+      error: error.message,
+    });
   }
 });
 
 router.get("/:isbn", async (req, res) => {
-  try{
+  try {
     const { isbn } = req.params;
     const ksiazka = await Ksiazka.pobierzPoISBN(isbn);
 
-    if(!ksiazka){
+    if (!ksiazka) {
+      if (pokazowka)
+        return res.json({ error: "Książka o danym ISBN nie istnieje!" });
       return res.render("error", {
         error: "Książka o danym ISBN nie istnieje!",
-        customCSS: '/css/error.css'
+        customCSS: "/css/error.css",
       });
     }
 
     const egzemplarze = await Egzemplarz.znajdzDlaKsiazki(ksiazka.id_ksiazki);
-    
-    const kopie = egzemplarze.map(e => ({
+
+    const kopie = egzemplarze.map((e) => ({
       id: e.id_egzemplarza,
-      dostepna: e.status === 'Wolna',
-      wKoszyku: e.status === 'W_koszyku',
+      dostepna: e.status === "Wolna",
+      wKoszyku: e.status === "W_koszyku",
       status: e.status,
-      lokalizacja: e.pokoj && e.polka ? `Pokój ${e.pokoj}, półka ${e.polka}` : 'Brak lokalizacji'
+      lokalizacja:
+        e.pokoj && e.polka
+          ? `Pokój ${e.pokoj}, półka ${e.polka}`
+          : "Brak lokalizacji",
     }));
     let uzytkownikDalRecenzje = null;
-    if(req.session.userId){
-      uzytkownikDalRecenzje = ksiazka.recenzje.find(recenzja => recenzja.numer_karty === req.session.userId);
+    if (req.session.userId) {
+      uzytkownikDalRecenzje = ksiazka.recenzje.find(
+        (recenzja) => recenzja.numer_karty === req.session.userId
+      );
     }
-    if(pokazowka) return res.json({
-      tytul: ksiazka.tytul,
-      ksiazka: ksiazka,
-      kopie: kopie,
-      dostepneKopie: kopie.filter(k => k.dostepna),
-      niedostepneKopie: kopie.filter(k => !k.dostepna),
-      recenzje: ksiazka.recenzje || [],
-      zmiennaKtorejNieMaJeszcze: uzytkownikDalRecenzje
-    })
+    if (pokazowka)
+      return res.json({
+        tytul: ksiazka.tytul,
+        ksiazka: ksiazka,
+        kopie: kopie,
+        dostepneKopie: kopie.filter((k) => k.dostepna),
+        niedostepneKopie: kopie.filter((k) => !k.dostepna),
+        recenzje: ksiazka.recenzje || [],
+        zmiennaKtorejNieMaJeszcze: uzytkownikDalRecenzje,
+      });
     res.render("ksiazki/szczegoly", {
       tytul: ksiazka.tytul,
       ksiazka: ksiazka,
       kopie: kopie,
-      dostepneKopie: kopie.filter(k => k.dostepna),
-      niedostepneKopie: kopie.filter(k => !k.dostepna),
+      dostepneKopie: kopie.filter((k) => k.dostepna),
+      niedostepneKopie: kopie.filter((k) => !k.dostepna),
       recenzje: ksiazka.recenzje || [],
       zmiennaKtorejNieMaJeszcze: uzytkownikDalRecenzje,
-      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css', '/css/recenzje.css']
+      customCSS: [
+        "/css/szczegolyKsiazka.css",
+        "/css/ksiazki.css",
+        "/css/recenzje.css",
+      ],
     });
   } catch (error) {
-    console.error('Błąd:', error);
+    if (pokazowka) return res.json({ error: error.message });
+    console.error("Błąd:", error);
     res.render("error", {
       error: "Wystąpił błąd serwera",
-      customCSS: '/css/error.css'
+      customCSS: "/css/error.css",
     });
   }
 });
 
 router.post("/dodaj-recenzje/:id_ksiazki", requireAuth, async (req, res) => {
-  try{
+  try {
     const { ocena, tekst } = req.body;
     const ksiazka = {
       id_ksiazki: req.params.id_ksiazki,
       ocena: parseInt(ocena),
       tekst: tekst || null,
-      numer_karty: req.session.userId
-    }
+      numer_karty: req.session.userId,
+    };
 
     const isbn = await Ksiazka.dodajRecenzje(ksiazka);
 
-    res.redirect(`/ksiazki/${isbn}`)
-
+    if (pokazowka) return res.json({ sukces: true, isbn });
+    res.redirect(`/ksiazki/${isbn}`);
   } catch (error) {
-    console.error('Błąd:', error);
+    if (pokazowka) return res.json({ error: error.message });
+    console.error("Błąd:", error);
     res.render("error", {
       error: "Wystąpił błąd serwera",
-      customCSS: '/css/error.css'
+      customCSS: "/css/error.css",
     });
   }
-})
+});
 
 router.post("/usun-recenzje/:id_recenzji", requireAuth, async (req, res) => {
-  try{
+  try {
     const ksiazka = {
       id_recenzji: req.params.id_recenzji,
-      numer_karty: req.session.userId
-    }
+      numer_karty: req.session.userId,
+    };
 
     const isbn = await Ksiazka.usunRecenzje(ksiazka);
 
-    res.redirect(`/ksiazki/${isbn}`)
-
+    if (pokazowka) return res.json({ sukces: true, isbn });
+    res.redirect(`/ksiazki/${isbn}`);
   } catch (error) {
-    console.error('Błąd:', error);
+    if (pokazowka) return res.json({ error: error.message });
+    console.error("Błąd:", error);
     res.render("error", {
       error: "Wystąpił błąd serwera",
-      customCSS: '/css/error.css'
+      customCSS: "/css/error.css",
     });
   }
-})
-
+});
 
 router.post("/wyszukaj", async (req, res) => {
   try {
     const { tytulksiazki, autor, isbn, kategoria } = req.body;
     const zapytanie = [
       tytulksiazki || null,
-      autor || null, 
-      Ksiazka.denormalizacjaISBN(isbn) || null, 
-      kategoria || null
+      autor || null,
+      Ksiazka.denormalizacjaISBN(isbn) || null,
+      kategoria || null,
     ];
     const ksiazki = await Ksiazka.znajdzKsiazki(zapytanie);
-    if(pokazowka) return res.json(ksiazki);
-    return res.render("ksiazki/lista", {
+    if (pokazowka) return res.json(ksiazki);
+    res.render("ksiazki/lista", {
       tytul: `Wyniki wyszukiwania`,
       ksiazki: ksiazki,
-      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css', '/css/admin.css']
+      customCSS: [
+        "/css/szczegolyKsiazka.css",
+        "/css/ksiazki.css",
+        "/css/admin.css",
+      ],
     });
   } catch (error) {
-      res.render("wyszukiwarka", {
-      tytul: 'Wyszukiwanie',
-      query: req.query.q || '',
+    if (pokazowka) return res.json({ error: error.message });
+    res.render("wyszukiwarka", {
+      tytul: "Wyszukiwanie",
+      query: req.query.q || "",
       ksiazki: [],
       error: `Wystąpił błąd podczas wyszukiwania: ${error}`,
-      customCSS: ['/css/szczegolyKsiazka.css', '/css/ksiazki.css', '/css/error.css', '/css/admin.css']
+      customCSS: [
+        "/css/szczegolyKsiazka.css",
+        "/css/ksiazki.css",
+        "/css/error.css",
+        "/css/admin.css",
+      ],
     });
   }
 });

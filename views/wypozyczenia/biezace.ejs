@@ -1,0 +1,54 @@
+<div class="wypozyczenia-container">
+  <h1>Bieżące wypożyczenia</h1>
+
+  <% if (wypozyczenia.length === 0) { %>
+  <div class="brak-wypozyczen">
+    <p>Nie masz aktualnie żadnych wypożyczeń</p>
+  </div>
+  <% } else { %>
+  <div class="wypozyczenia-lista">
+    <% wypozyczenia.forEach(function(wypozyczenie) { %>
+    <div class="wypozyczenie-item">
+      <div class="wypozyczenie-header">
+        <h3>Wypożyczenie #<%= wypozyczenie.id_wypozyczenia %></h3>
+        <div class="wypozyczenie-daty">
+          <span class="data-poczatku">
+            Data wypożyczenia: <%= new
+            Date(wypozyczenie.poczatek).toLocaleDateString('pl-PL') %>
+          </span>
+          <span
+            class="data-deadline <%= new Date() > new Date(wypozyczenie.deadline) ? 'przekroczony' : '' %>"
+          >
+            Termin zwrotu: <%= new
+            Date(wypozyczenie.deadline).toLocaleDateString('pl-PL') %>
+          </span>
+        </div>
+      </div>
+
+      <div class="wypozyczenie-ksiazki">
+        <h4>Książki:</h4>
+        <ul>
+          <% wypozyczenie.tytuly.forEach(function(tytul, index) { %>
+          <li>
+            <strong><%= tytul %></strong>
+            <% if (wypozyczenie.autorzy && wypozyczenie.autorzy[index]) { %> -
+            <%= wypozyczenie.autorzy[index] %> <% } %>
+          </li>
+          <% }); %>
+        </ul>
+      </div>
+
+      <div class="wypozyczenie-status">
+        <span class="status-info">
+          Oddano: <%= wypozyczenie.liczba_oddanych || 0 %>/<%=
+          wypozyczenie.laczna_liczba_ksiazek %> książek
+        </span>
+        <% if (new Date() > new Date(wypozyczenie.deadline)) { %>
+        <span class="status-przekroczony">TERMIN PRZEKROCZONY</span>
+        <% } %>
+      </div>
+    </div>
+    <% }); %>
+  </div>
+  <% } %>
+</div>
