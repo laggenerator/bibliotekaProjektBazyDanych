@@ -1,6 +1,5 @@
-require('dotenv').config();
-
+require("dotenv").config();
 
 module.exports = {
-  pokazowka: process.env.POKAZOWKA
-}
+  pokazowka: process.env.POKAZOWKA === "true",
+};

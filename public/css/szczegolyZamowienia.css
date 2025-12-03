@@ -1,0 +1,369 @@
+/* szczegolyZamowienia.css - Stylizacja strony szczegółów zamówienia */
+
+.zamowienie-naglowek {
+  background: color-mix(in srgb, var(--dashboard-color) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--dashboard-color) 15%, transparent);
+  border-radius: 15px;
+  padding: 30px;
+  margin-bottom: 30px;
+  border-left: 4px solid var(--green-accent);
+}
+
+.zamowienie-naglowek h1 {
+  margin: 0 0 15px 0;
+  color: var(--font-color);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.zamowienie-status-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+/* Status badges */
+.status-badge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid transparent;
+}
+
+.status-wypozyczone,
+.status-gotowe-do,
+.status-w-przygotowaniu {
+  background: color-mix(in srgb, #ffc107 15%, transparent);
+  color: color-mix(in srgb, #ffc107 90%, transparent);
+  border-color: color-mix(in srgb, #ffc107 30%, transparent);
+}
+
+.status-zwrocone {
+  background: color-mix(in srgb, var(--green-accent) 15%, transparent);
+  color: color-mix(in srgb, var(--green-accent) 90%, transparent);
+  border-color: color-mix(in srgb, var(--green-accent) 30%, transparent);
+}
+
+.status-zakończone,
+.status-oddane {
+  background: color-mix(in srgb, var(--green-accent) 20%, transparent);
+  color: color-mix(in srgb, var(--green-accent) 95%, transparent);
+  border-color: color-mix(in srgb, var(--green-accent) 40%, transparent);
+}
+
+.status-anulowane,
+.status-przekroczone {
+  background: color-mix(in srgb, var(--red-accent) 15%, transparent);
+  color: color-mix(in srgb, var(--red-accent) 90%, transparent);
+  border-color: color-mix(in srgb, var(--red-accent) 30%, transparent);
+}
+
+.status-przekroczony-badge {
+  background: var(--red-accent);
+  color: var(--font-color);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Sekcje informacji */
+.zamowienie-klient,
+.zamowienie-info,
+.zamowienie-ksiazki,
+.zamowienie-akcje {
+  background: color-mix(in srgb, var(--dashboard-color) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--dashboard-color) 15%, transparent);
+  border-radius: 15px;
+  padding: 30px;
+  margin-bottom: 30px;
+  transition: all 0.3s ease;
+}
+
+.zamowienie-klient:hover,
+.zamowienie-info:hover,
+.zamowienie-ksiazki:hover,
+.zamowienie-akcje:hover {
+  border-color: color-mix(in srgb, var(--dashboard-color) 25%, transparent);
+  transform: translateY(-2px);
+}
+
+.zamowienie-klient h2,
+.zamowienie-info h2,
+.zamowienie-ksiazki h2,
+.zamowienie-akcje h2 {
+  margin: 0 0 20px 0;
+  color: var(--font-color);
+  font-size: 1.5rem;
+  font-weight: 600;
+  border-bottom: 2px solid
+    color-mix(in srgb, var(--dashboard-color) 20%, transparent);
+  padding-bottom: 10px;
+}
+
+/* Grid dla szczegółów */
+.klient-details,
+.zamowienie-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.detail-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-group .label {
+  font-weight: 600;
+  color: var(--bg-contrast);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.8;
+}
+
+.detail-group .value {
+  color: var(--font-color);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Lista książek */
+.zamowienie-ksiazki .ksiazki-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ksiazka-lista-item {
+  display: flex;
+  gap: 25px;
+  background: color-mix(in srgb, var(--dashboard-color) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--dashboard-color) 15%, transparent);
+  border-radius: 12px;
+  padding: 25px;
+  transition: all 0.3s ease;
+  align-items: flex-start;
+  position: relative;
+}
+
+.ksiazka-lista-item.zwrocona {
+  background: color-mix(in srgb, var(--green-accent) 8%, transparent);
+  border-color: color-mix(in srgb, var(--green-accent) 25%, transparent);
+  border-left: 4px solid var(--green-accent);
+}
+
+.ksiazka-lista-item:hover {
+  transform: translateY(-3px);
+  border-color: var(--green-accent);
+  background: color-mix(in srgb, var(--dashboard-color) 12%, transparent);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.ksiazka-lista-item.zwrocona:hover {
+  border-color: color-mix(in srgb, var(--green-accent) 40%, transparent);
+}
+
+.ksiazka-lista-lewa {
+  flex-shrink: 0;
+}
+
+.ksiazka-lista-obraz {
+  width: 100px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--dashboard-color) 20%, transparent);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ksiazka-lista-prawa {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  min-width: 0;
+}
+
+.ksiazka-lista-tytul {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.ksiazka-lista-tytul .tytul-link {
+  color: var(--font-color);
+  text-decoration: none;
+  font-size: 1.3rem;
+  font-weight: 700;
+  transition: color 0.3s ease;
+}
+
+.ksiazka-lista-tytul .tytul-link:hover {
+  color: var(--green-accent);
+  text-decoration: underline;
+}
+
+.ksiazka-lista-autor {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ksiazka-lista-autor .label {
+  color: var(--bg-contrast);
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.ksiazka-lista-autor .autor-link {
+  color: color-mix(in srgb, var(--font-color) 70%, transparent);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.ksiazka-lista-autor .autor-link:hover {
+  color: var(--green-accent);
+  text-decoration: underline;
+}
+
+.ksiazka-lista-details {
+  display: flex;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+.ksiazka-lista-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 120px;
+  align-items: flex-end;
+}
+
+/* Przyciski w szczegółach zamówienia */
+.zamowienie-akcje .btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  min-width: 140px;
+  border: 2px solid transparent;
+  font-family: "Montserrat", sans-serif;
+}
+
+.zamowienie-akcje .btn-success {
+  background: rgba(33, 161, 121, 0.15);
+  border-color: var(--green-accent);
+  color: var(--green-accent);
+}
+
+.zamowienie-akcje .btn-success:hover {
+  background: var(--green-accent);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(33, 161, 121, 0.3);
+}
+
+.zamowienie-akcje .btn-warning {
+  background: color-mix(in srgb, #f39c12 20%, transparent);
+  border-color: #f39c12;
+  color: #f39c12;
+}
+
+.zamowienie-akcje .btn-warning:hover {
+  background: #f39c12;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.zamowienie-akcje .btn-primary {
+  background: color-mix(in srgb, var(--dashboard-color) 12%, transparent);
+  border-color: color-mix(in srgb, var(--dashboard-color) 30%, transparent);
+  color: var(--font-color);
+}
+
+.zamowienie-akcje .btn-primary:hover {
+  background: color-mix(in srgb, var(--dashboard-color) 20%, transparent);
+  border-color: color-mix(in srgb, var(--dashboard-color) 40%, transparent);
+  transform: translateY(-2px);
+}
+
+.zamowienie-akcje .btn-secondary {
+  background: color-mix(in srgb, var(--dashboard-color) 8%, transparent);
+  color: color-mix(in srgb, var(--font-color) 50%, transparent);
+  cursor: not-allowed;
+  border-color: color-mix(in srgb, var(--dashboard-color) 20%, transparent);
+  opacity: 0.7;
+}
+
+/* Sekcja akcji */
+.akcje-buttons {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Utility classes */
+.text-danger {
+  color: var(--red-accent) !important;
+  font-weight: 600;
+}
+
+.text-success {
+  color: var(--green-accent) !important;
+  font-weight: 600;
+}
+
+/* Style dla formularzy w akcjach */
+.ksiazka-lista-actions form {
+  margin: 0;
+  display: inline;
+}
+
+.ksiazka-lista-actions .btn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  min-width: 100px;
+}
+
+.tytul-link,
+.autor-link {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  font-weight: bold;
+}
+
+.tytul-link:hover,
+.autor-link:hover {
+  color: var(--green-accent);
+}
+
+.ksiazka-w-zamowieniu {
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background: color-mix(in srgb, var(--dashboard-color) 8%, transparent);
+  border-radius: 6px;
+  border-left: 3px solid var(--green-accent);
+}
+
+.ksiazka-w-zamowieniu:last-child {
+  margin-bottom: 0;
+}

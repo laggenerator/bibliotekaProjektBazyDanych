@@ -1,119 +1,366 @@
 <div id="noweksiazki" class="ksiazki-lista-container">
-  <% if (locals.error) { %>
-    <div class="alert alert-error">
-      <%= locals.error %>
-    </div>
-  <% } %>
 
-  <% if (locals.sukces) { %>
-    <div class="alert alert-sukces">
-      <%= locals.sukces %>
-    </div>
-  <% } %>
-  
-  <% if (locals.query) { %>
-    <h2>Wyniki wyszukiwania dla: <%= query %></h2>
-  <% } else { %> 
-    <h2>Zarządzanie zamówieniami</h2>
-  <% } %>
-  <% if (!locals.dodawanie) { %>
-    <div class="admin-actions">
-      <form action="/admin/zamowienia/szukaj" method="GET" class="d-inline">
-        <div class="input-group">
-          <input type="text" name="query" class="form-control" placeholder="Szukaj zamówień..." required>
-          <button type="submit" class="btn btn-success">Szukaj</button>
-        </div>
-      </form>
-      <div class="dynamiczny-filtr">
-        <div class="input-group">
-          <input type="text" id="filtr-ksiazki" class="form-control" placeholder="Filtruj zamówienia...">
-          <button type="button" class="btn btn-outline-secondary" disabled style="visibility: hidden;">
-          </button><span class="filtr-info input-group-text" id="filtr-info"></span>
-        </div>
+        <% if (locals.error) { %>
+            <div class="alert alert-error">
+                <%= locals.error %>
+            </div>
+        <% } %>
+
+        <% if (locals.sukces) { %>
+            <div class="alert alert-sukces">
+                <%= locals.sukces %>
+            </div>
+        <% } %>
+
+  <h2>Zarządzanie zamówieniami</h2>
+
+  <!-- Zakładki dla aktywnych i zakończonych zamówień -->
+  <div class="admin-tabs">
+    <button class="tab-button active" data-tab="aktywne">
+      Aktywne (<%= zamowienia.aktywne.length %>)
+    </button>
+    <button class="tab-button" data-tab="nieaktywne">
+      Zakończone (<%= zamowienia.nieaktywne.length %>)
+    </button>
+  </div>
+
+  <div class="admin-actions">
+    <div class="dynamiczny-filtr">
+      <div class="input-group">
+        <input
+          type="text"
+          id="filtr-zamowienia"
+          class="form-control"
+          placeholder="Filtruj zamówienia (tytuł, autor, użytkownik, numer karty, ID)..."
+        />
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          disabled
+          style="visibility: hidden"
+        ></button
+        ><span class="filtr-info input-group-text" id="filtr-info"></span>
       </div>
     </div>
-  <% } %>
-  
-  <div class="ksiazki-lista">
-    <% zamowienia.forEach(function(zamowienie) { %>
-      <div class="ksiazka-lista-item">
-        
+  </div>
+
+  <!-- Sekcja aktywnych zamówień -->
+  <div class="tab-content active" id="aktywne-tab">
+    <% if (zamowienia.aktywne.length === 0) { %>
+    <div class="brak-zamowien">
+      <p>Brak aktywnych zamówień</p>
+    </div>
+    <% } else { %>
+    <div class="ksiazki-lista">
+      <% zamowienia.aktywne.forEach(function(zamowienie) { %>
+      <div
+      class="ksiazka-lista-item"
+      data-tytul="<%= zamowienie.tytuly.join(' ').toLowerCase() %>"
+      data-autor="<%= zamowienie.autorzy.join(' ').toLowerCase() %>"
+      data-uzytkownik="<%= zamowienie.nazwa_uzytkownika.toLowerCase() %>"
+      data-id="<%= zamowienie.id_wypozyczenia %>"
+      data-karta="<%= zamowienie.numer_karty ? zamowienie.numer_karty.toString().toLowerCase() : '' %>"
+    >
         <div class="ksiazka-lista-prawa">
           <h3 class="ksiazka-lista-tytul">
-            <a href="/zamowienia/<%= zamowienie.zamowienie_id %>" class="tytul-link">
-              Zamówienie #<%= zamowienie.zamowienie_id %>
+            <a
+              href="/admin/zamowienia/<%= zamowienie.id_wypozyczenia %>"
+              class="tytul-link"
+            >
+              Zamówienie #<%= zamowienie.id_wypozyczenia %>
             </a>
+            <% if (zamowienie.termin_przekroczony) { %>
+            <span class="status-przekroczony-badge">PRZEKROCZONY</span>
+            <% } %>
           </h3>
-          
+
           <div class="ksiazka-lista-autor">
             <span class="label">Klient:</span>
             <span class="value">
-              <a href="/uzytkownicy/<%= zamowienie.numer_karty %>" class="autor-link">
-                <%= zamowienie.nazwa_uzytkownika %> (Karta: <%= zamowienie.numer_karty %>)
+              <a
+                href="/admin/uzytkownicy/<%= zamowienie.numer_karty %>"
+                class="autor-link"
+              >
+                <%= zamowienie.nazwa_uzytkownika %> (Karta: <%=
+                zamowienie.numer_karty %>)
               </a>
             </span>
           </div>
-          
+
           <div class="ksiazka-lista-details">
             <div class="detail-group">
-              <span class="label">Data zamówienia:</span>
-              <span class="value"><%= new Date(zamowienie.data_zamowienia).toLocaleDateString('pl-PL') %></span>
+              <span class="label">Data wypożyczenia:</span>
+              <span class="value"
+                ><%= new Date(zamowienie.poczatek).toLocaleDateString('pl-PL')
+                %></span
+              >
             </div>
-            
-            <% if (zamowienie.data_zwrotu) { %>
-            <div class="detail-group">
-              <span class="label">Data zwrotu:</span>
-              <span class="value"><%= new Date(zamowienie.data_zwrotu).toLocaleDateString('pl-PL') %></span>
-            </div>
-            <% } %>
-            
+
             <div class="detail-group">
               <span class="label">Deadline zwrotu:</span>
-              <span class="value <%= zamowienie.czy_przekroczony ? 'isbn' : '' %>">
-                <%= new Date(zamowienie.deadline_zwrotu).toLocaleDateString('pl-PL') %>
-                <% if (zamowienie.czy_przekroczony) { %>
-                  <span style="color: #e74c3c; margin-left: 8px;">PRZERKOCZONY</span>
-                <% } %>
+              <span
+                class="value <%= zamowienie.termin_przekroczony ? 'text-danger' : '' %>"
+              >
+                <%= new Date(zamowienie.deadline).toLocaleDateString('pl-PL') %>
               </span>
             </div>
-            
+
             <div class="detail-group">
-              <span class="label">Status:</span>
-              <span class="value"><%= zamowienie.status %></span>
-            </div>
-            
-            <% if (zamowienie.ksiazka_tytul) { %>
-            <div class="detail-group">
-              <span class="label">Książka:</span>
+              <span class="label">Książki:</span>
               <span class="value">
-                <a href="/ksiazki/<%= zamowienie.isbn %>" class="autor-link">
-                  <%= zamowienie.ksiazka_tytul %>
-                </a>
+                <% zamowienie.tytuly.forEach(function(tytul, index) { %>
+                <div class="ksiazka-w-zamowieniu">
+                  <strong><%= tytul %></strong>
+                  <% if (zamowienie.autorzy[index]) { %> - <%=
+                  zamowienie.autorzy[index] %> <% } %>
+                </div>
+                <% }); %>
               </span>
             </div>
-            <% } %>
-            
-            <% if (zamowienie.egzemplarze) { %>
-            <!-- TU TRZEBA ZROBIC FOREACH DLA EGZEMPLARZY JAKOS SCHLUDNIE WYSWIETLIC -->
-            <% } %>
+
+            <div class="detail-group">
+              <span class="label">Status zwrotu:</span>
+              <span class="value">
+                Oddano: <%= zamowienie.liczba_oddanych %>/<%=
+                zamowienie.laczna_liczba_ksiazek %> książek
+              </span>
+            </div>
           </div>
         </div>
-        
+
         <div class="ksiazka-lista-actions admin-actions">
-          <a href="/admin/zamowienia/<%= zamowienie.zamowienie_id %>/edytuj" class="btn btn-primary">Modyfikuj</a>
-          <% if (zamowienie.status === 'w_trakcie' || zamowienie.status === 'oczekujace') { %>
-            <a href="/admin/zamowienia/<%= zamowienie.zamowienie_id %>/zatwierdz" class="btn btn-primary">Zatwierdź</a>
+          <a href="/admin/zamowienia/<%= zamowienie.id_wypozyczenia %>" class="btn btn-primary">Szczegóły</a>
+          
+          <!-- Wybierak statusu -->
+          <form action="/admin/zamowienia/<%= zamowienie.id_wypozyczenia %>/status" method="POST" style="display: inline;">
+            <select name="nowy_status" class="form-select status-select" 
+                    onchange="this.form.submit()"
+                    style="display: inline-block; width: auto; margin: 0 8px;">
+              <option value="W przygotowaniu" <%= zamowienie.status === 'W przygotowaniu' ? 'selected' : '' %>>W przygotowaniu</option>
+              <option value="Gotowe do odbioru" <%= zamowienie.status === 'Gotowe do odbioru' ? 'selected' : '' %>>Gotowe do odbioru</option>
+              <option value="Odebrane" <%= zamowienie.status === 'Odebrane' ? 'selected' : '' %>>Odebrane</option>
+              <option value="Zwrócone" <%= zamowienie.status === 'Zwrócone' ? 'selected' : '' %>>Zwrócone</option>
+            </select>
+          </form>
+
+          
+          <% if (zamowienie.status === 'Odebrane') { %>
+            <form action="/admin/zamowienia/<%= zamowienie.id_wypozyczenia %>/zwrot" method="POST" style="display: inline;">
+              <button type="submit" class="btn btn-warning">Zarejestruj zwrot</button>
+            </form>
           <% } %>
-          <% if (zamowienie.status === 'wypozyczone' && !zamowienie.data_zwrotu) { %>
-            <a href="/admin/zamowienia/<%= zamowienie.zamowienie_id %>/zwrot" class="btn btn-primary">Zarejestruj zwrot</a>
-          <% } %>
-          <button class="btn usun usun-zamowienie" 
-                  data-zamowienie-id="<%= zamowienie.zamowienie_id %>" 
-                  data-tytul="Zamówienie #<%= zamowienie.zamowienie_id %>">
-            Usuń
-          </button>
+
+          <!-- Przycisk anulowania -->
+          <form action="/admin/zamowienia/<%= zamowienie.id_wypozyczenia %>/anuluj" method="POST" style="display: inline;">
+            <button type="submit" class="btn usun" 
+                    onclick="return confirm('Czy na pewno chcesz anulować zamówienie #<%= zamowienie.id_wypozyczenia %>?')">
+              Anuluj
+            </button>
+          </form>
         </div>
       </div>
-    <% }); %>
+      <% }); %>
+    </div>
+    <div class="sekcja-separator"></div>
+    <% } %>
+  </div>
+
+  <!-- Sekcja zakończonych zamówień -->
+  <div class="tab-content" id="nieaktywne-tab">
+    <% if (zamowienia.nieaktywne.length === 0) { %>
+    <div class="brak-zamowien">
+      <p>Brak zakończonych zamówień</p>
+    </div>
+    <% } else { %>
+    <div class="ksiazki-lista">
+      <% zamowienia.nieaktywne.forEach(function(zamowienie) { %>
+      <div
+        class="ksiazka-lista-item zakonczone"
+        data-tytul="<%= zamowienie.tytuly.join(' ').toLowerCase() %>"
+        data-autor="<%= zamowienie.autorzy.join(' ').toLowerCase() %>"
+        data-uzytkownik="<%= zamowienie.nazwa_uzytkownika.toLowerCase() %>"
+        data-id="<%= zamowienie.id_wypozyczenia %>"
+        data-karta="<%= zamowienie.numer_karty ? zamowienie.numer_karty.toString().toLowerCase() : '' %>"
+      >
+        <div class="ksiazka-lista-prawa">
+          <h3 class="ksiazka-lista-tytul">
+            <a href="/admin/zamowienia/<%= zamowienie.id_wypozyczenia %>" class="tytul-link">
+              Zamówienie #<%= zamowienie.id_wypozyczenia %>
+            </a>
+            <span class="status-badge status-<%= zamowienie.status.toLowerCase().replace(' ', '-') %>">
+              <%= zamowienie.status %>
+            </span>
+            <% if (zamowienie.termin_przekroczony) { %>
+              <span class="status-przekroczony-badge">PRZEKROCZONY</span>
+            <% } %>
+          </h3>
+
+          <div class="ksiazka-lista-autor">
+            <span class="label">Klient:</span>
+            <span class="value">
+              <a
+                href="/admin/uzytkownicy/<%= zamowienie.numer_karty %>"
+                class="autor-link"
+              >
+                <%= zamowienie.nazwa_uzytkownika %> (Karta: <%=
+                zamowienie.numer_karty %>)
+              </a>
+            </span>
+          </div>
+
+          <div class="ksiazka-lista-details">
+            <div class="detail-group">
+              <span class="label">Data wypożyczenia:</span>
+              <span class="value"
+                ><%= new Date(zamowienie.poczatek).toLocaleDateString('pl-PL')
+                %></span
+              >
+            </div>
+
+            <div class="detail-group">
+              <span class="label">Data zakończenia:</span>
+              <span class="value"
+                ><%= new Date(zamowienie.deadline).toLocaleDateString('pl-PL')
+                %></span
+              >
+            </div>
+
+            <div class="detail-group">
+              <span class="label">Książki:</span>
+              <span class="value">
+                <% zamowienie.tytuly.forEach(function(tytul, index) { %>
+                <div class="ksiazka-w-zamowieniu">
+                  <strong><%= tytul %></strong>
+                  <% if (zamowienie.autorzy[index]) { %> - <%=
+                  zamowienie.autorzy[index] %> <% } %>
+                </div>
+                <% }); %>
+              </span>
+            </div>
+
+            <div class="detail-group">
+              <span class="label">Status:</span>
+              <span class="value text-success">ZAKOŃCZONE</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- <div class="ksiazka-lista-actions admin-actions">
+          <a
+            href="/admin/zamowienia/<%= zamowienie.id_wypozyczenia %>"
+            class="btn btn-primary"
+            >Szczegóły</a
+          >
+          <button
+            class="btn usun usun-zamowienie"
+            data-zamowienie-id="<%= zamowienie.id_wypozyczenia %>"
+            data-tytul="Zamówienie #<%= zamowienie.id_wypozyczenia %>"
+          >
+            Usuń
+          </button>
+        </div> -->
+      </div>
+      <% }); %>
+    </div>
+    <% } %>
   </div>
 </div>
+
+<!-- JavaScript dla zakładek i filtrowania -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Obsługa zakładek
+    const tabButtons = document.querySelectorAll(".tab-button");
+    const tabContents = document.querySelectorAll(".tab-content");
+
+    tabButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const tabId = button.getAttribute("data-tab");
+
+        console.log("Kliknięto zakładkę:", tabId); // Debug
+
+        tabContents.forEach((content) => {
+          content.classList.remove("active");
+          console.log("Ukrywam:", content.id); // Debug
+        });
+
+        tabButtons.forEach((btn) => btn.classList.remove("active"));
+
+        const activeTab = document.getElementById(`${tabId}-tab`);
+        if (activeTab) {
+          activeTab.classList.add("active");
+          console.log("Pokazuję:", activeTab.id); // Debug
+        }
+
+        button.classList.add("active");
+
+        const filtrInput = document.getElementById("filtr-zamowienia");
+        if (filtrInput) {
+          filtrInput.value = "";
+          przefiltrujZamowienia();
+        }
+      });
+    });
+
+    // Filtrowanie zamówień
+    const filtrInput = document.getElementById("filtr-zamowienia");
+
+    function przefiltrujZamowienia() {
+      const filterText = filtrInput.value.toLowerCase();
+      const activeTab = document.querySelector(".tab-content.active");
+
+      if (!activeTab) return;
+
+      const zamowieniaItems = activeTab.querySelectorAll(".ksiazka-lista-item");
+      let visibleCount = 0;
+
+      zamowieniaItems.forEach((item) => {
+        const tytul = item.getAttribute("data-tytul") || "";
+        const autor = item.getAttribute("data-autor") || "";
+        const uzytkownik = item.getAttribute("data-uzytkownik") || "";
+        const id = item.getAttribute("data-id") || "";
+        const karta = item.getAttribute("data-karta") || "";
+
+        const matches =
+          tytul.includes(filterText) ||
+          autor.includes(filterText) ||
+          uzytkownik.includes(filterText) ||
+          id.includes(filterText) ||
+          karta.includes(filterText);
+
+        item.style.display = matches ? "flex" : "none";
+        if (matches) visibleCount++;
+      });
+
+      document.getElementById(
+        "filtr-info"
+      ).textContent = `Znaleziono: ${visibleCount}`;
+    }
+
+    if (filtrInput) {
+      filtrInput.addEventListener("input", przefiltrujZamowienia);
+    }
+
+    // Inicjalizacja - upewnij się że pierwsza zakładka jest aktywna
+    const firstTab = document.querySelector(".tab-button.active");
+    if (firstTab) {
+      const firstTabId = firstTab.getAttribute("data-tab");
+      const firstTabContent = document.getElementById(`${firstTabId}-tab`);
+      if (firstTabContent) {
+        firstTabContent.classList.add("active");
+      }
+    }
+  });
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const alerts = document.querySelectorAll('.alert');
+  alerts.forEach(alert => {
+    setTimeout(() => {
+      alert.style.opacity = '0';
+      alert.style.transition = 'opacity 0.5s ease';
+      setTimeout(() => alert.remove(), 500);
+    }, 5000);
+  });
+});
+</script>

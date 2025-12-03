@@ -3,39 +3,37 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%= typeof tytul !== 'undefined' ? tytul : 'Błąd' %> - Biblioteka</title>
+    <title>
+      <%= typeof tytul !== 'undefined' ? tytul : 'Błąd' %> - Biblioteka
+    </title>
     <link rel="stylesheet" href="/css/main.css" />
     <link rel="stylesheet" href="/css/header.css" />
     <link rel="stylesheet" href="/css/ksiazki.css" />
-    <% if (typeof customCSS !== 'undefined') { %>
-        <% if (Array.isArray(customCSS)) { %>
-            <% customCSS.forEach(function(plikCSS) { %>
-                <link rel="stylesheet" href="<%= plikCSS %>">
-            <% }); %>
-        <% } else { %>
-            <link rel="stylesheet" href="<%= customCSS %>">
-        <% } %>
-    <% } %>
+    <% if (typeof customCSS !== 'undefined') { %> <% if
+    (Array.isArray(customCSS)) { %> <% customCSS.forEach(function(plikCSS) { %>
+    <link rel="stylesheet" href="<%= plikCSS %>" />
+    <% }); %> <% } else { %>
+    <link rel="stylesheet" href="<%= customCSS %>" />
+    <% } %> <% } %>
 
-    <meta name="google" content="notranslate">
-    <meta name="translate" content="no">
+    <meta name="google" content="notranslate" />
+    <meta name="translate" content="no" />
   </head>
-<body>
-    
-<header class="main-header">
-    <div class="header-container">
+  <body>
+    <header class="main-header">
+      <div class="header-container">
         <div class="header-left">
-            <a href="/" class="logo-link">
-                <img src="/assets/favicon.png" class="logo" alt="Biblioteka">
-                <span class="logo-text">Biblioteka</span>
-            </a>
-            <nav class="main-nav">
-                <a href="/" class="nav-link">Strona główna</a>
-                <a href="/ksiazki" class="nav-link">Książki</a>
-                <a href="/autorzy" class="nav-link">Autorzy</a>
-                <a href="/kategorie" class="nav-link">Kategorie</a>
-                <a href="/wyszukiwarka" class="nav-link">Wyszukiwarka</a>
-            </nav>
+          <a href="/" class="logo-link">
+            <img src="/assets/favicon.png" class="logo" alt="Biblioteka" />
+            <span class="logo-text">Biblioteka</span>
+          </a>
+          <nav class="main-nav">
+            <a href="/" class="nav-link">Strona główna</a>
+            <a href="/ksiazki" class="nav-link">Książki</a>
+            <a href="/autorzy" class="nav-link">Autorzy</a>
+            <a href="/kategorie" class="nav-link">Kategorie</a>
+            <a href="/wyszukiwarka" class="nav-link">Wyszukiwarka</a>
+          </nav>
         </div>
 
         <!-- <div class="header-center">
@@ -48,53 +46,48 @@
             </a>
         </div> -->
 
-
         <div class="header-right">
-            <% if(!locals.uzytkownik) { %>
-                <a href="/auth/login" class="login-btn">
-                    <span>Zaloguj się</span>
-                </a>
-                <a href="/auth/register" class="register-btn">Zarejestruj się</a>
-            <% } else { %>
-                <div class="user-menu">
-                    <a href="/dashboard" class="user-btn">
-                        <span class="user-name <%= locals.uzytkownik.rola === 'ADMIN' ? 'rola-ADMIN' : 'rola-USER' %>"><%= locals.uzytkownik.nazwa_uzytkownika %></span>
-                    </a>
-                    <div class="user-dropdown">
-                        <% if(locals.uzytkownik.rola === 'ADMIN') {%>
-                            <a href="/admin/dashboard" class="dropdown-item admin-highlight">
-                            Panel admina
-                        </a>
-                        <% } %>
-                        <a href="/dashboard" class="dropdown-item">
-                            Panel użytkownika
-                        </a>
-                        <a href="/biezace-wypozyczenia" class="dropdown-item">
-                            Bieżące wypożyczenia
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <form action="/auth/wyloguj" method="POST" class="wyloguj-form">
-                            <button type="submit" class="dropdown-item wyloguj-item">
-                                Wyloguj się
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            <% } %>
-              <% if(locals.uzytkownik) { %>
-                <a href="/koszyk" id="pokaz-koszyk" class="user-btn">
-                    Koszyk <span id="ileWKoszyku">[<%= locals.uzytkownik.koszykCount %>]</span>
-                </a>
-                <% } %>
+          <% if(!locals.uzytkownik) { %>
+          <a href="/auth/login" class="login-btn">
+            <span>Zaloguj się</span>
+          </a>
+          <a href="/auth/register" class="register-btn">Zarejestruj się</a>
+          <% } else { %>
+          <div class="user-menu">
+            <a href="/dashboard" class="user-btn">
+              <span
+                class="user-name <%= locals.uzytkownik.rola === 'ADMIN' ? 'rola-ADMIN' : 'rola-USER' %>"
+                ><%= locals.uzytkownik.nazwa_uzytkownika %></span
+              >
+            </a>
+            <div class="user-dropdown">
+              <% if(locals.uzytkownik.rola === 'ADMIN') {%>
+              <a href="/admin/dashboard" class="dropdown-item admin-highlight">
+                Panel admina
+              </a>
+              <% } %>
+              <a href="/dashboard" class="dropdown-item"> Panel użytkownika </a>
+              <a href="/dashboard/biezace-wypozyczenia" class="dropdown-item">
+                Bieżące wypożyczenia
+              </a>
+              <div class="dropdown-divider"></div>
+              <form action="/auth/wyloguj" method="POST" class="wyloguj-form">
+                <button type="submit" class="dropdown-item wyloguj-item">
+                  Wyloguj się
+                </button>
+              </form>
+            </div>
+          </div>
+          <% } %> <% if(locals.uzytkownik) { %>
+          <a href="/koszyk" id="pokaz-koszyk" class="user-btn">
+            Koszyk
+            <span id="ileWKoszyku">[<%= locals.uzytkownik.koszykCount %>]</span>
+          </a>
+          <% } %>
         </div>
-    </div>
-</header>
+      </div>
+    </header>
 
-
-  <div class="main-content">
-
-    <%- body %>
-  </div>
-</body>
-
+    <div class="main-content"><%- body %></div>
+  </body>
 </html>

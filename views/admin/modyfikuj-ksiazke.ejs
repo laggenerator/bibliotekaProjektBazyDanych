@@ -1,0 +1,367 @@
+<div id="noweksiazki" class="ksiazki-lista-container">
+  <% if (locals.error) { %>
+  <div class="alert alert-error"><%= locals.error %></div>
+  <% } %> <% if (locals.sukces) { %>
+  <div class="alert alert-sukces"><%= locals.sukces %></div>
+  <% } %>
+
+  <h2>Edycja książki: <%= ksiazka.tytul %></h2>
+
+  <div class="admin-actions">
+    <a href="/admin/ksiazki" class="btn btn-secondary">Powrót do listy</a>
+    <a
+      href="/admin/ksiazki/<%= ksiazka.isbn %>/dodaj-egzemplarz"
+      class="btn btn-success"
+      >Dodaj egzemplarz</a
+    >
+  </div>
+
+  <!-- Sekcja informacji o książce -->
+  <div class="ksiazka-lista-item zamowienie-info">
+    <div class="ksiazka-lista-lewa">
+      <img
+        class="ksiazka-lista-obraz"
+        src="<%= ksiazka.img_link %>"
+        alt="Okładka: <%= ksiazka.tytul %>"
+        onerror="this.src='/assets/okladki/placeholder.webp'"
+      />
+    </div>
+
+    <div class="ksiazka-lista-prawa">
+      <h3 class="ksiazka-lista-tytul"><%= ksiazka.tytul %></h3>
+
+      <div class="ksiazka-lista-autor">
+        <span class="label">
+          <% if (Array.isArray(ksiazka.autor) && ksiazka.autor.length > 1) { %>
+          Autorzy: <% } else { %> Autor: <% } %>
+        </span>
+        <span class="value">
+          <% if (Array.isArray(ksiazka.autor)) { %> <%
+          ksiazka.autor.forEach(function(autor, index) { %>
+          <span class="autor-link"><%= autor %></span>
+          <% if (index < ksiazka.autor.length - 1) { %>, <% } %> <% }); %> <% }
+          else { %>
+          <span class="autor-link"><%= ksiazka.autor || "Nie wiem" %></span>
+          <% } %>
+        </span>
+      </div>
+
+      <div class="ksiazka-lista-details">
+        <div class="detail-group">
+          <span class="label">
+            <% if (Array.isArray(ksiazka.kategorie) && ksiazka.kategorie.length
+            > 1) { %> Kategorie: <% } else { %> Kategoria: <% } %>
+          </span>
+          <span class="value">
+            <% if (Array.isArray(ksiazka.kategorie)) { %> <%
+            ksiazka.kategorie.forEach(function(kategoria, index) { %>
+            <span class="autor-link"><%= kategoria %></span>
+            <% if (index < ksiazka.kategorie.length - 1) { %>, <% } %> <% }); %>
+            <% } else { %>
+            <span class="autor-link"
+              ><%= ksiazka.kategorie || "Nie wiem" %></span
+            >
+            <% } %>
+          </span>
+        </div>
+
+        <div class="detail-group">
+          <span class="label">Rok wydania:</span>
+          <span class="value"><%= ksiazka.rok_wydania %></span>
+        </div>
+
+        <div class="detail-group">
+          <span class="label">Ilość stron:</span>
+          <span class="value"><%= ksiazka.ilosc_stron %> stron</span>
+        </div>
+
+        <div class="detail-group">
+          <span class="label">ISBN:</span>
+          <span class="value isbn"><%= ksiazka.isbn %></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formularz edycji książki -->
+  <div class="zamowienie-info">
+    <h2>Modyfikuj dane książki</h2>
+
+    <form
+      action="/admin/ksiazki/<%= ksiazka.isbn %>/edytuj"
+      method="POST"
+      class="formularz-edycji"
+    >
+      <div class="form-grupa">
+        <label for="tytul" class="form-label">Tytuł:</label>
+        <input
+          type="text"
+          id="tytul"
+          name="tytul"
+          value="<%= ksiazka.tytul %>"
+          required
+          class="form-input"
+        />
+      </div>
+
+      <div class="form-row">
+        <div class="form-grupa">
+          <label for="rok_wydania" class="form-label">Rok wydania:</label>
+          <input
+            type="number"
+            id="rok_wydania"
+            name="rok_wydania"
+            value="<%= ksiazka.rok_wydania %>"
+            min="1000"
+            max="<%= new Date().getFullYear() %>"
+            required
+            class="form-input"
+          />
+        </div>
+
+        <div class="form-grupa">
+          <label for="ilosc_stron" class="form-label">Ilość stron:</label>
+          <input
+            type="number"
+            id="ilosc_stron"
+            name="ilosc_stron"
+            value="<%= ksiazka.ilosc_stron %>"
+            min="1"
+            required
+            class="form-input"
+          />
+        </div>
+      </div>
+
+      <div class="admin-actions">
+        <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+        <a
+          href="/admin/ksiazki/<%= ksiazka.isbn %>/edytuj"
+          class="btn btn-secondary"
+          >Anuluj</a
+        >
+      </div>
+    </form>
+  </div>
+
+  <!-- Lista egzemplarzy -->
+  <div class="zamowienie-info">
+    <h2>Egzemplarze książki</h2>
+
+    <% if (egzemplarze && egzemplarze.length > 0) { %>
+    <div class="tabela-kontener">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th>ID egzemplarza</th>
+            <th>Status</th>
+            <th>Akcje</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% egzemplarze.forEach(function(egzemplarz) { %>
+          <tr>
+            <td><%= egzemplarz.id_egzemplarza %></td>
+            <td>
+              <span class="status-badge <%= egzemplarz.status.toLowerCase() %>">
+                <%= egzemplarz.status %>
+              </span>
+            </td>
+            <td>
+              <div class="przyciski-akcji">
+                <% if (egzemplarz.status === 'Wolna') { %>
+                <form
+                  action="/admin/ksiazki/<%= ksiazka.isbn %>/egzemplarze/<%= egzemplarz.id_egzemplarza %>/zarchiwizuj"
+                  method="POST"
+                  class="form-akcja"
+                >
+                  <button
+                    type="submit"
+                    class="btn btn-warning btn-small"
+                    onclick="return confirm('Czy na pewno chcesz wycofać ten egzemplarz z obiegu?')"
+                  >
+                    Wycofaj z obiegu
+                  </button>
+                </form>
+                <% } else if (egzemplarz.status === 'Wycofana') { %>
+                <form
+                  action="/admin/ksiazki/<%= ksiazka.isbn %>/egzemplarze/<%= egzemplarz.id_egzemplarza %>/aktywuj"
+                  method="POST"
+                  class="form-akcja"
+                >
+                  <button
+                    type="submit"
+                    class="btn btn-success btn-small"
+                    onclick="return confirm('Czy na pewno chcesz przywrócić ten egzemplarz do obiegu?')"
+                  >
+                    Przywróć do obiegu
+                  </button>
+                </form>
+                <% } else if (egzemplarz.status === 'Wypozyczony') { %>
+                <span class="text-muted">Egzemplarz wypożyczony</span>
+                <% } else { %>
+                <span class="text-muted">Brak dostępnych akcji</span>
+                <% } %>
+              </div>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+    <% } else { %>
+    <p class="text-muted">Brak egzemplarzy tej książki.</p>
+    <% } %>
+  </div>
+</div>
+
+<style>
+  /* Style specyficzne dla edycji książki */
+  .formularz-edycji {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+  }
+
+  .form-grupa {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-label {
+    font-weight: 600;
+    color: var(--bg-contrast);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+  }
+
+  .form-input {
+    padding: 12px 16px;
+    border: 1px solid
+      color-mix(in srgb, var(--dashboard-color) 25%, transparent);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--dashboard-color) 5%, transparent);
+    color: var(--font-color);
+    font-size: 1rem;
+    font-family: "Montserrat", sans-serif;
+    transition: all 0.3s ease;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: var(--green-accent);
+    box-shadow: 0 0 0 2px
+      color-mix(in srgb, var(--green-accent) 25%, transparent);
+  }
+
+  .form-input:hover {
+    border-color: color-mix(in srgb, var(--dashboard-color) 35%, transparent);
+  }
+
+  /* Tabela egzemplarzy */
+  .tabela-kontener {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid
+      color-mix(in srgb, var(--dashboard-color) 20%, transparent);
+  }
+
+  .tabela {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+  }
+
+  .tabela thead {
+    background: color-mix(in srgb, var(--dashboard-color) 10%, transparent);
+  }
+
+  .tabela th {
+    padding: 16px 20px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--font-color);
+    border-bottom: 2px solid
+      color-mix(in srgb, var(--dashboard-color) 20%, transparent);
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+  }
+
+  .tabela td {
+    padding: 16px 20px;
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--dashboard-color) 15%, transparent);
+    color: var(--font-color);
+  }
+
+  .tabela tbody tr:hover {
+    background: color-mix(in srgb, var(--dashboard-color) 8%, transparent);
+  }
+
+  .tabela tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* Status badges specyficzne dla egzemplarzy */
+  .status-badge.wolna {
+    background: color-mix(in srgb, var(--green-accent) 15%, transparent);
+    color: color-mix(in srgb, var(--green-accent) 90%, transparent);
+    border-color: color-mix(in srgb, var(--green-accent) 30%, transparent);
+  }
+
+  .status-badge.wycofana {
+    background: color-mix(in srgb, #f39c12 15%, transparent);
+    color: color-mix(in srgb, #f39c12 90%, transparent);
+    border-color: color-mix(in srgb, #f39c12 30%, transparent);
+  }
+
+  .status-badge.wypozyczony {
+    background: color-mix(in srgb, #007bff 15%, transparent);
+    color: color-mix(in srgb, #007bff 90%, transparent);
+    border-color: color-mix(in srgb, #007bff 30%, transparent);
+  }
+
+  .status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid transparent;
+    display: inline-block;
+  }
+
+  /* Przyciski akcji w tabeli */
+  .przyciski-akcji {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .form-akcja {
+    margin: 0;
+    display: inline;
+  }
+
+  .btn-small {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    min-width: auto;
+  }
+
+  .text-muted {
+    color: color-mix(in srgb, var(--font-color) 50%, transparent);
+    font-style: italic;
+  }
+</style>

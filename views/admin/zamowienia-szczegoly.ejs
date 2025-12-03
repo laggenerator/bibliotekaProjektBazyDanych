@@ -1,0 +1,295 @@
+<div id="noweksiazki" class="ksiazki-lista-container">
+  <% if (locals.error) { %>
+  <div class="alert alert-error"><%= locals.error %></div>
+  <% } %> <% if (locals.sukces) { %>
+  <div class="alert alert-sukces"><%= locals.sukces %></div>
+  <% } %>
+
+  <!-- Nagłówek zamówienia -->
+  <div class="zamowienie-naglowek">
+    <h1>Zamówienie #<%= zamowienie.id_wypozyczenia %></h1>
+    <div class="zamowienie-status-info">
+      <span
+        class="status-badge status-<%= zamowienie.status_zamowienia.toLowerCase().replace(' ', '-') %>"
+      >
+        <%= zamowienie.status_zamowienia %>
+      </span>
+      <% if (zamowienie.termin_przekroczony) { %>
+      <span class="status-przekroczony-badge">
+        OPÓŹNIENIE: <%= zamowienie.dni_opoznienia || 0 %> dni
+      </span>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Informacje o kliencie -->
+  <div class="zamowienie-klient">
+    <h2>Informacje o kliencie</h2>
+    <div class="klient-details">
+      <div class="detail-group">
+        <span class="label">Numer karty:</span>
+        <span class="value"><%= zamowienie.numer_karty %></span>
+      </div>
+      <div class="detail-group">
+        <span class="label">Nazwa użytkownika:</span>
+        <span class="value"><%= zamowienie.nazwa_uzytkownika %></span>
+      </div>
+      <div class="detail-group">
+        <span class="label">Email:</span>
+        <span class="value"><%= zamowienie.email %></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Informacje o zamówieniu -->
+  <div class="zamowienie-info">
+    <h2>Informacje o zamówieniu</h2>
+    <div class="zamowienie-details">
+      <div class="detail-group">
+        <span class="label">Data wypożyczenia:</span>
+        <span class="value"
+          ><%= new Date(zamowienie.poczatek).toLocaleDateString('pl-PL')
+          %></span
+        >
+      </div>
+      <div class="detail-group">
+        <span class="label">Termin zwrotu:</span>
+        <span
+          class="value <%= zamowienie.termin_przekroczony ? 'text-danger' : '' %>"
+        >
+          <%= new Date(zamowienie.deadline).toLocaleDateString('pl-PL') %>
+        </span>
+      </div>
+      <div class="detail-group">
+        <span class="label">Status zwrotu:</span>
+        <span class="value">
+          Oddano: <%= zamowienie.liczba_oddanych %>/<%=
+          zamowienie.laczna_liczba_ksiazek %> książek
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista książek w zamówieniu -->
+  <div class="zamowienie-ksiazki">
+    <h2>Książki w zamówieniu (<%= zamowienie.laczna_liczba_ksiazek %>)</h2>
+
+    <div class="ksiazki-lista">
+      <% zamowienie.egzemplarze.forEach(function(egzemplarz) { %>
+      <div
+        class="ksiazka-lista-item <%= egzemplarz.zwrocono ? 'zwrocona' : '' %>"
+        data-id="<%= egzemplarz.id_egzemplarza %>"
+        data-tytul="<%= egzemplarz.tytul.toLowerCase() %>"
+      >
+        <div class="ksiazka-lista-lewa">
+          <img
+            class="ksiazka-lista-obraz"
+            src="<%= egzemplarz.img_link || '/assets/okladki/placeholder.webp' %>"
+            alt="Okładka: <%= egzemplarz.tytul %>"
+            onerror="this.src='/assets/okladki/placeholder.webp'"
+          />
+        </div>
+
+        <div class="ksiazka-lista-prawa">
+          <h3 class="ksiazka-lista-tytul">
+            <a href="/ksiazki/<%= egzemplarz.isbn %>" class="tytul-link">
+              <%= egzemplarz.tytul %>
+            </a>
+            <% if (egzemplarz.zwrocono) { %>
+            <span class="status-badge status-zwrocone">ZWRÓCONA</span>
+            <% } else { %>
+            <span class="status-badge status-wypozyczona">WYPOŻYCZONA</span>
+            <% } %>
+          </h3>
+
+          <div class="ksiazka-lista-autor">
+            <span class="label">Autor:</span>
+            <span class="value">
+              <% if (Array.isArray(egzemplarz.autorzy)) { %> <%
+              egzemplarz.autorzy.forEach(function(autor, index) { %>
+              <a
+                href="/autorzy/<%= encodeURIComponent(autor) %>"
+                class="autor-link"
+              >
+                <%= autor %>
+              </a>
+              <% if (index < egzemplarz.autorzy.length - 1) { %>, <% } %> <% });
+              %> <% } %>
+            </span>
+          </div>
+
+          <!-- NOWA SEKCJA: Lokalizacja książki -->
+          <% if (egzemplarz.lokalizacja_pokoj || egzemplarz.lokalizacja_polka) { %>
+          <div class="ksiazka-lista-lokalizacja">
+            <span class="label">Lokalizacja:</span>
+            <span class="value">
+              <% if (egzemplarz.lokalizacja_pokoj) { %>
+                Pokój <%= egzemplarz.lokalizacja_pokoj %>
+                <% if (egzemplarz.lokalizacja_polka) { %>
+                | Półka <%= egzemplarz.lokalizacja_polka %>
+                <% } %>
+              <% } else if (egzemplarz.lokalizacja_polka) { %>
+                Półka <%= egzemplarz.lokalizacja_polka %>
+              <% } %>
+            </span>
+          </div>
+          <% } %>
+
+          <div class="ksiazka-lista-details">
+            <div class="detail-group">
+              <span class="label">ID egzemplarza:</span>
+              <span class="value"><%= egzemplarz.id_egzemplarza %></span>
+            </div>
+
+            <div class="detail-group">
+              <span class="label">ISBN:</span>
+              <span class="value isbn"><%= egzemplarz.isbn %></span>
+            </div>
+
+            <div class="detail-group">
+              <span class="label">Rok wydania:</span>
+              <span class="value"><%= egzemplarz.rok_wydania %></span>
+            </div>
+
+            <% if (egzemplarz.oddanie) { %>
+            <div class="detail-group">
+              <span class="label">Data zwrotu:</span>
+              <span class="value"
+                ><%= new Date(egzemplarz.oddanie).toLocaleDateString('pl-PL')
+                %></span
+              >
+            </div>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="ksiazka-lista-actions">
+          <% if (!egzemplarz.zwrocono) { %>
+          <form
+            action="/admin/zamowienia/<%= zamowienie.id_wypozyczenia %>/zwroc/<%= egzemplarz.id_egzemplarza %>"
+            method="POST"
+            onsubmit="return confirm('Czy na pewno chcesz zwrócić książkę: <%= egzemplarz.tytul %>?')"
+          >
+            <button type="submit" class="btn btn-success">Zwróć</button>
+          </form>
+          <% } else { %>
+          <button class="btn btn-secondary" disabled>Zwrócono</button>
+          <% } %>
+
+          <a href="/ksiazki/<%= egzemplarz.isbn %>" class="btn btn-primary"
+            >Szczegóły</a
+          >
+        </div>
+      </div>
+      <% }); %>
+    </div>
+  </div>
+
+  <!-- Akcje dla całego zamówienia -->
+  <div class="zamowienie-akcje">
+    <h2>Akcje</h2>
+    <div class="akcje-buttons">
+      <!-- Wybierak statusu -->
+      <form
+        action="/admin/zamowienia/<%= zamowienie.id_wypozyczenia %>/status"
+        method="POST"
+        style="display: inline"
+      >
+        <select
+          name="nowy_status"
+          class="form-select status-select"
+          onchange="this.form.submit()"
+          style="display: inline-block; width: auto; margin: 0 8px"
+        >
+          <option
+            value="W przygotowaniu"
+            <%= zamowienie.status_zamowienia === 'W przygotowaniu' ? 'selected' : '' %>
+          >
+            W przygotowaniu
+          </option>
+          <option
+            value="Gotowe do odbioru"
+            <%= zamowienie.status_zamowienia === 'Gotowe do odbioru' ? 'selected' : '' %>
+          >
+            Gotowe do odbioru
+          </option>
+          <option
+            value="Odebrane"
+            <%= zamowienie.status_zamowienia === 'Odebrane' ? 'selected' : '' %>
+          >
+            Odebrane
+          </option>
+          <option
+            value="Zwrócone"
+            <%= zamowienie.status_zamowienia === 'Zwrócone' ? 'selected' : '' %>
+          >
+            Zwrócone
+          </option>
+        </select>
+      </form>
+      <% if (zamowienie.liczba_oddanych < zamowienie.laczna_liczba_ksiazek) { %>
+      <form
+        action="/admin/zamowienia/<%= zamowienie.id_wypozyczenia %>/zwrot"
+        method="POST"
+        onsubmit="return confirm('Czy na pewno chcesz zwrócić WSZYSTKIE książki z tego zamówienia?')"
+      >
+        <button type="submit" class="btn btn-warning">
+          Zwróć wszystkie książki
+        </button>
+      </form>
+      <% } %>
+
+      <a href="/admin/zamowienia" class="btn btn-primary">Powrót do listy</a>
+    </div>
+  </div>
+</div>
+
+<style>.ksiazka-lista-lokalizacja {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 5px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border-left: 3px solid;
+  max-width: fit-content;
+  transition: all 0.3s ease;
+}
+
+/* Light mode (domyślny) */
+.ksiazka-lista-lokalizacja {
+  background: rgba(108, 117, 125, 0.1);
+  border-left-color: #6c757d;
+}
+
+.ksiazka-lista-lokalizacja .label {
+  color: #495057;
+  font-weight: 600;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.ksiazka-lista-lokalizacja .value {
+  color: #343a40;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+/* Dark mode - obsługa przez media query */
+@media (prefers-color-scheme: dark) {
+  .ksiazka-lista-lokalizacja {
+    background: rgba(200, 200, 200, 0.1);
+    border-left-color: #adb5bd;
+  }
+  
+  .ksiazka-lista-lokalizacja .label {
+    color: #dee2e6;
+    opacity: 0.8;
+  }
+  
+  .ksiazka-lista-lokalizacja .value {
+    color: #e9ecef;
+    font-weight: 500;
+  }
+}
+</style>

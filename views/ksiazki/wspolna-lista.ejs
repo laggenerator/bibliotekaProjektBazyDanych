@@ -3,11 +3,22 @@
   <div class="alert alert-error"><%= locals.error %></div>
   <% } %> <% if (locals.sukces) { %>
   <div class="alert alert-sukces"><%= locals.sukces %></div>
-  <% } %> <% if (locals.query) { %>
-  <h2>Wyniki wyszukiwania dla: <%= query %></h2>
-  <% } else { %>
-  <h2>Katalog wszystich książek</h2>
   <% } %>
+  <!-- Nagłówek z tytułem/autorem/kategorią -->
+  <div class="ksiazka-header">
+    <div class="ksiazka-info">
+      <% if (locals.tytul) { %>
+      <h1 class="ksiazka-tytul"><%= tytul %></h1>
+      <% } else if (locals.autor) { %>
+      <h1 class="ksiazka-tytul"><%= autor %></h1>
+      <% } else if (locals.query) { %>
+      <h2>Wyniki wyszukiwania dla: <%= query %></h2>
+      <% } else { %>
+      <h2>Katalog wszystkich książek</h2>
+      <% } %>
+    </div>
+  </div>
+
   <div class="admin-actions">
     <div class="dynamiczny-filtr">
       <div class="input-group">
@@ -27,14 +38,15 @@
       </div>
     </div>
   </div>
+
   <div class="ksiazki-lista">
     <% ksiazki.forEach(function(ksiazka) { %>
     <div
       class="ksiazka-lista-item"
       data-tytul="<%= ksiazka.tytul.toLowerCase() %>"
-      data-autor="<%= Array.isArray(ksiazka.autor) ? ksiazka.autor.join(' ').toLowerCase() : ksiazka.autor.toLowerCase() %>"
-      data-kategorie="<%= Array.isArray(ksiazka.kategorie) ? ksiazka.kategorie.join(' ').toLowerCase() : ksiazka.kategorie.toLowerCase() %>"
-      data-isbn="<%= ksiazka.isbn.toLowerCase() %>"
+      data-autor="<%= Array.isArray(ksiazka.autor) ? ksiazka.autor.join(' ').toLowerCase() : (ksiazka.autor || '').toLowerCase() %>"
+      data-kategorie="<%= Array.isArray(ksiazka.kategorie) ? ksiazka.kategorie.join(' ').toLowerCase() : (ksiazka.kategorie || '').toLowerCase() %>"
+      data-isbn="<%= (ksiazka.isbn || '').toLowerCase() %>"
     >
       <div class="ksiazka-lista-lewa">
         <a href="/ksiazki/<%= ksiazka.isbn %>">
@@ -71,10 +83,10 @@
             <% if (index < ksiazka.autor.length - 1) { %>, <% } %> <% }); %> <%
             } else { %>
             <a
-              href="/autorzy/<%= encodeURIComponent(autor) %>"
+              href="/autorzy/<%= encodeURIComponent(ksiazka.autor) %>"
               class="autor-link"
             >
-              <%= ksiazka.autor || "Nie wiem" %>
+              <%= ksiazka.autor || "Nieznany autor" %>
             </a>
             <% } %>
           </span>
@@ -88,8 +100,7 @@
               Kategoria: <% } %>
             </span>
             <span class="value">
-              <% if (Array.isArray(ksiazka.kategorie) &&
-              ksiazka.kategorie.length > 1) { %> <%
+              <% if (Array.isArray(ksiazka.kategorie)) { %> <%
               ksiazka.kategorie.forEach(function(kategoria, index) { %>
               <a
                 href="/kategoria/<%= encodeURIComponent(kategoria) %>"
@@ -103,7 +114,7 @@
                 href="/kategoria/<%= encodeURIComponent(ksiazka.kategorie) %>"
                 class="autor-link"
               >
-                <%= ksiazka.kategorie || "Nie wiem" %>
+                <%= ksiazka.kategorie || "Brak kategorii" %>
               </a>
               <% } %>
             </span>
@@ -117,6 +128,15 @@
           <div class="detail-group">
             <span class="label">Ilość stron:</span>
             <span class="value"><%= ksiazka.ilosc_stron %> stron</span>
+          </div>
+
+          <div class="detail-group">
+            <span class="label">Ilość egzemplarzy:</span>
+            <span
+              class="value <%= ksiazka.dostepne_egzemplarze > 0 ? 'ksiazki-dostepne' : 'ksiazki-niedostepne' %>"
+              ><%= ksiazka.dostepne_egzemplarze %>/<%=
+              ksiazka.laczna_liczba_egzemplarzy %> dostępnych</span
+            >
           </div>
 
           <div class="detail-group">
@@ -139,16 +159,27 @@
             Szczegóły
           </button>
         </form>
-        <% if (ksiazka.dostepna) { %>
+
+        <% const dostepna = ksiazka.dostepna ||
+        ksiazka.liczba_dostepnych_egzemplarzy > 0; %> <% if (ksiazka.wKoszyku) {
+        %>
+        <button class="btn btn-success" style="width: 100%" disabled>
+          W koszyku ✓
+        </button>
+        <% } else if (dostepna) { %>
         <form
           action="/koszyk/dodaj/<%= ksiazka.isbn %>"
           method="POST"
-          style="display: inline"
+          style="display: contents"
         >
-          <button type="submit" class="btn btn-primary">Rezerwuj</button>
+          <button type="submit" class="btn btn-primary" style="width: 100%">
+            Rezerwuj
+          </button>
         </form>
         <% } else { %>
-        <button class="btn btn-sm btn-secondary" disabled>Niedostępna</button>
+        <button class="btn btn-secondary" style="width: 100%" disabled>
+          Niedostępna
+        </button>
         <% } %>
       </div>
     </div>

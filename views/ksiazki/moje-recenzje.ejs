@@ -1,63 +1,69 @@
 <div id="noweksiazki" class="ksiazki-lista-container">
   <% if (locals.error) { %>
-    <div class="alert alert-error">
-      <%= locals.error %>
-    </div>
-  <% } %>
-
-  <% if (locals.sukces) { %>
-    <div class="alert alert-sukces">
-      <%= locals.sukces %>
-    </div>
+  <div class="alert alert-error"><%= locals.error %></div>
+  <% } %> <% if (locals.sukces) { %>
+  <div class="alert alert-sukces"><%= locals.sukces %></div>
   <% } %>
 
   <h2>Moje recenzje</h2>
-  
+
   <div class="ksiazki-lista">
     <% recenzje.forEach(function(recenzja) { %>
-      <div class="ksiazka-lista-item">
-        
-        <div class="ksiazka-lista-prawa">
-          <h3 class="ksiazka-lista-tytul">
-            <a href="/ksiazki/<%= recenzja.isbn %>" class="tytul-link">
-              <%= recenzja.tytul_ksiazki || 'Brak tytułu' %>
-            </a>
-          </h3>
-          
-          <div class="ksiazka-lista-autor">
-            <span class="label">Ocena:</span>
-            <div class="recenzja-ocena">
-              <% for (let i = 1; i <= 5; i++) { %>
-                  <span class="gwiazdka <%= i <= recenzja.ocena ? 'aktywna' : '' %>">★</span>
-              <% } %>
-              <span class="ocena-wartosc">(<%= recenzja.ocena %>/5)</span>
-            </div>
-          </div>
-          
-          <div class="ksiazka-lista-details">
-            <div class="detail-group">
-              <span class="label">Data wystawienia:</span>
-              <span class="value"><%= new Date(recenzja.data_dodania).toLocaleDateString('pl-PL') %></span>
-            </div>
-            
-            <% if (recenzja.tekst) { %>
-            <div class="detail-group">
-              <span class="label">Opis:</span>
-              <span class="value"><%= recenzja.tekst %></span>
-            </div>
+    <div class="ksiazka-lista-item">
+      <div class="ksiazka-lista-prawa">
+        <h3 class="ksiazka-lista-tytul">
+          <a href="/ksiazki/<%= recenzja.isbn %>" class="tytul-link">
+            <%= recenzja.tytul_ksiazki || 'Brak tytułu' %>
+          </a>
+        </h3>
+
+        <div class="ksiazka-lista-autor">
+          <span class="label">Ocena:</span>
+          <div class="recenzja-ocena">
+            <% for (let i = 1; i <= 5; i++) { %>
+            <span class="gwiazdka <%= i <= recenzja.ocena ? 'aktywna' : '' %>"
+              >★</span
+            >
             <% } %>
+            <span class="ocena-wartosc">(<%= recenzja.ocena %>/5)</span>
           </div>
         </div>
-        
-        <div class="recenzja-akcje">
-          <form action="/ksiazki/usun-recenzje/<%= recenzja.id_recenzji %>" method="POST" class="usun-recenzje-form">
-            <input type="hidden" name="_method" value="DELETE">
-            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Czy na pewno chcesz usunąć tę recenzję?')">
-                Usuń recenzję
-            </button>
-          </form>
+
+        <div class="ksiazka-lista-details">
+          <div class="detail-group">
+            <span class="label">Data wystawienia:</span>
+            <span class="value"
+              ><%= new Date(recenzja.data_dodania).toLocaleDateString('pl-PL')
+              %></span
+            >
+          </div>
+
+          <% if (recenzja.tekst) { %>
+          <div class="detail-group">
+            <span class="label">Opis:</span>
+            <span class="value"><%= recenzja.tekst %></span>
+          </div>
+          <% } %>
+        </div>
       </div>
+
+      <div class="recenzja-akcje">
+        <form
+          action="/ksiazki/usun-recenzje/<%= recenzja.id_recenzji %>"
+          method="POST"
+          class="usun-recenzje-form"
+        >
+          <input type="hidden" name="_method" value="DELETE" />
+          <button
+            type="submit"
+            class="btn btn-sm btn-danger"
+            onclick="return confirm('Czy na pewno chcesz usunąć tę recenzję?')"
+          >
+            Usuń recenzję
+          </button>
+        </form>
       </div>
+    </div>
     <% }); %>
   </div>
 </div>

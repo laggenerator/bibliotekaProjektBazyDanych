@@ -1,110 +1,158 @@
 <div id="noweksiazki" class="ksiazki-lista-container">
   <% if (locals.error) { %>
-    <div class="alert alert-error">
-      <%= locals.error %>
-    </div>
-  <% } %>
-
-  <% if (locals.sukces) { %>
-    <div class="alert alert-sukces">
-      <%= locals.sukces %>
-    </div>
+  <div class="alert alert-error"><%= locals.error %></div>
+  <% } %> <% if (locals.sukces) { %>
+  <div class="alert alert-sukces"><%= locals.sukces %></div>
   <% } %>
   <h2>Twój koszyk</h2>
   <div class="admin-actions">
     <% if(ksiazki.length > 0) { %>
-      <a href="/koszyk/wyczysc" class="btn btn-primary usun" onclick="return confirm('Czy na pewno chcesz wyczyścić koszyk?')">Wyczyść koszyk</a>
-      <a href="/koszyk/zamow" class="btn btn-primary" onclick="return confirm('Czy na pewno chcesz złożyć zamówienie?')">Złóż zamówienie</a>
+    <form action="/koszyk/wyczysc" method="POST" style="display: inline">
+      <button
+        type="submit"
+        class="btn btn-primary usun"
+        onclick="return confirm('Czy na pewno chcesz wyczyścić koszyk?')"
+      >
+        Wyczyść koszyk
+      </button>
+    </form>
+    <form action="/koszyk/wypozycz" method="POST" style="display: inline">
+      <button
+        type="submit"
+        class="btn btn-primary"
+        onclick="return confirm('Czy na pewno chcesz złożyć zamówienie?')"
+      >
+        Złóż zamówienie
+      </button>
+    </form>
     <% } else { %>
-      <span>Koszyk jest pusty</span>
+    <span>Koszyk jest pusty</span>
     <% } %>
   </div>
-  
+
   <div class="ksiazki-lista">
     <% ksiazki.forEach(function(ksiazka) { %>
-      <div class="ksiazka-lista-item">
-        <div class="ksiazka-lista-lewa">
-          <a href="/ksiazki/<%= ksiazka.isbn %>">
-            <img class="ksiazka-lista-obraz" src="<%= ksiazka.img_link %>" alt="Okładka: <%= ksiazka.tytul %>" onerror="this.src='/assets/okladki/placeholder.webp'">
-          </a>
+    <div class="ksiazka-lista-item">
+      <div class="ksiazka-lista-lewa">
+        <a href="/ksiazki/<%= ksiazka.isbn %>">
+          <img
+            class="ksiazka-lista-obraz"
+            src="<%= ksiazka.img_link %>"
+            alt="Okładka: <%= ksiazka.tytul %>"
+            onerror="this.src='/assets/okladki/placeholder.webp'"
+          />
+        </a>
+      </div>
+
+      <div class="ksiazka-lista-prawa">
+        <h3 class="ksiazka-lista-tytul">
+          <a href="/ksiazki/<%= ksiazka.isbn %>" class="tytul-link"
+            ><%= ksiazka.tytul %></a
+          >
+        </h3>
+
+        <div class="ksiazka-lista-autor">
+          <span class="label">
+            <% if (Array.isArray(ksiazka.autor) && ksiazka.autor.length > 1) {
+            %> Autorzy: <% } else { %> Autor: <% } %>
+          </span>
+          <span class="value">
+            <% if (Array.isArray(ksiazka.autor)) { %> <%
+            ksiazka.autor.forEach(function(autor, index) { %>
+            <a
+              href="/autorzy/<%= encodeURIComponent(autor) %>"
+              class="autor-link"
+            >
+              <%= autor %>
+            </a>
+            <% if (index < ksiazka.autor.length - 1) { %>, <% } %> <% }); %> <%
+            } else { %>
+            <a
+              href="/autorzy/<%= encodeURIComponent(autor) %>"
+              class="autor-link"
+            >
+              <%= ksiazka.autor || "Nie wiem" %>
+            </a>
+            <% } %>
+          </span>
         </div>
-        
-        <div class="ksiazka-lista-prawa">
-          <h3 class="ksiazka-lista-tytul">
-            <a href="/ksiazki/<%= ksiazka.isbn %>" class="tytul-link"><%= ksiazka.tytul %></a>
-          </h3>
-          
-          <div class="ksiazka-lista-autor">
+
+        <div class="ksiazka-lista-details">
+          <div class="detail-group">
             <span class="label">
-                <% if (Array.isArray(ksiazka.autor) && ksiazka.autor.length > 1) { %>
-                    Autorzy:
-                <% } else { %>
-                    Autor:
-                <% } %>
+              <% if (Array.isArray(ksiazka.kategorie) &&
+              ksiazka.kategorie.length > 1) { %> Kategorie: <% } else { %>
+              Kategoria: <% } %>
             </span>
             <span class="value">
-                <% if (Array.isArray(ksiazka.autor)) { %>
-                    <% ksiazka.autor.forEach(function(autor, index) { %>
-                        <a href="/autorzy/<%= encodeURIComponent(autor) %>" class="autor-link">
-                            <%= autor %>
-                        </a>
-                        <% if (index < ksiazka.autor.length - 1) { %>, <% } %>
-                    <% }); %>
-                <% } else { %>
-                    <a href="/autorzy/<%= encodeURIComponent(autor) %>" class="autor-link">
-                        <%= ksiazka.autor || "Nie wiem" %>
-                    </a>
-                <% } %>
+              <% if (Array.isArray(ksiazka.kategorie) &&
+              ksiazka.kategorie.length > 1) { %> <%
+              ksiazka.kategorie.forEach(function(kategoria, index) { %>
+              <a
+                href="/kategoria/<%= encodeURIComponent(kategoria) %>"
+                class="autor-link"
+              >
+                <%= kategoria %>
+              </a>
+              <% if (index < ksiazka.kategorie.length - 1) { %>, <% } %> <% });
+              %> <% } else { %>
+              <a
+                href="/kategoria/<%= encodeURIComponent(ksiazka.kategorie) %>"
+                class="autor-link"
+              >
+                <%= ksiazka.kategorie || "Nie wiem" %>
+              </a>
+              <% } %>
             </span>
           </div>
-          
-          <div class="ksiazka-lista-details">
-            <div class="detail-group">
-                <span class="label">
-                <% if (Array.isArray(ksiazka.kategorie) && ksiazka.kategorie.length > 1) { %>
-                    Kategorie:
-                <% } else { %>
-                    Kategoria:
-                <% } %>
-              </span>
-              <span class="value">
-                <% if (Array.isArray(ksiazka.kategorie) && ksiazka.kategorie.length > 1) { %>
-                  <% ksiazka.kategorie.forEach(function(kategoria, index) { %>
-                    <a href="/kategoria/<%= encodeURIComponent(kategoria) %>" class="autor-link">
-                      <%= kategoria %>
-                    </a>
-                  <% if (index < ksiazka.kategorie.length - 1) { %>, <% } %>
-                  <% }); %>
-                <% } else { %>
-                  <a href="/kategoria/<%= encodeURIComponent(ksiazka.kategorie) %>" class="autor-link">
-                    <%= ksiazka.kategorie || "Nie wiem" %>
-                  </a>
-                <% } %>
-              </span>
-            </div>
-            
-            <div class="detail-group">
-              <span class="label">Rok wydania:</span>
-              <span class="value"><%= ksiazka.rok_wydania %></span>
-            </div>
-            
-            <div class="detail-group">
-              <span class="label">Ilość stron:</span>
-              <span class="value"><%= ksiazka.ilosc_stron %> stron</span>
-            </div>
-            
-            <div class="detail-group">
-              <span class="label">ISBN:</span>
-              <span class="value isbn"><%= ksiazka.isbn %></span>
-            </div>
+
+          <div class="detail-group">
+            <span class="label">Rok wydania:</span>
+            <span class="value"><%= ksiazka.rok_wydania %></span>
+          </div>
+
+          <div class="detail-group">
+            <span class="label">Ilość stron:</span>
+            <span class="value"><%= ksiazka.ilosc_stron %> stron</span>
+          </div>
+
+          <div class="detail-group">
+            <span class="label">ISBN:</span>
+            <span class="value isbn"><%= ksiazka.isbn %></span>
           </div>
         </div>
-        
-        <div class="ksiazka-lista-actions">
-          <a href="/ksiazki/<%= ksiazka.isbn %>" class="btn btn-primary">Szczegóły</a>
-          <a href="/koszyk/usun/<%= ksiazka.id %>" class="btn btn-primary usun">Usuń z koszyka</a>
-        </div>
       </div>
+
+      <div
+        class="ksiazka-lista-actions"
+        style="display: grid; grid-template-rows: 1fr 1fr; gap: 8px"
+      >
+        <form
+          action="/ksiazki/<%= ksiazka.isbn %>"
+          method="GET"
+          style="display: contents"
+        >
+          <button type="submit" class="btn btn-primary" style="width: 100%">
+            Szczegóły
+          </button>
+        </form>
+        <form
+          <form
+          action="/koszyk/usun/<%= ksiazka.id_egzemplarza %>"
+          method="POST"
+          style="display: contents"
+        >
+          <button
+            type="submit"
+            class="btn btn-primary usun"
+            style="width: 100%"
+            onclick="return confirm('Czy na pewno chcesz usunąć tę pozycję z koszyka?')"
+          >
+            Usuń z koszyka
+          </button>
+        </form>
+      </div>
+    </div>
     <% }); %>
   </div>
 </div>

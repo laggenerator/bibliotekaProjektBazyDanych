@@ -1,90 +1,144 @@
 <div id="noweksiazki" class="ksiazki-lista-container">
   <% if (locals.error) { %>
-    <div class="alert alert-error">
-      <%= locals.error %>
-    </div>
-  <% } %>
-
-  <% if (locals.sukces) { %>
-    <div class="alert alert-sukces">
-      <%= locals.sukces %>
-    </div>
-  <% } %>
-  
-  <% if (locals.query) { %>
-    <h2>Wyniki wyszukiwania dla: <%= query %></h2>
-  <% } else { %> 
-    <h2>Zarządzanie użytkownikami</h2>
-  <% } %>
-  <% if (!locals.dodawanie) { %>
-    <div class="admin-actions">
-      <form action="/admin/uzytkownicy/szukaj" method="GET" class="d-inline">
-        <div class="input-group">
-          <input type="text" name="query" class="form-control" placeholder="Szukaj użytkowników..." required>
-          <button type="submit" class="btn btn-success">Szukaj</button>
-        </div>
-      </form>
-      <div class="dynamiczny-filtr">
-        <div class="input-group">
-          <input type="text" id="filtr-ksiazki" class="form-control" placeholder="Filtruj użytkowników...">
-          <button type="button" class="btn btn-outline-secondary" disabled style="visibility: hidden;">
-          </button><span class="filtr-info input-group-text" id="filtr-info"></span>
-        </div>
+  <div class="alert alert-error"><%= locals.error %></div>
+  <% } %> <% if (locals.sukces) { %>
+  <div class="alert alert-sukces"><%= locals.sukces %></div>
+  <% } %> <% if (locals.query) { %>
+  <h2>Wyniki wyszukiwania dla: <%= query %></h2>
+  <% } else { %>
+  <h2>Zarządzanie użytkownikami</h2>
+  <% } %> <% if (!locals.dodawanie) { %>
+  <div class="admin-actions">
+    <!-- <form action="/admin/uzytkownicy/szukaj" method="GET" class="d-inline">
+      <div class="input-group">
+        <input
+          type="text"
+          name="query"
+          class="form-control"
+          placeholder="Szukaj użytkowników..."
+          required
+        />
+        <button type="submit" class="btn btn-success">Szukaj</button>
+      </div>
+    </form> -->
+    <div class="dynamiczny-filtr">
+      <div class="input-group">
+        <input
+          type="text"
+          id="filtr-ksiazki"
+          class="form-control"
+          placeholder="Filtruj użytkowników..."
+        />
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          disabled
+          style="visibility: hidden"
+        ></button
+        ><span class="filtr-info input-group-text" id="filtr-info"></span>
       </div>
     </div>
+  </div>
   <% } %>
-  
+
   <div class="ksiazki-lista">
     <% uzytkownicy.forEach(function(uzytkownik) { %>
-      <div class="ksiazka-lista-item uzytkownik-lista-item" 
-           data-nazwa="<%= uzytkownik.nazwa_uzytkownika.toLowerCase() %>"
-           data-email="<%= uzytkownik.email.toLowerCase() %>"
-           data-numer-karty="<%= uzytkownik.numer_karty %>"
-           data-rola="<%= (uzytkownik.rola || '').toLowerCase() %>">
-        
-        <div class="ksiazka-lista-prawa">
-          <h3 class="ksiazka-lista-tytul">
-            <a href="/uzytkownicy/<%= uzytkownik.numer_karty %>" class="tytul-link"><%= uzytkownik.nazwa_uzytkownika %></a>
-          </h3>
-          
-          <div class="ksiazka-lista-autor">
-            <span class="label">Numer karty:</span>
-            <span class="value"><%= uzytkownik.numer_karty %></span>
-          </div>
-          
-          <div class="ksiazka-lista-details">
-            <div class="detail-group">
-              <span class="label">Email:</span>
-              <span class="value"><%= uzytkownik.email %></span>
-            </div>
-            
-            <% if (uzytkownik.stworzono) { %>
-            <div class="detail-group">
-              <span class="label">Data rejestracji:</span>
-              <span class="value"><%= new Date(uzytkownik.stworzono).toLocaleDateString('pl-PL') %></span>
-            </div>
-            <% } %>
-                        
-            <% if (uzytkownik.ostatnie_logowanie) { %>
-            <div class="detail-group">
-              <span class="label">Ostatnie logowanie:</span>
-              <span class="value"><%= new Date(uzytkownik.ostatnie_logowanie).toLocaleDateString('pl-PL') %></span>
-            </div>
-            <% } %>
-
-            <% if (uzytkownik.rola) { %>
-            <div class="detail-group">
-              <span class="label">Rola:</span>
-              <span class="value rola-<%= uzytkownik.rola %>"><%= uzytkownik.rola %></span>
-            </div>
-            <% } %>
-          </div>
+    <div
+      class="ksiazka-lista-item uzytkownik-lista-item"
+      data-nazwa="<%= uzytkownik.nazwa_uzytkownika.toLowerCase() %>"
+      data-email="<%= uzytkownik.email.toLowerCase() %>"
+      data-numer-karty="<%= uzytkownik.numer_karty %>"
+      data-rola="<%= (uzytkownik.rola || '').toLowerCase() %>"
+    >
+      <div class="ksiazka-lista-prawa">
+        <h3 class="ksiazka-lista-tytul">
+          <a
+            href="/admin/uzytkownicy/<%= uzytkownik.numer_karty %>"
+            class="tytul-link"
+            ><%= uzytkownik.nazwa_uzytkownika %></a
+          >
+        </h3>
+        <div class="ksiazka-lista-autor">
+          <span class="label">Numer karty:</span>
+          <span class="value"><%= uzytkownik.numer_karty %></span>
         </div>
-        
-        <div class="ksiazka-lista-actions admin-actions">
-          <button class="btn btn-danger usun-ksiazke" data-numer_karty="<%= uzytkownik.numer_karty%>">Dezaktywuj konto</button>
+
+        <div class="ksiazka-lista-details">
+          <div class="detail-group">
+            <span class="label">Email:</span>
+            <span class="value"><%= uzytkownik.email %></span>
+          </div>
+
+          <% if (uzytkownik.stworzono) { %>
+          <div class="detail-group">
+            <span class="label">Data rejestracji:</span>
+            <span class="value"
+              ><%= new Date(uzytkownik.stworzono).toLocaleDateString('pl-PL')
+              %></span
+            >
+          </div>
+          <% } %> <% if (uzytkownik.ostatnie_logowanie) { %>
+          <div class="detail-group">
+            <span class="label">Ostatnie logowanie:</span>
+            <span class="value"
+              ><%= new
+              Date(uzytkownik.ostatnie_logowanie).toLocaleDateString('pl-PL')
+              %></span
+            >
+          </div>
+          <% } %> <% if (uzytkownik.rola) { %>
+          <div class="detail-group">
+            <span class="label">Rola:</span>
+            <span class="value rola-<%= uzytkownik.rola %>"
+              ><%= uzytkownik.rola %></span
+            >
+          </div>
+          <% } %> <% if (uzytkownik.aktywny != undefined) { %>
+          <div class="detail-group">
+            <span class="label">Status:</span>
+            <span class="value status-<%= uzytkownik.aktywny %>"
+              ><%= uzytkownik.aktywny === true ? "Aktywny" : "Dezaktywowany"
+              %></span
+            >
+          </div>
+          <% } %>
         </div>
       </div>
+
+      <div class="ksiazka-lista-actions admin-actions">
+        <% if(uzytkownik.aktywny == true) { %>
+        <form
+          action="/admin/uzytkownicy/dezaktywuj"
+          method="POST"
+          style="display: inline"
+        >
+          <input
+            type="hidden"
+            name="numer_karty"
+            value="<%= uzytkownik.numer_karty %>"
+          />
+          <button type="submit" class="btn btn-danger usun-ksiazke">
+            Dezaktywuj konto
+          </button>
+        </form>
+        <% } else { %>
+        <form
+          action="/admin/uzytkownicy/aktywuj"
+          method="POST"
+          style="display: inline"
+        >
+          <input
+            type="hidden"
+            name="numer_karty"
+            value="<%= uzytkownik.numer_karty %>"
+          />
+          <button type="submit" class="btn btn-success usun-ksiazke">
+            Aktywuj konto
+          </button>
+        </form>
+        <% } %>
+      </div>
+    </div>
     <% }); %>
   </div>
 </div>

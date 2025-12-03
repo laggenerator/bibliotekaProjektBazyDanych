@@ -1,74 +1,120 @@
-const e = require('express');
-const pool = require('../db');
+const e = require("express");
+const pool = require("../db");
 
 class Ksiazka {
-  static normalizacjaISBN(isbn){
-    const czystyISBN = isbn.replace(/[-\s]/g, '');
+  static normalizacjaISBN(isbn) {
+    const czystyISBN = isbn.replace(/[-\s]/g, "");
     const len = czystyISBN.length;
-    
+
     if (len === 10) {
-        return `${czystyISBN.substring(0, 2)}-${czystyISBN.substring(2, 4)}-${czystyISBN.substring(4, 9)}-${czystyISBN.substring(9)}`;
+      return `${czystyISBN.substring(0, 2)}-${czystyISBN.substring(
+        2,
+        4
+      )}-${czystyISBN.substring(4, 9)}-${czystyISBN.substring(9)}`;
     }
-    
+
     if (len === 13) {
-        return `${czystyISBN.substring(0, 3)}-${czystyISBN.substring(3, 5)}-${czystyISBN.substring(5, 9)}-${czystyISBN.substring(9, 12)}-${czystyISBN.substring(12)}`;
+      return `${czystyISBN.substring(0, 3)}-${czystyISBN.substring(
+        3,
+        5
+      )}-${czystyISBN.substring(5, 9)}-${czystyISBN.substring(
+        9,
+        12
+      )}-${czystyISBN.substring(12)}`;
     }
   }
 
-  static denormalizacjaISBN(isbn){
-    const czystyISBN = isbn.replace(/[-\s]/g, '');
+  static denormalizacjaISBN(isbn) {
+    const czystyISBN = isbn.replace(/[-\s]/g, "");
     return czystyISBN;
   }
 
-  // static formatKsiazka(ksiazka) {
-  //   return {
-  //     id: ksiazka.ksiazkaid,
-  //     isbn: this.normalizacjaISBN(ksiazka.isbn),
-  //     tytul: ksiazka.tytul,
-  //     autor: ksiazka.autor, // tablica autorów
-  //     rok_wydania: ksiazka.rok_wydania,
-  //     ilosc_stron: ksiazka.ilosc_stron,
-  //     img_link: `/assets/okladki/${this.normalizacjaISBN(ksiazka.isbn)}.webp`,
-  //     dostepna: ksiazka.dostepna,
-  //     wKoszyku: ksiazka.wkoszyku,
-  //     kategorie: ksiazka.kategorie
-  //   };
-  // }
-
   static formatKsiazka(ksiazka) {
-  return {
-    // Podstawowe informacje o książce
-    id_ksiazki: ksiazka.id_ksiazki,
-    isbn: this.normalizacjaISBN(ksiazka.isbn),
-    tytul: ksiazka.tytul,
-    rok_wydania: ksiazka.rok_wydania,
-    ilosc_stron: ksiazka.ilosc_stron,
-    
-    // Autorzy i kategorie
-    autor: ksiazka.autor || [],
-    kategorie: ksiazka.kategorie || [],
-    
-    // Link do okładki
-    img_link: ksiazka.img_link || `/assets/okladki/${this.denormalizacjaISBN(ksiazka.isbn)}.webp`,
-    
-    // Informacje o dostępności
-    dostepna: parseInt(ksiazka.liczba_dostepnych_egzemplarzy) > 0,
-    wKoszyku: ksiazka.wKoszyku || false,
-    
-    // Statystyki recenzji
-    srednia_ocena: ksiazka.srednia_ocena ? parseFloat(ksiazka.srednia_ocena) : 0,
-    liczba_recenzji: parseInt(ksiazka.liczba_recenzji) || 0,
-    
-    // Recenzje
-    recenzje: ksiazka.recenzje || [],
-    
-    // Informacje o egzemplarzach
-    laczna_liczba_egzemplarzy: parseInt(ksiazka.liczba_egzemplarzy) || 0,
-    dostepne_egzemplarze: parseInt(ksiazka.liczba_dostepnych_egzemplarzy) || 0
-  };
-}
+    return {
+      // Podstawowe informacje o książce
+      id_ksiazki: ksiazka.id_ksiazki,
+      isbn: this.normalizacjaISBN(ksiazka.isbn),
+      tytul: ksiazka.tytul,
+      rok_wydania: ksiazka.rok_wydania,
+      ilosc_stron: ksiazka.ilosc_stron,
 
-  static async pobierzWszystkie(){
+      // Autorzy i kategorie
+      autor: ksiazka.autor || [],
+      kategorie: ksiazka.kategorie || [],
+
+      // Link do okładki
+      img_link:
+        ksiazka.img_link ||
+        `/assets/okladki/${this.denormalizacjaISBN(ksiazka.isbn)}.webp`,
+
+      // Informacje o dostępności
+      dostepna: parseInt(ksiazka.liczba_dostepnych_egzemplarzy) > 0,
+      wKoszyku: ksiazka.wKoszyku || false,
+
+      // Statystyki recenzji
+      srednia_ocena: ksiazka.srednia_ocena
+        ? parseFloat(ksiazka.srednia_ocena)
+        : 0,
+      liczba_recenzji: parseInt(ksiazka.liczba_recenzji) || 0,
+
+      // Recenzje
+      recenzje: ksiazka.recenzje || [],
+
+      // Informacje o egzemplarzach
+      laczna_liczba_egzemplarzy: parseInt(ksiazka.liczba_egzemplarzy) || 0,
+      dostepne_egzemplarze:
+        parseInt(ksiazka.liczba_dostepnych_egzemplarzy) || 0,
+    };
+  }
+
+  static async aktualizuj(isbn, daneDoAktualizacji) {
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+
+      const ksiazka = await this.pobierzPoISBN(isbn);
+
+      if (!ksiazka) {
+        throw new Error(`Książka o ISBN ${isbn} nie istnieje`);
+      }
+
+      const noweDane = {
+        tytul: daneDoAktualizacji.tytul || ksiazka.tytul,
+        rok_wydania: daneDoAktualizacji.rok_wydania || ksiazka.rok_wydania,
+        ilosc_stron: daneDoAktualizacji.ilosc_stron || ksiazka.ilosc_stron,
+      };
+
+      const query = `
+      UPDATE ksiazka
+      SET tytul = $1, rok_wydania = $2, ilosc_stron = $3
+      WHERE isbn = $4
+      RETURNING *;
+    `;
+
+      const result = await client.query(query, [
+        noweDane.tytul,
+        noweDane.rok_wydania,
+        noweDane.ilosc_stron,
+        this.denormalizacjaISBN(isbn),
+      ]);
+
+      if (result.rows.length === 0) {
+        throw new Error(`Aktualizacja książki o ISBN ${isbn} nie powiodła się`);
+      }
+
+      await client.query("COMMIT");
+
+      return result.rows[0];
+    } catch (error) {
+      await client.query("ROLLBACK");
+      console.error("Błąd podczas aktualizacji książki:", error);
+      throw new Error(`Błąd podczas aktualizacji książki: ${error.message}`);
+    } finally {
+      client.release();
+    }
+  }
+
+  static async pobierzWszystkie() {
     // const query = `
     // SELECT * FROM ksiazka ORDER BY id_ksiazki desc;
     // `;
@@ -92,10 +138,10 @@ class Ksiazka {
     ORDER BY liczba_dostepnych_egzemplarzy DESC
     `;
     const result = await pool.query(query);
-    return result.rows.map(row => this.formatKsiazka(row));
+    return result.rows.map((row) => this.formatKsiazka(row));
   }
 
-  static async pobierzPoISBN(isbn){
+  static async pobierzPoISBN(isbn) {
     const query = `
     SELECT
       k.*,
@@ -127,11 +173,11 @@ class Ksiazka {
     GROUP BY k.id_ksiazki
   `;
     const result = await pool.query(query, [this.denormalizacjaISBN(isbn)]);
-    const ksiazka = this.formatKsiazka(result.rows[0])
+    const ksiazka = this.formatKsiazka(result.rows[0]);
     return ksiazka;
   }
 
-  static async pobierzPoID(ksiazkaId){
+  static async pobierzPoID(ksiazkaId) {
     const query = `
     SELECT
       k.*,
@@ -166,7 +212,7 @@ class Ksiazka {
     return this.formatKsiazka(result.rows[0]);
   }
 
-  static async najnowsze6Ksiazek(){
+  static async najnowsze6Ksiazek() {
     const query = `
     SELECT
       k.*,
@@ -188,48 +234,52 @@ class Ksiazka {
     LIMIT 6
     `;
     const result = await pool.query(query);
-    return result.rows.map(row => this.formatKsiazka(row));
+    return result.rows.map((row) => this.formatKsiazka(row));
   }
 
-  static async kategorie(){
+  static async kategorie() {
     const query = `
     SELECT opis FROM kategoria ORDER BY id_kategorii ASC;
     `;
     const result = await pool.query(query);
-    return result.rows.map(row => row.opis);
-  };
+    return result.rows.map((row) => row.opis);
+  }
 
-  static async wyszukajKategorie(kategoria){
+  static async wyszukajKategorie(kategoria) {
     const query = `
     SELECT
       k.*,
       ARRAY_AGG(DISTINCT a.imie || ' ' || a.nazwisko) AS autor,
-      ARRAY_AGG(DISTINCT kat.opis) AS kategorie
+      ARRAY_AGG(DISTINCT kat.opis) AS kategorie,
+      COUNT(DISTINCT e.id_egzemplarza) AS liczba_egzemplarzy,
+      COUNT(DISTINCT CASE WHEN e.status = 'Wolna' AND e.wlasciciel IS NULL THEN e.id_egzemplarza END) AS liczba_dostepnych_egzemplarzy
     FROM ksiazka k
     LEFT JOIN ksiazka_autor ka ON k.id_ksiazki = ka.id_ksiazki
     LEFT JOIN autor a ON ka.id_autora = a.id_autora
     LEFT JOIN ksiazka_kategoria kk ON k.id_ksiazki = kk.id_ksiazki
     LEFT JOIN kategoria kat ON kk.id_kategorii = kat.id_kategorii
+    LEFT JOIN egzemplarz e ON k.id_ksiazki = e.id_ksiazki
     WHERE kat.opis ILIKE $1
     GROUP BY k.id_ksiazki
     ORDER BY k.tytul
     `;
     const pattern = `%${kategoria}%`;
     const result = await pool.query(query, [pattern]);
-    return result.rows.map(row => this.formatKsiazka(row));
+    return result.rows.map((row) => this.formatKsiazka(row));
   }
 
-    static async dodaj(ksiazka){
+  static async dodaj(ksiazka) {
     const client = await pool.connect();
-    try{
+    try {
       await client.query("BEGIN");
       const dodawanaKsiazka = {
         ...ksiazka,
         isbn: this.denormalizacjaISBN(ksiazka.isbn),
         autor: Array.isArray(ksiazka.autor) ? ksiazka.autor : [ksiazka.autor],
-        kategorie: Array.isArray(ksiazka.kategorie) ? ksiazka.kategorie : [ksiazka.kategorie]  
-      
-      }
+        kategorie: Array.isArray(ksiazka.kategorie)
+          ? ksiazka.kategorie
+          : [ksiazka.kategorie],
+      };
 
       // Dodawania książki do ksiazka
       const ksiazkaQuery = `
@@ -244,22 +294,22 @@ class Ksiazka {
         dodawanaKsiazka.isbn,
         dodawanaKsiazka.tytul,
         parseInt(dodawanaKsiazka.rok_wydania),
-        parseInt(dodawanaKsiazka.ilosc_stron)
+        parseInt(dodawanaKsiazka.ilosc_stron),
       ]);
       if (ksiazkaResult.rows.length === 0) {
-        throw new Error('Książka o takim ISBN już istnieje w bazie');
+        throw new Error("Książka o takim ISBN już istnieje w bazie");
       }
 
       const idKsiazki = ksiazkaResult.rows[0].id_ksiazki;
 
       // Dodawanie autorów do autor
-      for (const autorStr of dodawanaKsiazka.autor){
+      for (const autorStr of dodawanaKsiazka.autor) {
         const pociety_autor = autorStr.trim().split(" ");
-        if(pociety_autor.length < 1){
-          throw new Error("TO AUTOR NAWET IMIENIA NIE MA!!!???")
+        if (pociety_autor.length < 1) {
+          throw new Error("TO AUTOR NAWET IMIENIA NIE MA!!!???");
         }
-        let nazwisko = '';
-        if(pociety_autor.length > 1){
+        let nazwisko = "";
+        if (pociety_autor.length > 1) {
           nazwisko = pociety_autor.pop();
         }
         const imie = pociety_autor.join(" ");
@@ -271,26 +321,32 @@ class Ksiazka {
         )
         RETURNING id_autora
         `;
-        
 
         const autorResult = await client.query(autorQuery, [imie, nazwisko]);
 
-        const idAutora = autorResult.rows.length > 0 
-        ? autorResult.rows[0].id_autora
-        : (await client.query(
-          `SELECT id_autora FROM autor WHERE imie = $1::text AND nazwisko = $2::text`, [imie, nazwisko]
-        )).rows[0].id_autora;
+        const idAutora =
+          autorResult.rows.length > 0
+            ? autorResult.rows[0].id_autora
+            : (
+                await client.query(
+                  `SELECT id_autora FROM autor WHERE imie = $1::text AND nazwisko = $2::text`,
+                  [imie, nazwisko]
+                )
+              ).rows[0].id_autora;
         // DOBRA A CO ROBIMY JAK DWOCH SIE TAK SAMO NAZYWA TO TRZEBA ROZWIAZAC A NIE ZE LACZYMY LUDZI
         const autorKsiazkaQuery = `
         INSERT INTO ksiazka_autor (id_ksiazki, id_autora)
         VALUES($1, $2)
         `;
-        const autorKsiazkaResult = await client.query(autorKsiazkaQuery, [idKsiazki, idAutora]);
+        const autorKsiazkaResult = await client.query(autorKsiazkaQuery, [
+          idKsiazki,
+          idAutora,
+        ]);
       }
       // Dodawanie kategorii do kategoria
-      for(const kategoriaStr of dodawanaKsiazka.kategorie){
+      for (const kategoriaStr of dodawanaKsiazka.kategorie) {
         const opis = kategoriaStr.trim();
-        if(!opis) continue;
+        if (!opis) continue;
 
         const kategoriaQuery = `
         INSERT INTO kategoria(opis)
@@ -300,22 +356,29 @@ class Ksiazka {
         `;
 
         const kategoriaResult = await client.query(kategoriaQuery, [opis]);
-        const idKategorii = kategoriaResult.rows.length > 0 
-        ? kategoriaResult.rows[0].id_kategorii
-        : (await client.query(
-          `SELECT id_kategorii FROM kategoria WHERE opis ILIKE $1`, [opis]
-        )).rows[0].id_kategorii;
+        const idKategorii =
+          kategoriaResult.rows.length > 0
+            ? kategoriaResult.rows[0].id_kategorii
+            : (
+                await client.query(
+                  `SELECT id_kategorii FROM kategoria WHERE opis ILIKE $1`,
+                  [opis]
+                )
+              ).rows[0].id_kategorii;
 
         const kategoriaKsiazkaQuery = `
         INSERT INTO ksiazka_kategoria (id_ksiazki, id_kategorii)
         VALUES ($1, $2)
         `;
 
-        const kategoriaKsiazkaResult = await client.query(kategoriaKsiazkaQuery, [idKsiazki, idKategorii]);
+        const kategoriaKsiazkaResult = await client.query(
+          kategoriaKsiazkaQuery,
+          [idKsiazki, idKategorii]
+        );
       }
       let dodaneItemy = [];
       // Dodawania egezemplarzy do egzemplarze
-      if(dodawanaKsiazka.liczba_kopii && dodawanaKsiazka.liczba_kopii > 0){
+      if (dodawanaKsiazka.liczba_kopii && dodawanaKsiazka.liczba_kopii > 0) {
         const domyslnyPokoj = 21;
         const domyslnaPolka = 37;
 
@@ -327,40 +390,48 @@ class Ksiazka {
         ) RETURNING id_lokalizacji
         `;
 
-        const lokalizacjaResult = await client.query(lokalizacjaQuery, [domyslnyPokoj, domyslnaPolka]);
-        const idLokalizacji = lokalizacjaResult.rows.length > 0 
-        ? lokalizacjaResult.rows[0].id_lokalizacji
-        : (await client.query(`
-          SELECT id_lokalizacji FROM magazyn WHERE pokoj = $1 AND polka = $2`, [domyslnyPokoj, domyslnaPolka]
-        )).rows[0].id_lokalizacji;
+        const lokalizacjaResult = await client.query(lokalizacjaQuery, [
+          domyslnyPokoj,
+          domyslnaPolka,
+        ]);
+        const idLokalizacji =
+          lokalizacjaResult.rows.length > 0
+            ? lokalizacjaResult.rows[0].id_lokalizacji
+            : (
+                await client.query(
+                  `
+          SELECT id_lokalizacji FROM magazyn WHERE pokoj = $1 AND polka = $2`,
+                  [domyslnyPokoj, domyslnaPolka]
+                )
+              ).rows[0].id_lokalizacji;
 
         const egzemplarzQuery = `
         INSERT INTO egzemplarz(id_ksiazki, id_lokalizacji)
         VALUES ($1, $2)
         RETURNING id_ksiazki
         `;
-        for(let i=0;i<dodawanaKsiazka.liczba_kopii;i++){
-          let placeholder = await client.query(egzemplarzQuery, [idKsiazki, idLokalizacji]);
+        for (let i = 0; i < dodawanaKsiazka.liczba_kopii; i++) {
+          let placeholder = await client.query(egzemplarzQuery, [
+            idKsiazki,
+            idLokalizacji,
+          ]);
         }
       }
       await client.query("COMMIT");
       return idKsiazki;
-    } catch (error){
+    } catch (error) {
       await client.query("ROLLBACK");
-      console.log([error])
+      console.log([error]);
       throw new Error(`Błąd podczas dodawania książki: ${error}`);
     } finally {
       client.release();
     }
   }
 
-
-
-
-  static async dodajRecenzje(recenzja){
+  static async dodajRecenzje(recenzja) {
     const client = await pool.connect();
-    try{
-      client.query("BEGIN")
+    try {
+      client.query("BEGIN");
       const recenzjaQuery = `
       INSERT INTO recenzja(id_ksiazki, numer_karty, ocena, tekst)
       VALUES ($1, $2, $3, $4)
@@ -371,21 +442,26 @@ class Ksiazka {
       ) AS isbn
       `;
 
-      const result = await client.query(recenzjaQuery, [recenzja.id_ksiazki, recenzja.numer_karty, recenzja.ocena, recenzja.tekst]);
+      const result = await client.query(recenzjaQuery, [
+        recenzja.id_ksiazki,
+        recenzja.numer_karty,
+        recenzja.ocena,
+        recenzja.tekst,
+      ]);
       client.query("COMMIT");
       return this.denormalizacjaISBN(result.rows[0].isbn);
-    } catch (error){
-      console.log(error)
+    } catch (error) {
+      console.log(error);
       client.query("ROLLBACK");
     } finally {
       client.release();
     }
   }
 
-  static async usunRecenzje(recenzja){
+  static async usunRecenzje(recenzja) {
     const client = await pool.connect();
-    try{
-      client.query("BEGIN")
+    try {
+      client.query("BEGIN");
       const recenzjaQuery = `
       DELETE FROM recenzja r
       WHERE id_recenzji = $1 AND (
@@ -399,19 +475,22 @@ class Ksiazka {
       ) AS isbn
       `;
 
-      const result = await client.query(recenzjaQuery, [recenzja.id_recenzji, recenzja.numer_karty]);
+      const result = await client.query(recenzjaQuery, [
+        recenzja.id_recenzji,
+        recenzja.numer_karty,
+      ]);
       client.query("COMMIT");
       return this.denormalizacjaISBN(result.rows[0].isbn);
-    } catch (error){
-      console.log(error)
+    } catch (error) {
+      console.log(error);
       client.query("ROLLBACK");
     } finally {
       client.release();
     }
   }
 
-  static async znajdzKsiazki(zapytanie){
-    try{
+  static async znajdzKsiazki(zapytanie) {
+    try {
       const query = `
       SELECT 
         k.*,
@@ -430,13 +509,38 @@ class Ksiazka {
       GROUP BY k.id_ksiazki, k.tytul, k.isbn, k.rok_wydania
       ORDER BY k.tytul
       `;
-  
+
       const result = await pool.query(query, zapytanie);
-      return result.rows.map(row => this.formatKsiazka(row));
+      return result.rows.map((row) => this.formatKsiazka(row));
     } catch (error) {
       console.log(error);
       throw new Error(error);
     }
+  }
+
+  static async dodajFlagiWKoszyku(ksiazki, numer_karty) {
+    if (!numer_karty || !ksiazki.length) return ksiazki;
+
+    const isbns = ksiazki.map((k) => this.denormalizacjaISBN(k.isbn));
+
+    const query = `
+    SELECT DISTINCT k.isbn
+    FROM egzemplarz e
+    JOIN ksiazka k ON e.id_ksiazki = k.id_ksiazki
+    WHERE k.isbn = ANY($1)
+    AND e.wlasciciel = $2 
+    AND e.status = 'W koszyku'
+    `;
+
+    const result = await pool.query(query, [isbns, numer_karty]);
+    const isbnsWKoszyku = new Set(result.rows.map((row) => row.isbn));
+
+    const ksiazkiZFlaga = ksiazki.map((ksiazka) => ({
+      ...ksiazka,
+      wKoszyku: isbnsWKoszyku.has(this.denormalizacjaISBN(ksiazka.isbn)),
+    }));
+
+    return ksiazkiZFlaga;
   }
 
   // PONIŻEJ SĄ JESZCZE STARE DO PRZERÓBKI NA PORZĄDNĄ BAZĘ
@@ -451,7 +555,7 @@ class Ksiazka {
   //   `;
   //   const arraySlow = wyszukiwanie.split(" ");
   //   const pattern = arraySlow.map(slowo => `\\m${slowo}`);
-    
+
   //   const result = await pool.query(query, [wyszukiwanie, pattern]);
   //   return result.rows.map(row => this.formatKsiazka(row));
 
@@ -459,7 +563,7 @@ class Ksiazka {
   //   return result.rows[0];
   // }
 
-  static async zaklepKsiazke(ksiazkaId){
+  static async zaklepKsiazke(ksiazkaId) {
     const query = `
     UPDATE ksiazki SET dostepna = false WHERE ksiazkaId = $1
     `;
@@ -467,6 +571,6 @@ class Ksiazka {
     const result = await pool.query(query, [ksiazkaId]);
     return result.rows[0];
   }
-};
+}
 
 module.exports = Ksiazka;

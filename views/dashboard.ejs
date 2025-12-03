@@ -4,7 +4,7 @@
         <p>Witaj, <strong class="<%= locals.uzytkownik.rola === 'ADMIN' ? 'rola-ADMIN' : 'rola-USER-light' %>"><%= locals.uzytkownik.nazwa_uzytkownika %></strong>!</p>
     </div>
 
-    <div class="dashboard-stats">
+    <!-- <div class="dashboard-stats">
         <div class="stat-card">
           <div class="stat-icon">📚</div>
           <div class="stat-info">
@@ -20,7 +20,7 @@
             <p class="stat-number"><%= poterminie %></p>
           </div>
         </div>
-    </div>
+    </div> -->
 
     <div class="dashboard-sections">
       <div class="section-card">
@@ -62,7 +62,7 @@
             </div>
             <div class="info-item">
               <span class="info-label">Data dołączenia:</span>
-              <span class="info-value"><%= new Date().toLocaleDateString('pl-PL') %></span>
+              <span class="info-value"><%= locals.uzytkownik.datarejestracji %></span>
             </div>
           </div>
         </div>

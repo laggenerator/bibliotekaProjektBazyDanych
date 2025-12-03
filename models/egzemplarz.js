@@ -1,18 +1,19 @@
-const e = require('express');
-const pool = require('../db');
-const Ksiazka = require("./ksiazka")
+const e = require("express");
+const pool = require("../db");
+const Ksiazka = require("./ksiazka");
 
 class Egzemplarz {
-  static async dodajEgzemplarz(id_ksiazki){
+  static async dodajEgzemplarz(id_ksiazki) {
     const client = await pool.connect();
-    try{
+    try {
       const egz = await this.znajdzDlaKsiazki(id_ksiazki);
-      const lokalizacje = egz.map(e => ({
+      const lokalizacje = egz.map((e) => ({
         pokoj: e.pokoj,
-        polka: e.polka
+        polka: e.polka,
       }));
-      const losowaLokalizacja = lokalizacje[Math.floor(Math.random() * lokalizacje.length)];
-      await client.query('BEGIN');
+      const losowaLokalizacja =
+        lokalizacje[Math.floor(Math.random() * lokalizacje.length)];
+      await client.query("BEGIN");
       const query = `
       INSERT INTO egzemplarz(id_ksiazki, id_lokalizacji, wlasciciel)
       SELECT $1, id_lokalizacji, NULL FROM magazyn WHERE pokoj = $2 AND polka = $3
@@ -20,17 +21,20 @@ class Egzemplarz {
         SELECT 1 FROM ksiazka WHERE id_ksiazki = $1
       ) RETURNING id_egzemplarza;
       `;
-      const result = await client.query(query, [id_ksiazki, losowaLokalizacja.pokoj, losowaLokalizacja.polka]);
-      await client.query('COMMIT');
+      const result = await client.query(query, [
+        id_ksiazki,
+        losowaLokalizacja.pokoj,
+        losowaLokalizacja.polka,
+      ]);
+      await client.query("COMMIT");
       return result.rows[0].id_egzemplarza;
-    } catch(error){
-      await client.query('ROLLBACK');
+    } catch (error) {
+      await client.query("ROLLBACK");
       throw new Error(error);
-    } finally{
+    } finally {
       client.release();
     }
   }
-
 
   static async znajdzDlaKsiazki(id_ksiazki) {
     const query = `
@@ -58,7 +62,7 @@ class Egzemplarz {
       WHERE e.id_ksiazki = $1
       ORDER BY e.id_egzemplarza
     `;
-    
+
     const result = await pool.query(query, [id_ksiazki]);
     return result.rows;
   }
@@ -78,7 +82,7 @@ class Egzemplarz {
       LEFT JOIN uzytkownik u ON e.wlasciciel = u.numer_karty
       WHERE e.id_egzemplarza = $1
     `;
-    
+
     const result = await pool.query(query, [id_egzemplarza]);
     return result.rows[0] || null;
   }
@@ -90,7 +94,7 @@ class Egzemplarz {
       WHERE id_egzemplarza = $2
       RETURNING *
     `;
-    
+
     const result = await pool.query(query, [nowy_status, id_egzemplarza]);
     return result.rows[0];
   }
@@ -101,9 +105,112 @@ class Egzemplarz {
       FROM egzemplarz 
       WHERE id_ksiazki = $1 AND status = 'Wolna'
     `;
-    
+
     const result = await pool.query(query, [id_ksiazki]);
     return parseInt(result.rows[0].count);
+  }
+  static async wylaczZObiegu(id_egzemplarza) {
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+
+      const checkQuery = `
+      SELECT status, id_ksiazki FROM egzemplarz WHERE id_egzemplarza = $1
+    `;
+      const checkResult = await client.query(checkQuery, [
+        parseInt(id_egzemplarza),
+      ]);
+
+      if (checkResult.rows.length === 0) {
+        throw new Error(`Egzemplarz ${id_egzemplarza} nie istnieje`);
+      }
+
+      const { status: staryStatus, id_ksiazki } = checkResult.rows[0];
+
+      if (staryStatus !== "Wolna") {
+        throw new Error(
+          `Nie można wycofać egzemplarza w statusie: ${staryStatus}`
+        );
+      }
+
+      const updateQuery = `
+      UPDATE egzemplarz
+      SET status = 'Wycofana'::stan
+      WHERE id_egzemplarza = $1
+      RETURNING *;
+    `;
+
+      const result = await client.query(updateQuery, [
+        parseInt(id_egzemplarza),
+      ]);
+      await client.query("COMMIT");
+
+      return {
+        id_ksiazki: id_ksiazki,
+        egzemplarz: result.rows[0],
+        stary_status: staryStatus,
+        nowy_status: "Wycofana",
+      };
+    } catch (error) {
+      await client.query("ROLLBACK");
+      console.error("Błąd podczas wycofywania egzemplarza:", error);
+      throw new Error(`Błąd podczas wycofywania egzemplarza: ${error.message}`);
+    } finally {
+      client.release();
+    }
+  }
+
+  static async przywrocDoObiegu(id_egzemplarza) {
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+
+      const checkQuery = `
+      SELECT status, id_ksiazki FROM egzemplarz WHERE id_egzemplarza = $1
+    `;
+      const checkResult = await client.query(checkQuery, [
+        parseInt(id_egzemplarza),
+      ]);
+
+      if (checkResult.rows.length === 0) {
+        throw new Error(`Egzemplarz ${id_egzemplarza} nie istnieje`);
+      }
+
+      const { status: staryStatus, id_ksiazki } = checkResult.rows[0];
+
+      if (staryStatus !== "Wycofana") {
+        throw new Error(
+          `Nie można przywrócić egzemplarza w statusie: ${staryStatus}`
+        );
+      }
+
+      const updateQuery = `
+      UPDATE egzemplarz
+      SET status = 'Wolna'::stan
+      WHERE id_egzemplarza = $1
+      RETURNING *;
+    `;
+
+      const result = await client.query(updateQuery, [
+        parseInt(id_egzemplarza),
+      ]);
+      await client.query("COMMIT");
+
+      return {
+        id_ksiazki: id_ksiazki,
+        egzemplarz: result.rows[0],
+        stary_status: staryStatus,
+        nowy_status: "Wolna",
+      };
+    } catch (error) {
+      await client.query("ROLLBACK");
+      console.error("Błąd podczas przywracania egzemplarza:", error);
+      throw new Error(
+        `Błąd podczas przywracania egzemplarza: ${error.message}`
+      );
+    } finally {
+      client.release();
+    }
   }
 }
 

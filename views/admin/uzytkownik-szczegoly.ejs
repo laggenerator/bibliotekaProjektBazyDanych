@@ -1,0 +1,324 @@
+<div id="noweksiazki" class="ksiazki-lista-container">
+  <% if (locals.error) { %>
+  <div class="alert alert-error"><%= locals.error %></div>
+  <% } %> <% if (locals.sukces) { %>
+  <div class="alert alert-sukces"><%= locals.sukces %></div>
+  <% } %>
+
+  <h2>Użytkownik: <%= przegladanyUzytkownik.nazwa_uzytkownika %></h2>
+
+  <div class="admin-actions">
+    <a href="/admin/uzytkownicy" class="btn btn-secondary">Powrót do listy</a>
+    <% if (przegladanyUzytkownik.aktywny) { %>
+    <form
+      action="/admin/uzytkownicy/dezaktywuj"
+      method="POST"
+      class="form-akcja"
+    >
+      <input
+        type="hidden"
+        name="numer_karty"
+        value="<%= przegladanyUzytkownik.numer_karty %>"
+      />
+      <button
+        type="submit"
+        class="btn btn-warning"
+        onclick="return confirm('Czy na pewno chcesz dezaktywować użytkownika?')"
+      >
+        Dezaktywuj
+      </button>
+    </form>
+    <% } else { %>
+    <form action="/admin/uzytkownicy/aktywuj" method="POST" class="form-akcja">
+      <input
+        type="hidden"
+        name="numer_karty"
+        value="<%= przegladanyUzytkownik.numer_karty %>"
+      />
+      <button
+        type="submit"
+        class="btn btn-success"
+        onclick="return confirm('Czy na pewno chcesz aktywować użytkownika?')"
+      >
+        Aktywuj
+      </button>
+    </form>
+    <% } %>
+  </div>
+
+  <!-- Informacje o użytkowniku -->
+  <div class="zamowienie-info">
+    <h2>Informacje o użytkowniku</h2>
+    <div class="zamowienie-details">
+      <div class="detail-group">
+        <span class="label">Numer karty:</span>
+        <span class="value"><%= przegladanyUzytkownik.numer_karty %></span>
+      </div>
+      <div class="detail-group">
+        <span class="label">Nazwa użytkownika:</span>
+        <span class="value"
+          ><%= przegladanyUzytkownik.nazwa_uzytkownika %></span
+        >
+      </div>
+      <div class="detail-group">
+        <span class="label">Email:</span>
+        <span class="value"><%= przegladanyUzytkownik.email %></span>
+      </div>
+      <div class="detail-group">
+        <span class="label">Data rejestracji:</span>
+        <span class="value">
+          <%= przegladanyUzytkownik.datarejestracji %>
+        </span>
+      </div>
+      <div class="detail-group">
+        <span class="label">Status:</span>
+        <span class="value">
+          <% if (przegladanyUzytkownik.aktywny) { %>
+          <span class="status-badge status-zwrocone">Aktywny</span>
+          <% } else { %>
+          <span class="status-badge status-anulowane">Nieaktywny</span>
+          <% } %>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Historia wypożyczeń -->
+  <div class="zamowienie-info">
+    <h2>Historia wypożyczeń (<%= wypozyczenia.length %>)</h2>
+
+    <% if (wypozyczenia && wypozyczenia.length > 0) { %>
+    <div class="tabela-kontener">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th>ID zamówienia</th>
+            <th>Data wypożyczenia</th>
+            <th>Termin zwrotu</th>
+            <th>Status</th>
+            <th>Liczba oddanych książek</th>
+            <th>Akcje</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% wypozyczenia.forEach(function(zamowienie) { %>
+          <tr>
+            <td>#<%= zamowienie.id_wypozyczenia %></td>
+            <td>
+              <%= new Date(zamowienie.poczatek).toLocaleDateString('pl-PL') %>
+            </td>
+            <td class="<%= zamowienie.czy_przekroczony ? 'text-danger' : '' %>">
+              <%= new Date(zamowienie.deadline).toLocaleDateString('pl-PL') %>
+            </td>
+            <td>
+              <% if (zamowienie.czy_przekroczony) { %>
+              <span class="status-badge status-przekroczone">
+                <%= zamowienie.status %> (PRZEKROCZONY TERMIN)
+              </span>
+              <% } else { %>
+              <span
+                class="status-badge status-<%= zamowienie.status.toLowerCase().replace(' ', '-') %>"
+              >
+                <%= zamowienie.status %>
+              </span>
+              <% } %>
+            </td>
+            <td>
+              <%= zamowienie.liczba_oddanych %>/<%=
+              zamowienie.laczna_liczba_ksiazek %>
+            </td>
+            <td>
+              <div class="przyciski-akcji">
+                <a
+                  href="/admin/zamowienia/<%= zamowienie.id_wypozyczenia %>"
+                  class="btn btn-primary btn-small"
+                >
+                  Szczegóły
+                </a>
+              </div>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+    <% } else { %>
+    <p class="text-muted">Brak historii wypożyczeń.</p>
+    <% } %>
+  </div>
+
+  <!-- Aktywne wypożyczenia -->
+  <% const aktywneWypozyczenia = wypozyczenia.filter(z => z.status !==
+  'Zwrócone' && z.status !== 'Anulowane' ); %> <% if (aktywneWypozyczenia.length
+  > 0) { %>
+  <div class="zamowienie-info">
+    <h2>Aktywne wypożyczenia (<%= aktywneWypozyczenia.length %>)</h2>
+
+    <div class="tabela-kontener">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th>ID zamówienia</th>
+            <th>Data wypożyczenia</th>
+            <th>Termin zwrotu</th>
+            <th>Status</th>
+            <th>Opóźnienie</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% aktywneWypozyczenia.forEach(function(zamowienie) { %>
+          <tr>
+            <td>#<%= zamowienie.id_wypozyczenia %></td>
+            <td>
+              <%= new Date(zamowienie.poczatek).toLocaleDateString('pl-PL') %>
+            </td>
+            <td
+              class="<%= zamowienie.termin_przekroczony ? 'text-danger' : '' %>"
+            >
+              <%= new Date(zamowienie.deadline).toLocaleDateString('pl-PL') %>
+              <% if (zamowienie.termin_przekroczony) { %>
+              <br /><small class="text-danger">(opóźnienie)</small>
+              <% } %>
+            </td>
+            <td>
+              <span
+                class="status-badge status-<%= zamowienie.status.toLowerCase().replace(' ', '-') %>"
+              >
+                <%= zamowienie.status %>
+              </span>
+            </td>
+            <td>
+              <% if (zamowienie.termin_przekroczony) { %>
+              <span class="text-danger">
+                <%= zamowienie.dni_opoznienia || '?' %> dni
+              </span>
+              <% } else { %>
+              <span class="text-success">W terminie</span>
+              <% } %>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <% } %>
+</div>
+
+<style>
+  .form-akcja {
+    margin: 0;
+    display: inline;
+  }
+
+  .btn-small {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    min-width: auto;
+  }
+
+  .text-muted {
+    color: color-mix(in srgb, var(--font-color) 50%, transparent);
+    font-style: italic;
+  }
+
+  .text-danger {
+    color: var(--red-accent) !important;
+    font-weight: 600;
+  }
+
+  .text-success {
+    color: var(--green-accent) !important;
+    font-weight: 600;
+  }
+
+  .tabela-kontener {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid
+      color-mix(in srgb, var(--dashboard-color) 20%, transparent);
+  }
+
+  .tabela {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+  }
+
+  .tabela thead {
+    background: color-mix(in srgb, var(--dashboard-color) 10%, transparent);
+  }
+
+  .tabela th {
+    padding: 16px 20px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--font-color);
+    border-bottom: 2px solid
+      color-mix(in srgb, var(--dashboard-color) 20%, transparent);
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+  }
+
+  .tabela td {
+    padding: 16px 20px;
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--dashboard-color) 15%, transparent);
+    color: var(--font-color);
+  }
+
+  .tabela tbody tr:hover {
+    background: color-mix(in srgb, var(--dashboard-color) 8%, transparent);
+  }
+
+  .tabela tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .przyciski-akcji {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid transparent;
+    display: inline-block;
+  }
+
+  .status-zwrocone,
+  .status-aktywny {
+    background: color-mix(in srgb, var(--green-accent) 15%, transparent);
+    color: color-mix(in srgb, var(--green-accent) 90%, transparent);
+    border-color: color-mix(in srgb, var(--green-accent) 30%, transparent);
+  }
+
+  .status-anulowane,
+  .status-przekroczone,
+  .status-nieaktywny {
+    background: color-mix(in srgb, var(--red-accent) 15%, transparent);
+    color: color-mix(in srgb, var(--red-accent) 90%, transparent);
+    border-color: color-mix(in srgb, var(--red-accent) 30%, transparent);
+  }
+
+  .status-w-przygotowaniu,
+  .status-gotowe-do-odbioru {
+    background: color-mix(in srgb, #f39c12 15%, transparent);
+    color: color-mix(in srgb, #f39c12 90%, transparent);
+    border-color: color-mix(in srgb, #f39c12 30%, transparent);
+  }
+
+  .status-odebrane,
+  .status-wypozyczona {
+    background: color-mix(in srgb, #007bff 15%, transparent);
+    color: color-mix(in srgb, #007bff 90%, transparent);
+    border-color: color-mix(in srgb, #007bff 30%, transparent);
+  }
+</style>

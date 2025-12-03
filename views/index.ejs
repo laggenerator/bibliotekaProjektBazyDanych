@@ -1,48 +1,60 @@
-<% if (locals.error) { %>
-  <div class="alert alert-error">
-    <%= locals.error %>
-  </div>
-<% } %>
 
-<% if (locals.sukces) { %>
-  <div class="alert alert-sukces">
-    <%= locals.sukces %>
-  </div>
-<% } %>
+        <% if (locals.error) { %>
+            <div class="alert alert-error">
+                <%= locals.error %>
+            </div>
+        <% } %>
+
+        <% if (locals.sukces) { %>
+            <div class="alert alert-sukces">
+                <%= locals.sukces %>
+            </div>
+        <% } %>
 
 <div id="noweksiazki" class="ksiazki-container">
   <h2>Nowe nabytki w bibliotece</h2>
   <div class="ksiazki-grid">
-      <% ksiazki.forEach(function(ksiazka) { %>
-          <div class="ksiazka-karta">
-              <a href="/ksiazki/<%= ksiazka.isbn %>">
-                <img class="ksiazka-obraz" src="<%= ksiazka.img_link %>" alt="Okładka: <%= ksiazka.tytul %>" onerror="this.src='/assets/okladki/placeholder.webp'">
+    <% ksiazki.forEach(function(ksiazka) { %>
+    <div class="ksiazka-karta">
+      <a href="/ksiazki/<%= ksiazka.isbn %>">
+        <img
+          class="ksiazka-obraz"
+          src="<%= ksiazka.img_link %>"
+          alt="Okładka: <%= ksiazka.tytul %>"
+          onerror="this.src='/assets/okladki/placeholder.webp'"
+        />
+      </a>
+      <a href="/ksiazki/<%= ksiazka.isbn %>" class="tytul-link"
+        ><%= ksiazka.tytul %></a
+      >
+      <p class="ksiazka-autor">
+        <span class="label">
+          <% if (Array.isArray(ksiazka.autor) && ksiazka.autor.length > 1) { %>
+          Autorzy: <% } else { %> Autor: <% } %>
+        </span>
+        <span class="value">
+          <% if (Array.isArray(ksiazka.autor)) { %> 
+            <% ksiazka.autor.forEach(function(autor, index) { %>
+              <a
+                href="/autorzy/<%= encodeURIComponent(autor) %>"
+                class="autor-link"
+              >
+                <%= autor %>
               </a>
-              <a href="/ksiazki/<%= ksiazka.isbn %>" class="tytul-link"><%= ksiazka.tytul %></a>
-              <p class="ksiazka-autor">
-                <span class="label">
-                <% if (Array.isArray(ksiazka.autor) && ksiazka.autor.length > 1) { %>
-                    Autorzy:
-                <% } else { %>
-                    Autor:
-                <% } %>
-            </span>
-            <span class="value">
-                <% if (Array.isArray(ksiazka.autor)) { %>
-                    <% ksiazka.autor.forEach(function(autor, index) { %>
-                        <a href="/autorzy/<%= encodeURIComponent(autor) %>" class="autor-link">
-                            <%= autor %>
-                        </a>
-                        <% if (index < ksiazka.autor.length - 1) { %>, <% } %>
-                    <% }); %>
-                <% } else { %>
-                    <a href="/autorzy/<%= encodeURIComponent(autor) %>" class="autor-link">
-                        <%= ksiazka.autor %>
-                    </a>
-                <% } %>
-            </span>
-          </div>
-      <% }); %>
+              <% if (index < ksiazka.autor.length - 1) { %>, <% } %> 
+            <% }); %> 
+          <% } else { %>
+            <a
+              href="/autorzy/<%= encodeURIComponent(ksiazka.autor) %>"  <!-- POPRAWIONE: ksiazka.autor zamiast autor -->
+              class="autor-link"
+            >
+              <%= ksiazka.autor %>
+            </a>
+          <% } %>
+        </span>
+      </p>
+    </div>
+    <% }); %>
   </div>
 </div>
 
@@ -50,14 +62,14 @@
   <h2>Najnowsze wypożyczenie</h2>
   <ul>
     <% najnowsze.forEach(function(ksiazka) { %>
-        <li>
-            <%= ksiazka.tytul %> - 
-            <% if (Array.isArray(ksiazka.autor)) { %>
-                <%= ksiazka.autor.join(', ') %>
-            <% } else { %>
-                <%= ksiazka.autor || "Autor nieznany" %>
-            <% } %>
-        </li>
+    <li>
+      <%= ksiazka.tytul %> - 
+      <% if (Array.isArray(ksiazka.autor)) { %> 
+        <%= ksiazka.autor.join(', ') %> 
+      <% } else { %> 
+        <%= ksiazka.autor || "Autor nieznany" %> 
+      <% } %>
+    </li>
     <% }); %>
   </ul>
 </div>
