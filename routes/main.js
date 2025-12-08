@@ -7,6 +7,7 @@ const Ksiazka = require("../models/ksiazka");
 const { pokazowka } = require("../zmienna");
 const { historiaWypozyczen } = require("../models/zamowienie");
 const Zamowienie = require("../models/zamowienie");
+const Admin = require("../models/admin");
 
 router.get("/", async (req, res) => {
   try {
@@ -175,6 +176,62 @@ router.get("/koszyk", requireAuth, async (req, res) => {
   } catch (error) {
     if (pokazowka) return res.json({ error: error.message });
     res.json({ error: error.message });
+  }
+});
+
+router.post("/dashboard/dezaktywuj", requireAuth, async (req, res) => {
+  try {
+    const numer_karty = req.session.userId;
+    const result = await Admin.dezaktywujUzytkownika(numer_karty);
+    let zwrot;
+    if (!result) {
+      zwrot = {
+        sukces: false,
+        wiadomosc:
+          "Nie udało się dezaktywować konta, sprawdź czy nie masz zaległości w oddawaniu książek",
+        numer_karty: numer_karty,
+      };
+      const liczbaPoTerminie = await Uzytkownik.ilePoTerminie(
+        req.session.userId
+      );
+      res.render("dashboard", {
+        tytul: "Panel użytkownika",
+        poterminie: liczbaPoTerminie,
+        customCSS: ["/css/dashboard.css", "/css/error.css"],
+        error: zwrot.wiadomosc,
+      });
+    } else {
+      zwrot = {
+        sukces: true,
+        wiadomosc: "Dezaktywowano konto",
+        numer_karty: numer_karty,
+      };
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("Błąd przy niszczeniu sesji:", err);
+          throw new Error("Błąd przy niszczeniu sesji");
+        }
+      });
+
+      const ksiazki = await Ksiazka.najnowsze6Ksiazek();
+      const najnowsze = await Zamowienie.najnowsze();
+
+      res.render("index", {
+        tytul: "Strona główna",
+        ksiazki: ksiazki,
+        najnowsze: najnowsze,
+        customCSS: ["/css/index.css"],
+        sukces: zwrot.wiadomosc,
+      });
+    }
+  } catch (error) {
+    const liczbaPoTerminie = await Uzytkownik.ilePoTerminie(req.session.userId);
+    res.render("dashboard", {
+      tytul: "Panel użytkownika",
+      poterminie: liczbaPoTerminie,
+      customCSS: ["/css/dashboard.css", "/css/error.css"],
+      error: "Błąd dezaktywacji konta",
+    });
   }
 });
 

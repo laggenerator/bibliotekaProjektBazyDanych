@@ -8,6 +8,7 @@ const { Pool } = require("pg");
 require("dotenv").config();
 
 // Ścieżki
+const apiRoutes = require("./routes/api");
 const authRoutes = require("./routes/uwierzytelnianie");
 const mainRoutes = require("./routes/main");
 const adminRoutes = require("./routes/admin");
@@ -60,6 +61,7 @@ app.use(async (req, res, next) => {
 
 app.use(setSearchContext);
 
+app.use("/api", apiRoutes);
 app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/ksiazki", ksiazkiRoutes);

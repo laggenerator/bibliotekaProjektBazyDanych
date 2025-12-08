@@ -442,6 +442,9 @@ class Ksiazka {
       ) AS isbn
       `;
 
+      if (recenzja.ocena > 5 || recenzja.ocena < 0)
+        throw new Error("Zakres ocen to [0;5]");
+
       const result = await client.query(recenzjaQuery, [
         recenzja.id_ksiazki,
         recenzja.numer_karty,
@@ -453,6 +456,7 @@ class Ksiazka {
     } catch (error) {
       console.log(error);
       client.query("ROLLBACK");
+      return -1;
     } finally {
       client.release();
     }

@@ -144,8 +144,25 @@
           </div>
         </div>
       </div>
-
       <div class="ksiazka-lista-actions admin-actions">
+        <form
+          action="/admin/ksiazki/dodajEgzemplarz"
+          method="POST"
+          class="form-akcja"
+        >
+          <input
+            type="hidden"
+            name="id_ksiazki"
+            value="<%= ksiazka.id_ksiazki %>"
+          />
+          <button
+            type="submit"
+            class="btn btn-warning btn-small"
+            onclick="return confirm('Czy na pewno chcesz dodać nowy egzemplarz do obiegu?')"
+          >
+            Dodaj egzemplarz
+          </button>
+        </form>
         <a
           href="/admin/ksiazki/<%= ksiazka.isbn %>/edytuj"
           class="btn btn-primary"

@@ -1,26 +1,22 @@
+        <% if (locals.error) { %>
+            <div class="alert alert-error">
+                <%= locals.error %>
+            </div>
+        <% } %>
+
+        <% if (locals.sukces) { %>
+            <div class="alert alert-sukces">
+                <%= locals.sukces %>
+            </div>
+        <% } %>
+
 <div class="dashboard-container">
     <div class="dashboard-header">
         <h1>Panel użytkownika</h1>
         <p>Witaj, <strong class="<%= locals.uzytkownik.rola === 'ADMIN' ? 'rola-ADMIN' : 'rola-USER-light' %>"><%= locals.uzytkownik.nazwa_uzytkownika %></strong>!</p>
     </div>
 
-    <!-- <div class="dashboard-stats">
-        <div class="stat-card">
-          <div class="stat-icon">📚</div>
-          <div class="stat-info">
-            <h3>Aktualnie wypożyczone</h3>
-            <p class="stat-number">0</p>
-          </div>
-        </div>
-
-        <div class="stat-card <%= poterminie > 0 ? 'zle' : '' %>">
-          <div class="stat-icon">⏰</div>
-          <div class="stat-info">
-            <h3>Książki przetrzymane po terminie zwrotu</h3>
-            <p class="stat-number"><%= poterminie %></p>
-          </div>
-        </div>
-    </div> -->
+    
 
     <div class="dashboard-sections">
       <div class="section-card">
@@ -45,7 +41,7 @@
         </div>
       </div>
 
-        <div class="section-card">
+      <div class="section-card">
         <h2>Informacje o koncie</h2>
         <div class="action-buttons">
           <div class="info-item">
@@ -64,6 +60,12 @@
               <span class="info-label">Data dołączenia:</span>
               <span class="info-value"><%= locals.uzytkownik.datarejestracji %></span>
             </div>
+              <form action="/dashboard/dezaktywuj" method="POST" 
+                    onsubmit="return confirm('Czy na pewno chcesz dezaktywować swoje konto? Tej operacji nie można samodzielnie cofnąć!')">
+                <button type="submit" class="btn btn-danger btn-small">
+                  Dezaktywuj konto
+                </button>
+              </form>
           </div>
         </div>
       </div>

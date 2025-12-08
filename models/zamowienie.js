@@ -166,6 +166,7 @@ class Zamowienie {
     const query = `
     SELECT 
         w.id_wypozyczenia,
+        w.status,
         w.poczatek,
         w.deadline,
         ARRAY_AGG(DISTINCT k.tytul) AS tytuly,

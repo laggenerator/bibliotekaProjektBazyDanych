@@ -474,6 +474,7 @@ router.post("/ksiazki/dodajEgzemplarz", requireAdmin, async (req, res) => {
       customCSS: ["/css/dashboard.css", "/css/ksiazki.css", "/css/admin.css"],
     });
   } catch (error) {
+    console.log(error);
     if (pokazowka) return res.json({ error: error.message });
     const ksiazki = await Ksiazka.pobierzWszystkie();
     res.render("admin/ksiazki", {
