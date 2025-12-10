@@ -1,8 +1,14 @@
 # Biblioteka
+
 Tutaj trwają prace nad najlepszym systemem wypożyczania treści dla bibliotek.
 No jest wszystko w porządku, jest dobrze, dobrze robią, dobrze wszystko jest w porzadku. Jest git pozdrawiam cały PWr, dobrych chłopaków i niech się to trzyma. DOBRY PRZEKAZ LECI.
 
+## Dokumentacja API
+
+[https://biblioteka.pwrowicz.pl/dokumentacja](https://biblioteka.pwrowicz.pl/dokumentacja)
+
 Well everything's alright, it's good, they're doing well, everything's heavenly alright. It's all good, shoutout to the whole PWr, the good guys, and let it stay that way. POSITIVE MESSAGE IS FLYING.
+
 ## License
 
 These files are distributed under the emailware License:
