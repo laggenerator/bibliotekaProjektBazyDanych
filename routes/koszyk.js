@@ -8,6 +8,7 @@ const pool = require("../db");
 const Zamowienie = require("../models/zamowienie");
 const Ksiazka = require("../models/ksiazka");
 const { znajdzPoId } = require("../models/egzemplarz");
+const Egzemplarz = require("../models/egzemplarz");
 
 router.get("/", requireAuth, async (req, res) => {
   try {
@@ -52,7 +53,39 @@ router.post("/dodaj/:isbn", requireAuth, async (req, res) => {
     if (result) wiadomosc = "Udalo sie dodac ksiazke";
     else wiadomosc = "Nie udalo sie dodac ksiazki";
     if (pokazowka) return res.json({ result, wiadomosc });
-    res.redirect("/koszyk");
+    if (result) res.redirect("/koszyk");
+    else {
+      try {
+        const koszyk = await Uzytkownik.zapodajKoszyk(req.session.userId);
+        const results = await Promise.all(
+          koszyk.map(async (item) => {
+            const egzemplarz = await znajdzPoId(item.id_egzemplarza);
+            const ksiazka = await Ksiazka.pobierzPoID(egzemplarz.id_ksiazki);
+            return {
+              ...ksiazka,
+              id_egzemplarza: item.id_egzemplarza,
+            };
+          })
+        );
+
+        if (pokazowka) return res.json(Array.isArray(results) ? results : []);
+        res.render("koszyk", {
+          tytul: "Koszyk",
+          ksiazki: Array.isArray(results) ? results : [],
+          customCSS: [
+            "/css/header.css",
+            "/css/admin.css",
+            "/css/ksiazki.css",
+            "/css/szczegolyKsiazka.css",
+          ],
+          error: "Wybrana książka jest niedostępna",
+        });
+      } catch (error) {
+        if (pokazowka) return res.json({ error: error.message });
+        console.error("Błąd pobierania koszyka:", error);
+        res.status(500).json({ error: "Błąd serwera" });
+      }
+    }
   } catch (error) {
     if (pokazowka) return res.json({ error: error.message });
     res.render("error", {
@@ -73,7 +106,39 @@ router.post("/dodajPoID/:id_egzemplarza", requireAuth, async (req, res) => {
     if (result) wiadomosc = "Udalo sie dodac ksiazke";
     else wiadomosc = "Nie udalo sie dodac ksiazki";
     if (pokazowka) return res.json({ result, wiadomosc });
-    res.redirect("/koszyk");
+    if (result) res.redirect("/koszyk");
+    else {
+      try {
+        const koszyk = await Uzytkownik.zapodajKoszyk(req.session.userId);
+        const results = await Promise.all(
+          koszyk.map(async (item) => {
+            const egzemplarz = await znajdzPoId(item.id_egzemplarza);
+            const ksiazka = await Ksiazka.pobierzPoID(egzemplarz.id_ksiazki);
+            return {
+              ...ksiazka,
+              id_egzemplarza: item.id_egzemplarza,
+            };
+          })
+        );
+
+        if (pokazowka) return res.json(Array.isArray(results) ? results : []);
+        res.render("koszyk", {
+          tytul: "Koszyk",
+          ksiazki: Array.isArray(results) ? results : [],
+          customCSS: [
+            "/css/header.css",
+            "/css/admin.css",
+            "/css/ksiazki.css",
+            "/css/szczegolyKsiazka.css",
+          ],
+          error: "Wybrana książka jest niedostępna",
+        });
+      } catch (error) {
+        if (pokazowka) return res.json({ error: error.message });
+        console.error("Błąd pobierania koszyka:", error);
+        res.status(500).json({ error: "Błąd serwera" });
+      }
+    }
   } catch (error) {
     if (pokazowka) return res.json({ error: error.message });
     res.render("error", {

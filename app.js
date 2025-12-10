@@ -74,6 +74,10 @@ app.get("/roadmap", (req, res) => {
   res.sendFile(__dirname + "/public/roadmap.html");
 });
 
+app.get("/dokumentacja", (req, res) => {
+  res.redirect("https://documenter.getpostman.com/view/34718178/2sB3dQupPE");
+});
+
 // Error handling
 app.use((err, req, res, next) => {
   console.error(err.stack);

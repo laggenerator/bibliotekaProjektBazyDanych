@@ -270,7 +270,7 @@ router.get("/admin/ksiazki/dodaj", requireAdmin, (req, res) => {
 });
 
 router.post(
-  "/ksiazki/dodaj",
+  "/admin/ksiazki/dodaj",
   requireAdmin,
   upload.single("okladka"),
   uploadValidation,
@@ -344,7 +344,7 @@ router.post("/admin/ksiazki/:isbn/edytuj", requireAdmin, async (req, res) => {
 });
 
 router.post(
-  "/ksiazki/:isbn/egzemplarze/:id_egzemplarza/zarchiwizuj",
+  "/admin/ksiazki/:isbn/egzemplarze/:id_egzemplarza/zarchiwizuj",
   requireAdmin,
   async (req, res) => {
     try {
@@ -364,7 +364,7 @@ router.post(
 );
 
 router.post(
-  "/ksiazki/:isbn/egzemplarze/:id_egzemplarza/aktywuj",
+  "/admin/ksiazki/:isbn/egzemplarze/:id_egzemplarza/aktywuj",
   requireAdmin,
   async (req, res) => {
     try {
@@ -656,7 +656,7 @@ router.get("/ksiazki/:isbn", async (req, res) => {
 });
 
 router.post(
-  "/ksiazki/dodaj-recenzje/:id_ksiazki",
+  "/admin/ksiazki/dodaj-recenzje/:id_ksiazki",
   requireAuth,
   async (req, res) => {
     try {
@@ -678,7 +678,7 @@ router.post(
 );
 
 router.post(
-  "/ksiazki/usun-recenzje/:id_recenzji",
+  "/admin/ksiazki/usun-recenzje/:id_recenzji",
   requireAuth,
   async (req, res) => {
     try {
