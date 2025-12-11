@@ -9,12 +9,12 @@ const { pokazowka } = require("../zmienna");
 
 // Walidacja upload i uwierzytelnianie
 const uploadValidation = require("../validators/uploadValidator");
-const { requireAuth, requireAdmin } = require("../middleware/auth");
+const { requireAuth, requireAdmin } = require("../middleware/apiauth");
 const {
   registerValidation,
   loginValidation,
 } = require("../validators/authValidator");
-const { validateRequest } = require("../middleware/auth");
+const { validateRequest } = require("../middleware/apiauth");
 // Modele
 const Uzytkownik = require("../models/uzytkownik");
 const Admin = require("../models/admin");
@@ -140,14 +140,13 @@ router.get("/admin/zamowienia/:id", requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const zamowienie = await Zamowienie.pobierzSzczegoly(id);
-
     if (!zamowienie) {
-      return res.json({ error: "Zamówienie nie istnieje" });
+      return res.status(404).json({ error: "Zamówienie nie istnieje" });
     }
 
-    return res.json(zamowienie);
+    return res.status(200).json(zamowienie);
   } catch (error) {
-    return res.json({ error: error.message });
+    return res.status(400).json({ error: error.message });
   }
 });
 
@@ -164,9 +163,9 @@ router.post("/admin/zamowienia/:id/status", requireAdmin, async (req, res) => {
       wiadomosc = `Zarejestrowano zwrot wszystkich książek z zamówienia #${id}`;
     }
 
-    return res.json({ sukces: true, wiadomosc });
+    return res.status(200).json({ sukces: true, wiadomosc });
   } catch (error) {
-    return res.json({ sukces: false, error: error.message });
+    return res.status(400).json({ sukces: false, error: error.message });
   }
 });
 
@@ -175,12 +174,12 @@ router.post("/admin/zamowienia/:id/zwrot", requireAdmin, async (req, res) => {
     const { id } = req.params;
     await Zamowienie.zmienStatus(id, "Zwrócone");
 
-    res.json({
+    res.status(200).json({
       sukces: true,
       wiadomosc: `Pomyślnie zarejestrowano zwrot zamówienia #${id}`,
     });
   } catch (error) {
-    return res.json({ sukces: false, error: error.message });
+    return res.status(400).json({ sukces: false, error: error.message });
   }
 });
 
@@ -258,9 +257,9 @@ router.post(
     try {
       const { id_ksiazki } = req.body;
       const result = await Egzemplarz.dodajEgzemplarz(id_ksiazki);
-      return res.json({ result });
+      return res.status(200).json({ result });
     } catch (error) {
-      return res.json({ error: error.message });
+      return res.status(400).json({ error: error.message });
     }
   }
 );
@@ -278,7 +277,7 @@ router.post(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.json({ error: errors.array()[0].msg });
+        return res.status(409).json({ error: errors.array()[0].msg });
       }
       const liczbaKopii = parseInt(req.body.liczba_kopii) || 1;
       const ksiazka = {
@@ -296,9 +295,9 @@ router.post(
       const result = await Ksiazka.dodaj(ksiazka);
       const ksiazki = await Ksiazka.pobierzPoID(result);
 
-      return res.json(ksiazki);
+      return res.status(200).json(ksiazki);
     } catch (error) {
-      return res.json({ error: error.message });
+      return res.status(400).json({ error: error.message });
     }
   }
 );
@@ -522,12 +521,17 @@ router.post("/koszyk/dodaj/:isbn", requireAuth, async (req, res) => {
       req.session.userId,
       isbn
     );
-    let wiadomosc;
-    if (result) wiadomosc = "Udalo sie dodac ksiazke";
-    else wiadomosc = "Nie udalo sie dodac ksiazki";
-    return res.json({ result, wiadomosc });
+    let wiadomosc, kod;
+    if (result) {
+      wiadomosc = "Udalo sie dodac ksiazke";
+      kod = 200;
+    } else {
+      wiadomosc = "Nie udalo sie dodac ksiazki";
+      kod = 400;
+    }
+    return res.status(kod).json({ result, wiadomosc });
   } catch (error) {
-    return res.json({ error: error.message });
+    return res.status(400).json({ error: error.message });
   }
 });
 
@@ -541,12 +545,17 @@ router.post(
         req.session.userId,
         id_egzemplarza
       );
-      let wiadomosc;
-      if (result) wiadomosc = "Udalo sie dodac ksiazke";
-      else wiadomosc = "Nie udalo sie dodac ksiazki";
-      return res.json({ result, wiadomosc });
+      let wiadomosc, kod;
+      if (result) {
+        wiadomosc = "Udalo sie dodac ksiazke";
+        kod = 200;
+      } else {
+        wiadomosc = "Nie udalo sie dodac ksiazki";
+        kod = 400;
+      }
+      return res.status(kod).json({ result, wiadomosc });
     } catch (error) {
-      return res.json({ error: error.message });
+      return res.status(400).json({ error: error.message });
     }
   }
 );
@@ -558,7 +567,7 @@ router.post("/koszyk/usun/:id_egzemplarza", requireAuth, async (req, res) => {
       req.session.userId,
       id_egzemplarza
     );
-    let wiadomosc;
+    let wiadomosc, kod;
     if (result) wiadomosc = "Udalo sie wyciagnac ksiazke";
     else wiadomosc = "Nie udalo sie wyciagnac ksiazki";
     return res.json({ result, wiadomosc });
@@ -570,21 +579,29 @@ router.post("/koszyk/usun/:id_egzemplarza", requireAuth, async (req, res) => {
 router.post("/koszyk/wyczysc", requireAuth, async (req, res) => {
   try {
     const usuniete = await Uzytkownik.wyczyscKoszyk(req.session.userId);
-    let wiadomosc;
-    if (usuniete > 0) wiadomosc = "Udalo sie wyczyscic koszyk";
-    else wiadomosc = "Nie udalo sie wyczyscic koszyka";
-    return res.json({ usuniete, wiadomosc });
+    let wiadomosc, kod;
+    if (usuniete > 0) {
+      wiadomosc = "Udalo sie wyczyscic koszyk";
+      kod = 200;
+    } else {
+      wiadomosc = "Nie udalo sie wyczyscic koszyka";
+      kod = 400;
+    }
+    return res.status(kod).json({ usuniete, wiadomosc });
   } catch (error) {
-    return res.json({ error: error.message });
+    return res.status(400).json({ error: error.message });
   }
 });
 
 router.post("/koszyk/wypozycz", requireAuth, async (req, res) => {
   try {
     const result = await Zamowienie.zlozZamowienie(req.session.userId);
-    return res.json(result);
+    let kod;
+    if (result.sukces === true) kod = 200;
+    else kod = 400;
+    return res.status(kod).json(result);
   } catch (error) {
-    return res.json({ error: error.message });
+    return res.status(400).json({ error: error.message });
   }
 });
 
@@ -837,10 +854,10 @@ router.post("/dashboard/dezaktywuj", requireAuth, async (req, res) => {
 
 router.get("/auth/register", (req, res) => {
   if (req.session.userId) {
-    return res.json({ message: "Jesteś już zalogowany" });
+    return res.status(400).json({ message: "Jesteś już zalogowany" });
   }
 
-  return res.json({ message: "Strona rejestracji" });
+  return res.status(200).json({ message: "Strona rejestracji" });
 });
 
 router.post(
@@ -852,7 +869,7 @@ router.post(
       const { nazwa_uzytkownika, email, haslo } = req.body;
       const czyIstnieje = await Uzytkownik.istnieje(nazwa_uzytkownika, email);
       if (czyIstnieje) {
-        return res.json({
+        return res.status(409).json({
           sukces: false,
           wiadomosc: "Nazwa użytkownika lub email jest w użyciu!",
         });
@@ -864,14 +881,14 @@ router.post(
         haslo
       );
 
-      return res.json({
+      return res.status(200).json({
         sukces: true,
         wiadomosc: "Konto utworzone pomyślnie!",
         uzytkownik: uzytkownik,
       });
     } catch (error) {
       console.error("Błąd rejestracji:", error);
-      return res.json({
+      return res.status(400).json({
         sukces: false,
         wiadomosc: error.message,
       });
@@ -884,10 +901,10 @@ router.get("/auth/login", (req, res) => {
   req.session.returnTo = returnTo;
 
   if (req.session.userId) {
-    return res.json({ message: "Jesteś już zalogowany/a" });
+    return res.status(400).json({ message: "Jesteś już zalogowany/a" });
   }
 
-  return res.json({ message: "Strona logowania" });
+  return res.status(200).json({ message: "Strona logowania" });
 });
 
 router.post(
@@ -905,13 +922,13 @@ router.post(
       req.session.poterminie = uzytkownik.numer_karty;
       req.session.koszyk = uzytkownik.koszyk;
       req.session.datarejestracji = uzytkownik.datarejestracji;
-      return res.json({
+      return res.status(200).json({
         sukces: true,
         wiadomosc: "Logowanie pomyślne",
         uzytkownik: uzytkownik,
       });
     } catch (error) {
-      return res.json({
+      return res.status(400).json({
         sukces: false,
         wiadomosc: error.message,
         formData: req.body,
@@ -923,14 +940,14 @@ router.post(
 router.post("/auth/wyloguj", (req, res) => {
   req.session.destroy((err) => {
     if (err) {
-      return res.json({
+      return res.status(400).json({
         sukces: false,
         wiadomosc: "Nie udało się wylogować",
       });
     }
 
     res.clearCookie("connect.sid");
-    return res.json({
+    return res.status(200).json({
       sukces: true,
       wiadomosc: "Wylogowano pomyślnie!",
     });

@@ -59,7 +59,6 @@ class Zamowienie {
 
   static async zmienStatus(id_wypozyczenia, nowy_status) {
     const client = await pool.connect();
-    console.log(nowy_status);
     try {
       await client.query("BEGIN");
 

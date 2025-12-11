@@ -1,6 +1,12 @@
-const { Pool } = require('pg');
-require('dotenv').config();
+const { Pool } = require("pg");
+require("dotenv").config();
 
+if (process.env.NODE_ENV === "test") {
+  process.env.DB_NAME = "testy_hej";
+  console.log("Używany .env.test");
+} else {
+  console.log("Używany .env");
+}
 const pool = new Pool({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,

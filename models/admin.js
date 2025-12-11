@@ -33,23 +33,10 @@ class Admin {
     try {
       await client.query("BEGIN");
 
-      // const query = `
-      // UPDATE uzytkownik
-      //   SET aktywny = FALSE
-      //   WHERE numer_karty = $1
-      //   AND NOT EXISTS (
-      //       SELECT 1
-      //       FROM wypozyczenie w
-      //       JOIN wypozyczenie_egzemplarz we ON w.id_wypozyczenia = we.id_wypozyczenia
-      //       WHERE w.numer_karty = $1
-      //       AND we.oddanie IS NULL
-      //   ) RETURNING numer_karty, nazwa_uzytkownika, aktywny;
-      // `;
-
       const query = `
       UPDATE uzytkownik
       SET aktywny = FALSE
-      WHERE numer_karty = $1
+      WHERE numer_karty = $1 AND aktywny = TRUE
       AND NOT EXISTS (
         SELECT 1 
         FROM wypozyczenie w
@@ -89,7 +76,7 @@ class Admin {
       const query = `
       UPDATE uzytkownik
       SET aktywny = TRUE
-      WHERE numer_karty = $1
+      WHERE numer_karty = $1 AND aktywny = FALSE
       RETURNING numer_karty, nazwa_uzytkownika, aktywny;
       `;
       const result = await client.query(query, [numer_karty]);

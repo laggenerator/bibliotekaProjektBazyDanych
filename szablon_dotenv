@@ -1,0 +1,9 @@
+DB_HOST=adres_bazy_postgres
+DB_PORT=port_bazy_postgres
+DB_NAME=twoja_baza_danych
+DB_USER=twoj_uzytkownik
+DB_PASSWORD=twoje_haslo
+PORT=twoj_port_dla_strony
+SESSION_SECRET=SECRET_do_cookies
+NODE_ENV=dev
+POKAZOWKA=false
